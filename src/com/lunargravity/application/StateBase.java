@@ -1,31 +1,67 @@
-//
-// Lunar Gravity
-//
-// This game is based upon the Amiga video game Gravity Force that was
-// released in 1989 by Stephan Wenzler
-//
-// https://www.mobygames.com/game/gravity-force
-// https://www.youtube.com/watch?v=m9mFtCvnko8
-//
-// This implementation is Copyright (c) 2021, Damian Coventry
-// All rights reserved
-// Written for Massey University course 159.261 Game Programming (Assignment 2)
-//
-
 package com.lunargravity.application;
 
+import com.lunargravity.engine.graphics.GlViewportConfig;
+import org.joml.Matrix4f;
+
 public class StateBase implements IState {
-    IContext _context;
-    protected StateBase(IContext context) {
+    private final IStateMachineContext _context;
+
+    public StateBase(IStateMachineContext context) {
         _context = context;
     }
 
-    @Override
-    public void Temp() {
-
+    protected IStateMachineContext getContext() {
+        return _context;
     }
 
-    protected IContext getContext() {
-        return _context;
+    @Override
+    public void begin() {
+        // TODO
+    }
+
+    @Override
+    public void end() {
+        // TODO
+    }
+
+    @Override
+    public void think() {
+        // TODO
+    }
+
+    @Override
+    public void draw3d(int viewport, Matrix4f projectionMatrix) {
+        // TODO
+    }
+
+    @Override
+    public void draw2d(int viewport, Matrix4f projectionMatrix) {
+        // TODO
+    }
+
+    @Override
+    public GlViewportConfig onViewportSizeChanged(int viewport, GlViewportConfig currentConfig, int windowWidth, int windowHeight) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public void onKeyboardKeyEvent(int key, int scancode, int action, int mods) {
+        // TODO
+    }
+
+    @Override
+    public void onMouseButtonEvent(int button, int action, int mods) {
+        // TODO
+    }
+
+    @Override
+    public void onMouseCursorMovedEvent(double xPos, double yPos) {
+        // TODO
+    }
+
+    @Override
+    public void onMouseWheelScrolledEvent(double xOffset, double yOffset) {
+        // TODO
     }
 }
