@@ -15,6 +15,7 @@
 package com.lunargravity.application;
 
 import com.lunargravity.engine.core.IInputConsumer;
+import com.lunargravity.engine.core.IManualFrameUpdater;
 import com.lunargravity.engine.graphics.GlViewportConfig;
 import org.joml.Matrix4f;
 
@@ -24,5 +25,8 @@ public interface IState extends IInputConsumer {
     void think();
     void draw3d(int viewport, Matrix4f projectionMatrix);
     void draw2d(int viewport, Matrix4f projectionMatrix);
+
+    IManualFrameUpdater getManualFrameUpdater();
+
     GlViewportConfig onViewportSizeChanged(int viewport, GlViewportConfig currentConfig, int windowWidth, int windowHeight);
 }

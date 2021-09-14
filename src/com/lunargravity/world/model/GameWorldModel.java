@@ -13,7 +13,12 @@ public class GameWorldModel implements IGameWorldModel {
     }
 
     @Override
-    public void temp() {
+    public void doWorldModelStuff() {
+        // TODO
+    }
+
+    @Override
+    public void onStateSettingLoaded(String name, String value) {
         // TODO
     }
 }

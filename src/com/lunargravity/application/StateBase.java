@@ -1,5 +1,6 @@
 package com.lunargravity.application;
 
+import com.lunargravity.engine.core.IManualFrameUpdater;
 import com.lunargravity.engine.graphics.GlViewportConfig;
 import org.joml.Matrix4f;
 
@@ -13,6 +14,17 @@ public class StateBase implements IState {
     protected IStateMachineContext getContext() {
         return _context;
     }
+
+    protected void changeState(IState state) {
+        _context.changeState(state);
+    }
+
+    protected void changeStateNow(IState state) {
+        _context.changeStateNow(state);
+    }
+
+    // TODO: add code here that simplifies the process of adding and removing timeouts
+    // TODO: add code here that automatically removes timeouts when the class is freed
 
     @Override
     public void begin() {
@@ -37,6 +49,11 @@ public class StateBase implements IState {
     @Override
     public void draw2d(int viewport, Matrix4f projectionMatrix) {
         // TODO
+    }
+
+    @Override
+    public IManualFrameUpdater getManualFrameUpdater() {
+        return _context.getEngine();
     }
 
     @Override

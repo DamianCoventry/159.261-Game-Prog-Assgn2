@@ -16,4 +16,9 @@ public class RaceModel implements IRaceModel {
     public void temp() {
         // TODO
     }
+
+    @Override
+    public void onStateSettingLoaded(String name, String value) {
+        // TODO
+    }
 }

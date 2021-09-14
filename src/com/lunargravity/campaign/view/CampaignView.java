@@ -1,6 +1,10 @@
 package com.lunargravity.campaign.view;
 
 import com.lunargravity.campaign.model.ICampaignModel;
+import com.lunargravity.engine.graphics.GlMaterial;
+import com.lunargravity.engine.graphics.GlStaticMesh;
+import com.lunargravity.engine.graphics.GlTexture;
+import com.lunargravity.engine.graphics.GlTransform;
 import org.joml.Matrix4f;
 
 public class CampaignView implements ICampaignView {
@@ -27,6 +31,26 @@ public class CampaignView implements ICampaignView {
 
     @Override
     public void temp() {
+        // TODO
+    }
+
+    @Override
+    public void onObjectLoaded(String name, String type, GlTransform transform) {
+        // TODO
+    }
+
+    @Override
+    public void onStaticMeshLoaded(GlStaticMesh staticMesh) {
+        // TODO
+    }
+
+    @Override
+    public void onMaterialLoaded(GlMaterial material) {
+        // TODO
+    }
+
+    @Override
+    public void onTextureLoaded(GlTexture texture) {
         // TODO
     }
 }

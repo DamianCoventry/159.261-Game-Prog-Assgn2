@@ -1,5 +1,9 @@
 package com.lunargravity.menu.view;
 
+import com.lunargravity.engine.graphics.GlMaterial;
+import com.lunargravity.engine.graphics.GlStaticMesh;
+import com.lunargravity.engine.graphics.GlTexture;
+import com.lunargravity.engine.graphics.GlTransform;
 import com.lunargravity.menu.model.IMenuModel;
 import org.joml.Matrix4f;
 
@@ -27,6 +31,26 @@ public class MenuView implements IMenuView {
 
     @Override
     public void temp() {
+        // TODO
+    }
+
+    @Override
+    public void onObjectLoaded(String name, String type, GlTransform transform) {
+        // TODO
+    }
+
+    @Override
+    public void onStaticMeshLoaded(GlStaticMesh staticMesh) {
+        // TODO
+    }
+
+    @Override
+    public void onMaterialLoaded(GlMaterial material) {
+        // TODO
+    }
+
+    @Override
+    public void onTextureLoaded(GlTexture texture) {
         // TODO
     }
 }

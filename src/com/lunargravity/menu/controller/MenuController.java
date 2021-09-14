@@ -1,8 +1,9 @@
 package com.lunargravity.menu.controller;
 
+import com.lunargravity.engine.scene.ISceneLogicOwner;
 import com.lunargravity.menu.model.IMenuModel;
 
-public class MenuController implements IMenuController {
+public class MenuController implements IMenuController, ISceneLogicOwner {
     private final IMenuControllerEvents _eventHandler;
     private final IMenuModel _model;
 
@@ -18,6 +19,11 @@ public class MenuController implements IMenuController {
 
     @Override
     public void think() {
+        // TODO
+    }
+
+    @Override
+    public void onLogicSettingLoaded(String name, String value) {
         // TODO
     }
 }

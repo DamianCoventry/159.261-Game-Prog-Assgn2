@@ -13,7 +13,17 @@ public class MenuWorldModel implements IMenuWorldModel {
     }
 
     @Override
-    public void temp() {
+    public void doWorldModelStuff() {
+        // TODO
+    }
+
+    @Override
+    public void doMenuWorldModelStuff() {
+        // TODO
+    }
+
+    @Override
+    public void onStateSettingLoaded(String name, String value) {
         // TODO
     }
 }

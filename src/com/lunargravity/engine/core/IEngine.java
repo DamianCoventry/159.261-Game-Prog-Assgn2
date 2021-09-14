@@ -1,12 +1,19 @@
 package com.lunargravity.engine.core;
 
-import com.lunargravity.engine.scene.ISceneLoadObserver;
+import com.jme3.bullet.PhysicsSpace;
+import com.lunargravity.engine.graphics.GlRenderer;
+import com.lunargravity.engine.scene.ISceneBuilderObserver;
+import com.lunargravity.engine.timeouts.TimeoutManager;
 
-public interface IEngine {
+public interface IEngine extends IManualFrameUpdater {
     void freeResources();
     void run();
+
     void setDefaultViewport();
     long getFps();
     long getFrameLengthMs();
-    void loadScene(String fileName, ISceneLoadObserver loadProgressObserver);
+
+    TimeoutManager getTimeoutManager();
+    PhysicsSpace getPhysicsSpace();
+    GlRenderer getRenderer();
 }

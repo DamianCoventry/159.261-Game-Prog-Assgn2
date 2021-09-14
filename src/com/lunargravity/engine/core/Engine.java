@@ -1,18 +1,26 @@
 package com.lunargravity.engine.core;
 
+import com.jme3.bullet.PhysicsSpace;
+import com.jme3.system.NativeLibraryLoader;
 import com.lunargravity.engine.desktopwindow.*;
 import com.lunargravity.engine.graphics.*;
-import com.lunargravity.engine.scene.ISceneLoadObserver;
+import com.lunargravity.engine.timeouts.TimeoutManager;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.*;
 
+import java.io.File;
 import java.io.IOException;
 
 public class Engine implements IEngine {
+    static private final float PHYSICS_TIME_STEP = 0.01666666f; // which is 60 FPS
+
     private final IFrameConsumer _frameConsumer;
     private final IInputConsumer _inputConsumer;
-    private final GlRenderer _renderer;
     private final IViewportSizeObserver _viewportSizeObserver;
 
+    private final GlRenderer _renderer;
+    private final TimeoutManager _timeoutManager;
+    private final PhysicsSpace _physicsSpace;
     private GlfwWindow _window;
 
     private long _currentFrameNo;
@@ -27,9 +35,13 @@ public class Engine implements IEngine {
     public Engine(IFrameConsumer frameConsumer, IInputConsumer inputConsumer, IViewportSizeObserver viewportSizeObserver,
                   GlfwWindowConfig windowConfig) throws IOException {
 
+        loadBullet3RuntimeLibrary();
+
         _frameConsumer = frameConsumer;
         _inputConsumer = inputConsumer;
         _viewportSizeObserver = viewportSizeObserver;
+        _timeoutManager = new TimeoutManager();
+        _physicsSpace = new PhysicsSpace(PhysicsSpace.BroadphaseType.DBVT);
 
         resetFrameCounters();
         createDesktopWindow(windowConfig);
@@ -46,23 +58,20 @@ public class Engine implements IEngine {
 
     @Override
     public void run() {
-        int i;
-        GlViewport viewport;
-
         resetFrameCounters();
-
         while (!_window.shouldClose()) {
             _currentTimeMs = System.currentTimeMillis();
             _previousTimeMs = updateFrameTime(_currentTimeMs, _previousTimeMs);
 
+            _timeoutManager.dispatchTimeouts(_currentTimeMs);
             _frameConsumer.onFrameBegin(_currentFrameNo, _currentTimeMs, _frameDelta);
 
-            // TODO: physics engine time step
+            _physicsSpace.update(PHYSICS_TIME_STEP, 0);
             _frameConsumer.onFrameThink();
 
             _renderer.clearBuffers();
-            for (i = 0; i < _renderer.getNumViewports(); ++i) {
-                viewport = _renderer.getViewport(i);
+            for (int i = 0; i < _renderer.getNumViewports(); ++i) {
+                GlViewport viewport = _renderer.getViewport(i);
                 if (viewport != null) {
                     viewport.activate();
                     _frameConsumer.onFrameDraw3d(i, viewport.getPerspectiveMatrix());
@@ -84,6 +93,32 @@ public class Engine implements IEngine {
     }
 
     @Override
+    public void prepareNewFrame() {
+        _renderer.clearBuffers();
+    }
+
+    @Override
+    public void submitFrame() {
+        _window.flipPages();
+    }
+
+    @Override
+    public Matrix4f getPerspectiveProjectionMatrix() {
+        if (_renderer.getNumViewports() == 0) {
+            throw new RuntimeException("There are no viewports");
+        }
+        return _renderer.getViewport(0).getPerspectiveMatrix();
+    }
+
+    @Override
+    public Matrix4f getOrthographicProjectionMatrix() {
+        if (_renderer.getNumViewports() == 0) {
+            throw new RuntimeException("There are no viewports");
+        }
+        return _renderer.getViewport(0).getOrthographicMatrix();
+    }
+
+    @Override
     public long getFps() {
         return _fps;
     }
@@ -94,8 +129,26 @@ public class Engine implements IEngine {
     }
 
     @Override
-    public void loadScene(String fileName, ISceneLoadObserver loadProgressObserver) {
-        // TODO
+    public TimeoutManager getTimeoutManager() {
+        return _timeoutManager;
+    }
+
+    @Override
+    public PhysicsSpace getPhysicsSpace() {
+        return _physicsSpace;
+    }
+
+    @Override
+    public GlRenderer getRenderer() {
+        return _renderer;
+    }
+
+    private void loadBullet3RuntimeLibrary() {
+        File directory = new File("lib");
+        boolean success = NativeLibraryLoader.loadLibbulletjme(true, directory, "Release", "Dp");
+        if (!success) {
+            throw new RuntimeException("Failed to load the Bullet3 run-time library");
+        }
     }
 
     private void resetFrameCounters() {

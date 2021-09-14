@@ -46,12 +46,17 @@ public class Application implements
         IViewportSizeObserver,
         IStateMachineContext,
         IApplicationModes,
+        IMenuControllerEvents,
+        IMenuWorldControllerEvents,
         IGameWorldControllerEvents,
         ICampaignControllerEvents,
         IRaceControllerEvents,
         IDogfightControllerEvents {
 
     static final private String WINDOW_TITLE = "Lunar Gravity v1.0";
+    static final private String MENU_SCENE_FILE_NAME = "menuScene.json";
+    static final private String MENU_WORLD_SCENE_FILE_NAME = "menuWorldScene.json";
+
     private static final int WINDOW_WIDTH = 1280;
     private static final int WINDOW_HEIGHT = 960;
     private static final int ARROW_MOUSE_CURSOR = 1;
@@ -125,6 +130,7 @@ public class Application implements
         _currentState.think();
     }
 
+
     @Override
     public void onFrameDraw3d(int viewport, Matrix4f projectionMatrix) {
         if (_worldView != null) {
@@ -189,6 +195,11 @@ public class Application implements
     }
 
     @Override
+    public IEngine getEngine() {
+        return _engine;
+    }
+
+    @Override
     public long getFrameNo() {
         return _frameNo;
     }
@@ -204,18 +215,26 @@ public class Application implements
     }
 
     @Override
-    public void startMenu(ISceneLoadObserver loadingProgress, IMenuWorldControllerEvents worldEventHandler, IMenuControllerEvents eventHandler) {
+    public void startMenu(ISceneBuilderObserver sceneBuilderObserver) {
         _worldModel = new MenuWorldModel();
-        _worldController = new MenuWorldController(worldEventHandler, (IMenuWorldModel)_worldModel);
+        _worldController = new MenuWorldController(this, (IMenuWorldModel)_worldModel);
         _worldView = new MenuWorldView((IMenuWorldModel)_worldModel);
 
         _logicModel = new MenuModel();
-        _logicController = new MenuController(eventHandler, (IMenuModel)_logicModel);
+        _logicController = new MenuController(this, (IMenuModel)_logicModel);
         _logicView = new MenuView((IMenuModel)_logicModel);
+
+        _engine.setDefaultViewport();
+
+        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
+        worldSceneBuilder.build(MENU_WORLD_SCENE_FILE_NAME);
+
+        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
+        logicSceneBuilder.build(MENU_SCENE_FILE_NAME);
     }
 
     @Override
-    public void startCampaignGame(ISceneLoadObserver loadingProgress) {
+    public void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver) {
         _worldModel = new GameWorldModel();
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
@@ -226,7 +245,7 @@ public class Application implements
     }
 
     @Override
-    public void startRaceGame(ISceneLoadObserver loadingProgress) {
+    public void startRaceGame(ISceneBuilderObserver sceneBuilderObserver) {
         _worldModel = new GameWorldModel();
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
@@ -237,7 +256,7 @@ public class Application implements
     }
 
     @Override
-    public void startDogfightGame(ISceneLoadObserver loadingProgress) {
+    public void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver) {
         _worldModel = new GameWorldModel();
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);

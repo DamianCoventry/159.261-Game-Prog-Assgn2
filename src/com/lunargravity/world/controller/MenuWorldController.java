@@ -17,7 +17,12 @@ public class MenuWorldController implements IWorldController {
     }
 
     @Override
-    public void temp() {
+    public void doWorldControllerStuff() {
+        // TODO
+    }
+
+    @Override
+    public void onLogicSettingLoaded(String name, String value) {
         // TODO
     }
 }

@@ -1,12 +1,10 @@
 package com.lunargravity.application;
 
-import com.lunargravity.engine.scene.ISceneLoadObserver;
-import com.lunargravity.menu.controller.IMenuControllerEvents;
-import com.lunargravity.world.controller.IMenuWorldControllerEvents;
+import com.lunargravity.engine.scene.ISceneBuilderObserver;
 
 public interface IApplicationModes {
-    void startMenu(ISceneLoadObserver loadingProgress, IMenuWorldControllerEvents worldEventHandler, IMenuControllerEvents eventHandler);
-    void startCampaignGame(ISceneLoadObserver loadingProgress);
-    void startRaceGame(ISceneLoadObserver loadingProgress);
-    void startDogfightGame(ISceneLoadObserver loadingProgress);
+    void startMenu(ISceneBuilderObserver sceneBuilderObserver);
+    void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver);
+    void startRaceGame(ISceneBuilderObserver sceneBuilderObserver);
+    void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver);
 }

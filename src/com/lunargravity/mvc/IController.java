@@ -1,5 +1,7 @@
 package com.lunargravity.mvc;
 
-public interface IController {
+import com.lunargravity.engine.scene.ISceneLogicOwner;
+
+public interface IController extends ISceneLogicOwner {
     void think();
 }

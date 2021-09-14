@@ -1,6 +1,8 @@
 package com.lunargravity.menu.model;
 
-public class MenuModel implements IMenuModel {
+import com.lunargravity.engine.scene.ISceneStateOwner;
+
+public class MenuModel implements IMenuModel, ISceneStateOwner {
     @Override
     public String toJson() {
         // TODO
@@ -14,6 +16,11 @@ public class MenuModel implements IMenuModel {
 
     @Override
     public void temp() {
+        // TODO
+    }
+
+    @Override
+    public void onStateSettingLoaded(String name, String value) {
         // TODO
     }
 }

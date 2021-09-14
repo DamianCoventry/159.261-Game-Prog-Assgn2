@@ -13,11 +13,16 @@ public class CampaignController implements ICampaignController {
 
     @Override
     public void think() {
-
+        // TODO
     }
 
     @Override
     public void temp() {
+        // TODO
+    }
 
+    @Override
+    public void onLogicSettingLoaded(String name, String value) {
+        // TODO
     }
 }

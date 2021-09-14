@@ -14,7 +14,10 @@
 
 package com.lunargravity.application;
 
-public interface IStateMachineContext extends ICurrentFrame {
+import com.lunargravity.engine.core.IEngine;
+
+public interface IStateMachineContext extends ICurrentFrame, IApplicationModes {
     void changeState(IState state);
     void changeStateNow(IState state);
+    IEngine getEngine();
 }
