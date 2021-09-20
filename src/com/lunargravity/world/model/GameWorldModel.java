@@ -1,14 +1,23 @@
 package com.lunargravity.world.model;
 
-public class GameWorldModel implements IGameWorldModel {
+import com.lunargravity.engine.scene.ISceneStateOwner;
+import org.joml.Vector2f;
+
+import java.util.HashMap;
+
+public class GameWorldModel implements IGameWorldModel, ISceneStateOwner {
+    public GameWorldModel() {
+        // TODO
+    }
+
     @Override
-    public String toJson() {
+    public String modelToJson() {
         // TODO
         return null;
     }
 
     @Override
-    public void fromJson(String json) {
+    public void modelFromJson(String json) {
         // TODO
     }
 

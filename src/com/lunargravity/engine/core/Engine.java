@@ -86,6 +86,11 @@ public class Engine implements IEngine {
     }
 
     @Override
+    public void exit() {
+        _window.close();
+    }
+
+    @Override
     public void setDefaultViewport() {
         _renderer.setViewports(new GlViewportConfig[] {
                 createDefaultViewportConfig()
@@ -141,6 +146,60 @@ public class Engine implements IEngine {
     @Override
     public GlRenderer getRenderer() {
         return _renderer;
+    }
+
+    @Override
+    public boolean isSoundEnabled() {
+        // TODO
+        return false;
+    }
+
+    @Override
+    public void enableSound() {
+        // TODO
+    }
+
+    @Override
+    public void disableSound() {
+        // TODO
+    }
+
+    @Override
+    public void setSoundVolume(int volume) {
+        // TODO
+    }
+
+    @Override
+    public int getSoundVolume() {
+        // TODO
+        return 0;
+    }
+
+    @Override
+    public boolean isMusicEnabled() {
+        // TODO
+        return false;
+    }
+
+    @Override
+    public void enableMusic() {
+        // TODO
+    }
+
+    @Override
+    public void disableMusic() {
+        // TODO
+    }
+
+    @Override
+    public void setMusicVolume(int volume) {
+        // TODO
+    }
+
+    @Override
+    public int getMusicVolume() {
+        // TODO
+        return 0;
     }
 
     private void loadBullet3RuntimeLibrary() {

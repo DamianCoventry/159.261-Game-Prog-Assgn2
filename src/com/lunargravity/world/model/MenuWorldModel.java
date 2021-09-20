@@ -2,13 +2,13 @@ package com.lunargravity.world.model;
 
 public class MenuWorldModel implements IMenuWorldModel {
     @Override
-    public String toJson() {
+    public String modelToJson() {
         // TODO
         return null;
     }
 
     @Override
-    public void fromJson(String json) {
+    public void modelFromJson(String json) {
         // TODO
     }
 

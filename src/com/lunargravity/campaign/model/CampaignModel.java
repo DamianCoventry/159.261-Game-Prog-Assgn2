@@ -1,14 +1,25 @@
 package com.lunargravity.campaign.model;
 
-public class CampaignModel implements ICampaignModel {
+import com.lunargravity.engine.scene.ISceneStateOwner;
+import org.joml.Vector2f;
+
+import java.util.HashMap;
+
+public class CampaignModel implements ICampaignModel, ISceneStateOwner {
+    private final int _numPlayers;
+
+    public CampaignModel(int numPlayers) {
+        _numPlayers = numPlayers;
+    }
+
     @Override
-    public String toJson() {
+    public String modelToJson() {
         // TODO
         return null;
     }
 
     @Override
-    public void fromJson(String json) {
+    public void modelFromJson(String json) {
         // TODO
     }
 

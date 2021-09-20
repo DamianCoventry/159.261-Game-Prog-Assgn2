@@ -1,5 +1,5 @@
 package com.lunargravity.dogfight.controller;
 
-public interface IDogfightControllerEvents {
+public interface IDogfightControllerObserver {
     void temp();
 }

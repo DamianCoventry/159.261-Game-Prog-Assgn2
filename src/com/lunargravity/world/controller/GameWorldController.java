@@ -1,23 +1,32 @@
 package com.lunargravity.world.controller;
 
+import com.lunargravity.engine.scene.ISceneLogicOwner;
 import com.lunargravity.world.model.IGameWorldModel;
+import org.joml.Vector2f;
 
-public class GameWorldController implements IWorldController {
-    private final IGameWorldControllerEvents _eventHandler;
+import java.util.HashMap;
+
+public class GameWorldController implements IGameWorldController, ISceneLogicOwner {
+    private final IGameWorldControllerObserver _observer;
     private final IGameWorldModel _model;
 
-    public GameWorldController(IGameWorldControllerEvents eventHandler, IGameWorldModel model) {
-        _eventHandler = eventHandler;
+    public GameWorldController(IGameWorldControllerObserver observer, IGameWorldModel model) {
+        _observer = observer;
         _model = model;
     }
 
     @Override
-    public void think() {
+    public void onControllerThink() {
         // TODO
     }
 
     @Override
     public void doWorldControllerStuff() {
+        // TODO
+    }
+
+    @Override
+    public void doGameWorldControllerStuff() {
         // TODO
     }
 

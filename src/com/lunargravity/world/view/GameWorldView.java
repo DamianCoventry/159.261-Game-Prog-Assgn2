@@ -4,10 +4,12 @@ import com.lunargravity.engine.graphics.GlMaterial;
 import com.lunargravity.engine.graphics.GlStaticMesh;
 import com.lunargravity.engine.graphics.GlTexture;
 import com.lunargravity.engine.graphics.GlTransform;
+import com.lunargravity.engine.scene.ISceneAssetOwner;
+import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
 import com.lunargravity.world.model.IGameWorldModel;
 import org.joml.Matrix4f;
 
-public class GameWorldView implements IWorldView {
+public class GameWorldView implements IGameWorldView, ISceneAssetOwner {
     private final IGameWorldModel _model;
 
     public GameWorldView(IGameWorldModel model) {
@@ -15,22 +17,27 @@ public class GameWorldView implements IWorldView {
     }
 
     @Override
-    public void think() {
+    public void onViewThink() {
         // TODO
     }
 
     @Override
-    public void draw3d(int viewport, Matrix4f projectionMatrix) {
+    public void onDrawView3d(int viewport, Matrix4f projectionMatrix) {
         // TODO
     }
 
     @Override
-    public void draw2d(int viewport, Matrix4f projectionMatrix) {
+    public void onDrawView2d(int viewport, Matrix4f projectionMatrix) {
         // TODO
     }
 
     @Override
     public void drawWorldViewStuff() {
+        // TODO
+    }
+
+    @Override
+    public void drawGameWorldViewStuff() {
         // TODO
     }
 
@@ -51,6 +58,11 @@ public class GameWorldView implements IWorldView {
 
     @Override
     public void onTextureLoaded(GlTexture texture) {
+        // TODO
+    }
+
+    @Override
+    public void onWidgetLoaded(WidgetCreateInfo wci) {
         // TODO
     }
 }

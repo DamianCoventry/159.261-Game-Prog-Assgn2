@@ -1,12 +1,16 @@
 package com.lunargravity.world.view;
 
 import com.lunargravity.engine.graphics.*;
+import com.lunargravity.engine.scene.ISceneAssetOwner;
+import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
 import com.lunargravity.world.model.IMenuWorldModel;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 
-public class MenuWorldView implements IMenuWorldView {
+public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     static private final String PLANET_STRING_ID = ".planet.";
 
     private static class PlanetarySystem {
@@ -37,18 +41,24 @@ public class MenuWorldView implements IMenuWorldView {
     }
 
     @Override
-    public void think() {
+    public void onViewThink() {
         // TODO
     }
 
     @Override
-    public void draw3d(int viewport, Matrix4f projectionMatrix) {
+    public void onDrawView3d(int viewport, Matrix4f projectionMatrix) {
         if (_cameras.size() == 0) {
-            throw new RuntimeException("No cameras are defined");
+            // begin temp
+            _cameras.add(new GlObject("temp", new GlTransform(new Vector3f(), new Quaternionf())));
+            _currentCamera = _cameras.get(0);
+            // end temp
+            //throw new RuntimeException("No cameras are defined");
         }
 
         Matrix4f viewProjectionMatrix = projectionMatrix.mul(_currentCamera._transform.getViewMatrix());
-        _sun.draw(viewProjectionMatrix);
+        if (_sun != null) { // Should always pass
+            _sun.draw(viewProjectionMatrix);
+        }
 
         for (final var planetarySystem : _planetarySystems) {
             planetarySystem._planet.draw(viewProjectionMatrix);
@@ -59,7 +69,7 @@ public class MenuWorldView implements IMenuWorldView {
     }
 
     @Override
-    public void draw2d(int viewport, Matrix4f projectionMatrix) {
+    public void onDrawView2d(int viewport, Matrix4f projectionMatrix) {
         // TODO
     }
 
@@ -113,6 +123,11 @@ public class MenuWorldView implements IMenuWorldView {
     @Override
     public void onTextureLoaded(GlTexture texture) {
         _textures.add(texture);
+    }
+
+    @Override
+    public void onWidgetLoaded(WidgetCreateInfo wci) {
+        // TODO
     }
 
     public GlStaticMesh findStaticMesh(String name) {

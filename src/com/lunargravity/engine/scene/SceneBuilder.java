@@ -1,6 +1,7 @@
 package com.lunargravity.engine.scene;
 
 import com.lunargravity.engine.graphics.*;
+import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
 
 public class SceneBuilder {
     private final ISceneBuilderObserver _observer;
@@ -25,10 +26,12 @@ public class SceneBuilder {
 
         _assetOwner.onTextureLoaded(new GlTexture("blah"));
         _assetOwner.onStaticMeshLoaded(new GlStaticMesh("blah"));
+        _assetOwner.onWidgetLoaded(new WidgetCreateInfo("id", "type"));
         _observer.onSceneBuildProgressed(66, 100); // TODO
 
         _assetOwner.onObjectLoaded("blah", "blah", new GlTransform());
         _assetOwner.onMaterialLoaded(new GlMaterial("blah"));
+        _assetOwner.onWidgetLoaded(new WidgetCreateInfo("id", "type"));
         _observer.onSceneBuildProgressed(100, 100); // TODO
 
         _observer.onSceneBuildEnded();

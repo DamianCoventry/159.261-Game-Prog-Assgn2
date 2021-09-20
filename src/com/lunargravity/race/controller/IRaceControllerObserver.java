@@ -1,5 +1,5 @@
 package com.lunargravity.race.controller;
 
-public interface IRaceControllerEvents {
+public interface IRaceControllerObserver {
     void temp();
 }

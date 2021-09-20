@@ -1,14 +1,19 @@
 package com.lunargravity.race.model;
 
-public class RaceModel implements IRaceModel {
+import com.lunargravity.engine.scene.ISceneStateOwner;
+import org.joml.Vector2f;
+
+import java.util.HashMap;
+
+public class RaceModel implements IRaceModel, ISceneStateOwner {
     @Override
-    public String toJson() {
+    public String modelToJson() {
         // TODO
         return null;
     }
 
     @Override
-    public void fromJson(String json) {
+    public void modelFromJson(String json) {
         // TODO
     }
 

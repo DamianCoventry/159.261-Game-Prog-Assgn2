@@ -2,20 +2,21 @@ package com.lunargravity.menu.model;
 
 import com.lunargravity.engine.scene.ISceneStateOwner;
 
+// TODO: is this class needed?
 public class MenuModel implements IMenuModel, ISceneStateOwner {
     @Override
-    public String toJson() {
+    public String modelToJson() {
         // TODO
         return null;
     }
 
     @Override
-    public void fromJson(String json) {
+    public void modelFromJson(String json) {
         // TODO
     }
 
     @Override
-    public void temp() {
+    public void doMenuModelSpecificWork() {
         // TODO
     }
 

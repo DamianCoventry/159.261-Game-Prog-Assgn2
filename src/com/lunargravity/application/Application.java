@@ -24,6 +24,7 @@ import com.lunargravity.engine.core.*;
 import com.lunargravity.engine.desktopwindow.GlfwWindowConfig;
 import com.lunargravity.engine.graphics.GlViewportConfig;
 import com.lunargravity.engine.scene.*;
+import com.lunargravity.engine.widgetsystem.WidgetManager;
 import com.lunargravity.menu.controller.*;
 import com.lunargravity.menu.model.*;
 import com.lunargravity.menu.statemachine.LoadingMenuState;
@@ -37,6 +38,7 @@ import com.lunargravity.world.model.*;
 import com.lunargravity.world.view.*;
 import org.joml.Matrix4f;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -45,15 +47,14 @@ public class Application implements
         IInputConsumer,
         IViewportSizeObserver,
         IStateMachineContext,
-        IApplicationModes,
-        IMenuControllerEvents,
-        IMenuWorldControllerEvents,
-        IGameWorldControllerEvents,
-        ICampaignControllerEvents,
-        IRaceControllerEvents,
-        IDogfightControllerEvents {
+        IMenuWorldControllerObserver,
+        IGameWorldControllerObserver,
+        ICampaignControllerObserver,
+        IRaceControllerObserver,
+        IDogfightControllerObserver {
 
     static final private String WINDOW_TITLE = "Lunar Gravity v1.0";
+    static final private String PLAYER_INPUT_BINDINGS_FILE_NAME = "playerInputBindings.json";
     static final private String MENU_SCENE_FILE_NAME = "menuScene.json";
     static final private String MENU_WORLD_SCENE_FILE_NAME = "menuWorldScene.json";
 
@@ -63,7 +64,12 @@ public class Application implements
     private static final int GRAB_MOUSE_CURSOR = 2;
     private static final int HAND_MOUSE_CURSOR = 3;
 
+    private static final int FIRST_EPISODE = 0;
+    private static final int FIRST_MISSION = 0;
+
     private final IEngine _engine;
+    private PlayerInputBindings _playerInputBindings;
+
     private long _frameNo;
     private long _nowMs;
     private double _frameDelta;
@@ -79,8 +85,9 @@ public class Application implements
     private IView _logicView;
     private IController _logicController;
 
+    private final WidgetManager _widgetManager;
+
     public Application() throws IOException {
-        _engine = new Engine(this, this, this, createWindowConfig());
         _frameNo = _nowMs = 0;
         _frameDelta = 0.0;
 
@@ -94,6 +101,12 @@ public class Application implements
         _logicModel = null;
         _logicView = null;
         _logicController = null;
+
+        _engine = new Engine(this, this, this, createWindowConfig());
+
+        _widgetManager = new WidgetManager();
+
+        initialisePlayerInputBindings();
 
         changeStateNow(new LoadingMenuState(this));
     }
@@ -116,17 +129,18 @@ public class Application implements
     @Override
     public void onFrameThink() {
         if (_worldController != null) {
-            _worldController.think();
+            _worldController.onControllerThink();
         }
         if (_logicController != null) {
-            _logicController.think();
+            _logicController.onControllerThink();
         }
         if (_worldView != null) {
-            _worldView.think();
+            _worldView.onViewThink();
         }
         if (_logicView != null) {
-            _logicView.think();
+            _logicView.onViewThink();
         }
+        _widgetManager.think();
         _currentState.think();
     }
 
@@ -134,10 +148,10 @@ public class Application implements
     @Override
     public void onFrameDraw3d(int viewport, Matrix4f projectionMatrix) {
         if (_worldView != null) {
-            _worldView.draw3d(viewport, projectionMatrix);
+            _worldView.onDrawView3d(viewport, projectionMatrix);
         }
         if (_logicView != null) {
-            _logicView.draw3d(viewport, projectionMatrix);
+            _logicView.onDrawView3d(viewport, projectionMatrix);
         }
         _currentState.draw3d(viewport, projectionMatrix);
     }
@@ -145,37 +159,43 @@ public class Application implements
     @Override
     public void onFrameDraw2d(int viewport, Matrix4f projectionMatrix) {
         if (_worldView != null) {
-            _worldView.draw2d(viewport, projectionMatrix);
+            _worldView.onDrawView2d(viewport, projectionMatrix);
         }
         if (_logicView != null) {
-            _logicView.draw2d(viewport, projectionMatrix);
+            _logicView.onDrawView2d(viewport, projectionMatrix);
         }
+        _widgetManager.draw2d(viewport, projectionMatrix);
         _currentState.draw2d(viewport, projectionMatrix);
     }
 
     @Override
     public void onKeyboardKeyEvent(int key, int scancode, int action, int mods) {
-        _currentState.onKeyboardKeyEvent(key, scancode, action, mods);
+        _currentState.onKeyboardKeyEvent(key, scancode, action, mods); // TODO: consider adding a 'consumed' return code
+        _widgetManager.onKeyboardKeyEvent(key, scancode, action, mods);
     }
 
     @Override
     public void onMouseButtonEvent(int button, int action, int mods) {
-        _currentState.onMouseButtonEvent(button, action, mods);
+        _currentState.onMouseButtonEvent(button, action, mods); // TODO: consider adding a 'consumed' return code
+        _widgetManager.onMouseButtonEvent(button, action, mods);
     }
 
     @Override
     public void onMouseCursorMovedEvent(double xPos, double yPos) {
-        _currentState.onMouseCursorMovedEvent(xPos, yPos);
+        _currentState.onMouseCursorMovedEvent(xPos, yPos); // TODO: consider adding a 'consumed' return code
+        _widgetManager.onMouseCursorMovedEvent(xPos, yPos);
     }
 
     @Override
     public void onMouseWheelScrolledEvent(double xOffset, double yOffset) {
-        _currentState.onMouseWheelScrolledEvent(xOffset, yOffset);
+        _currentState.onMouseWheelScrolledEvent(xOffset, yOffset); // TODO: consider adding a 'consumed' return code
+        _widgetManager.onMouseWheelScrolledEvent(xOffset, yOffset);
     }
 
     @Override
     public GlViewportConfig onViewportSizeChanged(int viewport, GlViewportConfig currentConfig, int windowWidth, int windowHeight) {
-        return _currentState.onViewportSizeChanged(viewport, currentConfig, windowWidth, windowHeight);
+        GlViewportConfig newViewportConfig = _currentState.onViewportSizeChanged(viewport, currentConfig, windowWidth, windowHeight);
+        return _widgetManager.onViewportSizeChanged(viewport, newViewportConfig, windowWidth, windowHeight);
     }
 
     @Override
@@ -184,19 +204,43 @@ public class Application implements
     }
 
     @Override
-    public void changeStateNow(IState state) {
-        if (_currentState != null) {
-            _currentState.end();
-        }
-        _currentState = state;
-        if (_currentState != null) {
-            _currentState.begin();
-        }
+    public IEngine getEngine() {
+        return _engine;
     }
 
     @Override
-    public IEngine getEngine() {
-        return _engine;
+    public IModel getWorldModel() {
+        return _worldModel;
+    }
+
+    @Override
+    public IView getWorldView() {
+        return _worldView;
+    }
+
+    @Override
+    public IController getWorldController() {
+        return _worldController;
+    }
+
+    @Override
+    public IModel getLogicModel() {
+        return _logicModel;
+    }
+
+    @Override
+    public IView getLogicView() {
+        return _logicView;
+    }
+
+    @Override
+    public IController getLogicController() {
+        return _logicController;
+    }
+
+    @Override
+    public void exitApplication() {
+        _engine.exit();
     }
 
     @Override
@@ -221,10 +265,11 @@ public class Application implements
         _worldView = new MenuWorldView((IMenuWorldModel)_worldModel);
 
         _logicModel = new MenuModel();
-        _logicController = new MenuController(this, (IMenuModel)_logicModel);
-        _logicView = new MenuView((IMenuModel)_logicModel);
+        _logicController = new MenuController(_engine, _playerInputBindings, (IMenuModel)_logicModel);
+        _logicView = new MenuView(_widgetManager, (IMenuController)_logicController, (IMenuModel)_logicModel);
 
         _engine.setDefaultViewport();
+        _widgetManager.closeAll();
 
         SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
         worldSceneBuilder.build(MENU_WORLD_SCENE_FILE_NAME);
@@ -234,14 +279,48 @@ public class Application implements
     }
 
     @Override
-    public void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver) {
+    public void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver, String savedGameFileName) throws IOException {
+        SavedGameFile savedGameFile = new SavedGameFile(savedGameFileName); // throws
+
         _worldModel = new GameWorldModel();
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
 
-        _logicModel = new CampaignModel();
+        _logicModel = new CampaignModel(savedGameFile.getNumPlayers());
         _logicController = new CampaignController(this, (ICampaignModel)_logicModel);
-        _logicView = new CampaignView((ICampaignModel)_logicModel);
+        _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
+
+        _engine.setDefaultViewport();
+        _widgetManager.closeAll();
+
+        String worldSceneFileName = makeCampaignWorldSceneFileName(savedGameFile.getEpisode(), savedGameFile.getMission());
+        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
+        worldSceneBuilder.build(worldSceneFileName);
+
+        String logicSceneFileName = makeCampaignLogicSceneFileName(savedGameFile.getEpisode(), savedGameFile.getMission());
+        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
+        logicSceneBuilder.build(logicSceneFileName);
+    }
+
+    @Override
+    public void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) {
+        _worldModel = new GameWorldModel();
+        _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
+        _worldView = new GameWorldView((IGameWorldModel)_worldModel);
+
+        _logicModel = new CampaignModel(numPlayers);
+        _logicController = new CampaignController(this, (ICampaignModel)_logicModel);
+        _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
+
+        _engine.setDefaultViewport();
+
+        String worldSceneFileName = makeCampaignWorldSceneFileName(FIRST_EPISODE, FIRST_MISSION);
+        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
+        worldSceneBuilder.build(worldSceneFileName);
+
+        String logicSceneFileName = makeCampaignLogicSceneFileName(FIRST_EPISODE, FIRST_MISSION);
+        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
+        logicSceneBuilder.build(logicSceneFileName);
     }
 
     @Override
@@ -252,7 +331,9 @@ public class Application implements
 
         _logicModel = new RaceModel();
         _logicController = new RaceController(this, (IRaceModel)_logicModel);
-        _logicView = new RaceView((IRaceModel)_logicModel);
+        _logicView = new RaceView(_widgetManager, (IRaceController)_logicController, (IRaceModel)_logicModel);
+
+        // TODO
     }
 
     @Override
@@ -263,12 +344,19 @@ public class Application implements
 
         _logicModel = new DogfightModel();
         _logicController = new DogfightController(this, (IDogfightModel)_logicModel);
-        _logicView = new DogfightView((IDogfightModel)_logicModel);
+        _logicView = new DogfightView(_widgetManager, (IDogfightController)_logicController, (IDogfightModel)_logicModel);
+
+        // TODO
     }
 
     @Override
     public void temp() {
-        // TODO: forward this to the current state
+        // TODO
+    }
+
+    @Override
+    public void onMenuWorldControllerEvent() {
+        // TODO
     }
 
     public void run() {
@@ -277,6 +365,16 @@ public class Application implements
 
     public void freeResources() {
         _engine.freeResources();
+    }
+
+    public void changeStateNow(IState state) {
+        if (_currentState != null) {
+            _currentState.end();
+        }
+        _currentState = state;
+        if (_currentState != null) {
+            _currentState.begin();
+        }
     }
 
     private GlfwWindowConfig createWindowConfig() {
@@ -304,6 +402,28 @@ public class Application implements
                 new GlfwWindowConfig.MouseCursorConfig("images/HandMouseCursor.png", 19, 3));
         windowConfig._initialMouseCursor = ARROW_MOUSE_CURSOR;
         return windowConfig;
+    }
+
+    private void initialisePlayerInputBindings() {
+        _playerInputBindings = new PlayerInputBindings();
+
+        File file = new File(PLAYER_INPUT_BINDINGS_FILE_NAME);
+        if (file.exists() && file.isFile()) {
+            try {
+                _playerInputBindings.load(file);
+            }
+            catch (IOException e) {
+                // TODO: Is there something useful we can do with the exception?
+            }
+        }
+    }
+
+    static private String makeCampaignWorldSceneFileName(int episode, int mission) {
+        return String.format("scenes/CampaignWorldE%02dM%02d.json", episode, mission);
+    }
+
+    static private String makeCampaignLogicSceneFileName(int episode, int mission) {
+        return String.format("scenes/CampaignLogicE%02dM%02d.json", episode, mission);
     }
 
     public static void main(String[] args) {

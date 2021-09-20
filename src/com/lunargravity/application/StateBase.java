@@ -2,7 +2,10 @@ package com.lunargravity.application;
 
 import com.lunargravity.engine.core.IManualFrameUpdater;
 import com.lunargravity.engine.graphics.GlViewportConfig;
+import com.lunargravity.engine.timeouts.TimeoutManager;
 import org.joml.Matrix4f;
+
+import java.util.function.Function;
 
 public class StateBase implements IState {
     private final IStateMachineContext _context;
@@ -19,12 +22,16 @@ public class StateBase implements IState {
         _context.changeState(state);
     }
 
-    protected void changeStateNow(IState state) {
-        _context.changeStateNow(state);
-    }
-
     // TODO: add code here that simplifies the process of adding and removing timeouts
     // TODO: add code here that automatically removes timeouts when the class is freed
+
+    protected int addTimeout(long timeoutMs, Function<Integer, TimeoutManager.CallbackResult> callback) {
+        return _context.getEngine().getTimeoutManager().addTimeout(timeoutMs, callback);
+    }
+
+    protected void removeTimeout(int timeoutId) {
+        _context.getEngine().getTimeoutManager().removeTimeout(timeoutId);
+    }
 
     @Override
     public void begin() {

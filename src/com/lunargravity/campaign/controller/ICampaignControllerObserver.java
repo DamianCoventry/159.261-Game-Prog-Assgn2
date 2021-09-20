@@ -1,5 +1,5 @@
 package com.lunargravity.campaign.controller;
 
-public interface ICampaignControllerEvents {
+public interface ICampaignControllerObserver {
     void temp();
 }

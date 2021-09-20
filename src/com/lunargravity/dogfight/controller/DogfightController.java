@@ -1,18 +1,22 @@
 package com.lunargravity.dogfight.controller;
 
 import com.lunargravity.dogfight.model.IDogfightModel;
+import com.lunargravity.engine.scene.ISceneLogicOwner;
+import org.joml.Vector2f;
 
-public class DogfightController implements IDogfightController {
-    private final IDogfightControllerEvents _eventHandler;
+import java.util.HashMap;
+
+public class DogfightController implements IDogfightController, ISceneLogicOwner {
+    private final IDogfightControllerObserver _observer;
     private final IDogfightModel _model;
 
-    public DogfightController(IDogfightControllerEvents eventHandler, IDogfightModel model) {
-        _eventHandler = eventHandler;
+    public DogfightController(IDogfightControllerObserver observer, IDogfightModel model) {
+        _observer = observer;
         _model = model;
     }
 
     @Override
-    public void think() {
+    public void onControllerThink() {
         // TODO
     }
 
