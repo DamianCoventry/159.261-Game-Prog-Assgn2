@@ -49,9 +49,7 @@ public class Application implements
         IStateMachineContext,
         IMenuWorldControllerObserver,
         IGameWorldControllerObserver,
-        ICampaignControllerObserver,
-        IRaceControllerObserver,
-        IDogfightControllerObserver {
+        ICampaignControllerObserver {
 
     static final private String WINDOW_TITLE = "Lunar Gravity v1.0";
     static final private String PLAYER_INPUT_BINDINGS_FILE_NAME = "playerInputBindings.json";
@@ -313,6 +311,7 @@ public class Application implements
         _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
 
         _engine.setDefaultViewport();
+        _widgetManager.closeAll();
 
         String worldSceneFileName = makeCampaignWorldSceneFileName(FIRST_EPISODE, FIRST_MISSION);
         SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
@@ -324,29 +323,47 @@ public class Application implements
     }
 
     @Override
-    public void startRaceGame(ISceneBuilderObserver sceneBuilderObserver) {
+    public void startRaceGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) {
         _worldModel = new GameWorldModel();
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
 
-        _logicModel = new RaceModel();
-        _logicController = new RaceController(this, (IRaceModel)_logicModel);
+        _logicModel = new RaceModel(numPlayers);
+        _logicController = new RaceController((IRaceModel)_logicModel);
         _logicView = new RaceView(_widgetManager, (IRaceController)_logicController, (IRaceModel)_logicModel);
 
-        // TODO
+        _engine.setDefaultViewport();
+        _widgetManager.closeAll();
+
+        String worldSceneFileName = getFirstWorldRaceSceneFileName();
+        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
+        worldSceneBuilder.build(worldSceneFileName);
+
+        String logicSceneFileName = getFirstLogicRaceSceneFileName();
+        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
+        logicSceneBuilder.build(logicSceneFileName);
     }
 
     @Override
-    public void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver) {
+    public void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) {
         _worldModel = new GameWorldModel();
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
 
-        _logicModel = new DogfightModel();
-        _logicController = new DogfightController(this, (IDogfightModel)_logicModel);
+        _logicModel = new DogfightModel(numPlayers);
+        _logicController = new DogfightController((IDogfightModel)_logicModel);
         _logicView = new DogfightView(_widgetManager, (IDogfightController)_logicController, (IDogfightModel)_logicModel);
 
-        // TODO
+        _engine.setDefaultViewport();
+        _widgetManager.closeAll();
+
+        String worldSceneFileName = getFirstWorldDogfightSceneFileName();
+        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
+        worldSceneBuilder.build(worldSceneFileName);
+
+        String logicSceneFileName = getFirstLogicDogfightSceneFileName();
+        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
+        logicSceneBuilder.build(logicSceneFileName);
     }
 
     @Override
@@ -424,6 +441,22 @@ public class Application implements
 
     static private String makeCampaignLogicSceneFileName(int episode, int mission) {
         return String.format("scenes/CampaignLogicE%02dM%02d.json", episode, mission);
+    }
+
+    static private String getFirstWorldRaceSceneFileName() {
+        return "scenes/RaceWorld00.json";
+    }
+
+    static private String getFirstLogicRaceSceneFileName() {
+        return "scenes/RaceLogic00.json";
+    }
+
+    static private String getFirstWorldDogfightSceneFileName() {
+        return "scenes/DogfightWorld00.json";
+    }
+
+    static private String getFirstLogicDogfightSceneFileName() {
+        return "scenes/DogfightLogic00.json";
     }
 
     public static void main(String[] args) {

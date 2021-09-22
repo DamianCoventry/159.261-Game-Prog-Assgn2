@@ -2,17 +2,17 @@ package com.lunargravity.race.controller;
 
 import com.lunargravity.engine.scene.ISceneLogicOwner;
 import com.lunargravity.race.model.IRaceModel;
-import org.joml.Vector2f;
 
-import java.util.HashMap;
+import java.time.LocalTime;
+import java.util.LinkedList;
 
 public class RaceController implements IRaceController, ISceneLogicOwner {
-    private final IRaceControllerObserver _observer;
+    private final LinkedList<IRaceControllerObserver> _observers;
     private final IRaceModel _model;
 
-    public RaceController(IRaceControllerObserver observer, IRaceModel model) {
-        _observer = observer;
+    public RaceController(IRaceModel model) {
         _model = model;
+        _observers = new LinkedList<>();
     }
 
     @Override
@@ -21,12 +21,77 @@ public class RaceController implements IRaceController, ISceneLogicOwner {
     }
 
     @Override
-    public void temp() {
+    public void onLogicSettingLoaded(String name, String value) {
         // TODO
     }
 
     @Override
-    public void onLogicSettingLoaded(String name, String value) {
-        // TODO
+    public void addObserver(IRaceControllerObserver observer) {
+        _observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(IRaceControllerObserver observer) {
+        _observers.remove(observer);
+    }
+
+    @Override
+    public void startNewRace(int numPlayers) {
+        for (var observer : _observers) {
+            observer.startNewRaceRequested(numPlayers);
+        }
+    }
+
+    @Override
+    public void startNextRace() {
+        for (var observer : _observers) {
+            observer.startNextRaceRequested();
+        }
+    }
+
+    @Override
+    public void resumeRace() {
+        for (var observer : _observers) {
+            observer.resumeRaceRequested();
+        }
+    }
+
+    @Override
+    public void goToMainMenu() {
+        for (var observer : _observers) {
+            observer.goToMainMenuRequested();
+        }
+    }
+
+    @Override
+    public void goToRaceScoreboard() {
+        for (var observer : _observers) {
+            observer.goToRaceScoreboardRequested();
+        }
+    }
+
+    @Override
+    public boolean isHighScore(LocalTime elapsedTime) {
+        return _model.isHighScore(elapsedTime);
+    }
+
+    @Override
+    public void resetRaceScoreboard() {
+        _model.resetRaceScoreboard();
+    }
+
+    @Override
+    public boolean insertRaceHighScore(LocalTime elapsedTime) {
+        return _model.insertRaceHighScore(elapsedTime);
+    }
+
+    @Override
+    public void saveRaceScoreboard(String fileName) {
+        _model.saveRaceScoreboard(fileName);
+    }
+
+    @Override
+    public void loadRaceScoreboard(String fileName) {
+        _model.loadRaceScoreboard(fileName);
     }
 }

@@ -11,6 +11,18 @@ public class WidgetCreateInfo {
         _type = type;
     }
 
+    public WidgetCreateInfo getChild(String id, String type) {
+        if (_children == null) {
+            return null;
+        }
+        for (var child : _children) {
+            if (child._id.equals(id) && child._type.equals(type)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
     public String _id;
     public String _type;
     public Vector2f _position;

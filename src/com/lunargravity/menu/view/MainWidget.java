@@ -12,13 +12,6 @@ public class MainWidget extends WidgetObserver implements IButtonObserver {
 
     private final IMainWidgetObserver _observer;
 
-    private Widget _backgroundImage;
-    private Widget _campaignButton;
-    private Widget _raceButton;
-    private Widget _dogfightButton;
-    private Widget _optionsButton;
-    private Widget _exitButton;
-
     public MainWidget(WidgetManager widgetManager, IMainWidgetObserver observer) {
         super(widgetManager);
         _observer = observer;
@@ -26,31 +19,40 @@ public class MainWidget extends WidgetObserver implements IButtonObserver {
 
     @Override
     protected void createChildWidgets(WidgetCreateInfo wci) {
-        // TODO: need to examine the wci structure and pass the correct info to each of these ctor calls
-        _backgroundImage = new Widget(wci, new ImageWidget(_widgetManager));
-        _campaignButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
-        _raceButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
-        _dogfightButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
-        _optionsButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
-        _exitButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
+        WidgetCreateInfo child = wci.getChild(BACKGROUND_IMAGE, "ImageWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(child, new ImageWidget(_widgetManager)));
+        }
+        child = wci.getChild(CAMPAIGN_BUTTON, "ButtonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(child, new ButtonWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(RACE_BUTTON, "ButtonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(child, new ButtonWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(DOGFIGHT_BUTTON, "ButtonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(child, new ButtonWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(OPTIONS_BUTTON, "ButtonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(child, new ButtonWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(EXIT_BUTTON, "ButtonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(child, new ButtonWidget(_widgetManager, this)));
+        }
     }
 
     @Override
     public void buttonClicked(String widgetId) {
-        if (widgetId.equals(CAMPAIGN_BUTTON)) {
-            _observer.campaignGameButtonClicked();
-        }
-        else if (widgetId.equals(RACE_BUTTON)) {
-            _observer.raceGameButtonClicked();
-        }
-        else if (widgetId.equals(DOGFIGHT_BUTTON)) {
-            _observer.dogfightGameButtonClicked();
-        }
-        else if (widgetId.equals(OPTIONS_BUTTON)) {
-            _observer.optionsButtonClicked();
-        }
-        else if  (widgetId.equals(EXIT_BUTTON)) {
-            _observer.exitApplicationButtonClicked();
+        switch (widgetId) {
+            case CAMPAIGN_BUTTON -> _observer.campaignGameButtonClicked();
+            case RACE_BUTTON -> _observer.raceGameButtonClicked();
+            case DOGFIGHT_BUTTON -> _observer.dogfightGameButtonClicked();
+            case OPTIONS_BUTTON -> _observer.optionsButtonClicked();
+            case EXIT_BUTTON -> _observer.exitApplicationButtonClicked();
         }
     }
 }

@@ -2,9 +2,15 @@ package com.lunargravity.dogfight.view;
 
 import com.lunargravity.dogfight.controller.IDogfightController;
 import com.lunargravity.dogfight.model.IDogfightModel;
-import com.lunargravity.engine.graphics.*;
+import com.lunargravity.engine.graphics.GlMaterial;
+import com.lunargravity.engine.graphics.GlStaticMesh;
+import com.lunargravity.engine.graphics.GlTexture;
+import com.lunargravity.engine.graphics.GlTransform;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
-import com.lunargravity.engine.widgetsystem.*;
+import com.lunargravity.engine.widgetsystem.ImageWidget;
+import com.lunargravity.engine.widgetsystem.Widget;
+import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
+import com.lunargravity.engine.widgetsystem.WidgetManager;
 import org.joml.Matrix4f;
 
 public class DogfightView implements
@@ -14,11 +20,11 @@ public class DogfightView implements
         IDogfightScoreboardObserver,
         IDogfightResultsObserver
 {
-    private static final String DOGFIGHT_RESULTS = "dogfightResults";
-    private static final String DOGFIGHT_SCOREBOARD = "dogfightScoreboard";
-    private static final String DOGFIGHT_PAUSED = "dogfightPaused";
+    private static final String RACE_RESULTS = "dogfightResults";
+    private static final String RACE_SCOREBOARD = "dogfightScoreboard";
+    private static final String RACE_PAUSED = "dogfightPaused";
     private static final String GET_READY = "getReady";
-    private static final String DOGFIGHT_COMPLETED = "dogfightCompleted";
+    private static final String RACE_COMPLETED = "dogfightCompleted";
 
     private final WidgetManager _widgetManager;
     private final IDogfightController _controller;
@@ -52,11 +58,6 @@ public class DogfightView implements
     }
 
     @Override
-    public void temp() {
-        // TODO
-    }
-
-    @Override
     public void onObjectLoaded(String name, String type, GlTransform transform) {
         // TODO
     }
@@ -77,17 +78,49 @@ public class DogfightView implements
     }
 
     @Override
+    public void showResultsWidget() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_dogfightResults, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showScoreboardWidget() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_dogfightScoreboard, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showPausedWidget() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_dogfightPaused, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showGetReadyWidget(int countdown) {
+        ImageWidget imageWidget = (ImageWidget)_getReady.getObserver();
+        imageWidget.setImage(String.format("images/DogfightGetReady%02d.png", countdown));
+        _widgetManager.hideAll();
+        _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showCompletedWidget() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_dogfightCompleted, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
     public void onWidgetLoaded(WidgetCreateInfo wci) {
-        if (wci._id.equals(DOGFIGHT_SCOREBOARD) && wci._type.equals("DogfightScoreboardWidget")) {
+        if (wci._id.equals(RACE_SCOREBOARD) && wci._type.equals("DogfightScoreboardWidget")) {
             _dogfightScoreboard = new Widget(wci, new DogfightScoreboardWidget(_widgetManager, this));
         }
-        else if (wci._id.equals(DOGFIGHT_RESULTS) && wci._type.equals("DogfightResultsWidget")) {
+        else if (wci._id.equals(RACE_RESULTS) && wci._type.equals("DogfightResultsWidget")) {
             _dogfightResults = new Widget(wci, new DogfightResultsWidget(_widgetManager, this));
         }
-        else if (wci._id.equals(DOGFIGHT_PAUSED) && wci._type.equals("DogfightPausedWidget")) {
+        else if (wci._id.equals(RACE_PAUSED) && wci._type.equals("DogfightPausedWidget")) {
             _dogfightPaused = new Widget(wci, new DogfightPausedWidget(_widgetManager, this));
         }
-        else if (wci._id.equals(DOGFIGHT_COMPLETED) && wci._type.equals("ImageWidget")) {
+        else if (wci._id.equals(RACE_COMPLETED) && wci._type.equals("ImageWidget")) {
             _dogfightCompleted = new Widget(wci, new ImageWidget(_widgetManager));
         }
         else if (wci._id.equals(GET_READY) && wci._type.equals("ImageWidget")) {
@@ -97,41 +130,36 @@ public class DogfightView implements
 
     @Override
     public void resumeDogfightButtonClicked() {
-        // TODO: changeState();
-    }
-
-    @Override
-    public void quitDogfightButtonClicked() {
-        // TODO: changeState();
-    }
-
-    @Override
-    public void startNextDogfightButtonClicked() {
-        // TODO: changeState();
-    }
-
-    @Override
-    public void quitToDogfightScoreboardButtonClicked() {
-        // TODO: changeState();
-    }
-
-    @Override
-    public void resetDogfightScoreboardButtonClicked() {
-        // TODO
-    }
-
-    @Override
-    public void startSinglePlayerDogfightButtonClicked() {
-        // TODO: changeState();
-    }
-
-    @Override
-    public void startTwoPlayersDogfightButtonClicked() {
-        // TODO: changeState();
+        _controller.resumeDogfight();
     }
 
     @Override
     public void mainMenuButtonClicked() {
-        // TODO: changeState();
+        _controller.goToMainMenu();
+    }
+
+    @Override
+    public void startNextDogfightButtonClicked() {
+        _controller.startNextDogfight();
+    }
+
+    @Override
+    public void quitToDogfightScoreboardButtonClicked() {
+        _controller.goToDogfightScoreboard();
+    }
+
+    @Override
+    public void resetDogfightScoreboardButtonClicked() {
+        _controller.resetDogfightScoreboard();
+    }
+
+    @Override
+    public void startSinglePlayerDogfightButtonClicked() {
+        _controller.startNewDogfight(1);
+    }
+
+    @Override
+    public void startTwoPlayersDogfightButtonClicked() {
+        _controller.startNewDogfight(2);
     }
 }

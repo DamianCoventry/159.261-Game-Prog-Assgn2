@@ -28,24 +28,6 @@ public class OptionsWidget extends WidgetObserver implements
 
     private final IOptionsWidgetObserver _observer;
 
-    private Widget _backgroundImage;
-    private Widget _enableSoundCheck;
-    private Widget _soundVolumeNumeric;
-    private Widget _enableMusicCheck;
-    private Widget _musicVolumeNumeric;
-    private Widget _p1RotateCwKeyboardKey;
-    private Widget _p1RotateCcwKeyboardKey;
-    private Widget _p1ThrustKeyboardKey;
-    private Widget _p1KickKeyboardKey;
-    private Widget _p1ShootKeyboardKey;
-    private Widget _p2RotateCwKeyboardKey;
-    private Widget _p2RotateCcwKeyboardKey;
-    private Widget _p2ThrustKeyboardKey;
-    private Widget _p2KickKeyboardKey;
-    private Widget _p2ShootKeyboardKey;
-    private Widget _resetToDefaultsButton;
-    private Widget _mainMenuButton;
-
     public OptionsWidget(WidgetManager widgetManager, IOptionsWidgetObserver observer) {
         super(widgetManager);
         _observer = observer;
@@ -53,24 +35,74 @@ public class OptionsWidget extends WidgetObserver implements
 
     @Override
     protected void createChildWidgets(WidgetCreateInfo wci) {
-        // TODO: need to examine the wci structure and pass the correct info to each of these ctor calls
-        _backgroundImage = new Widget(wci, new ImageWidget(_widgetManager));
-        _enableSoundCheck = new Widget(wci, new CheckWidget(_widgetManager, this));
-        _soundVolumeNumeric = new Widget(wci, new NumericWidget(_widgetManager, this));
-        _enableMusicCheck = new Widget(wci, new CheckWidget(_widgetManager, this));
-        _musicVolumeNumeric = new Widget(wci, new NumericWidget(_widgetManager, this));
-        _p1RotateCwKeyboardKey = new Widget(wci, new KeyBindingWidget(_widgetManager, this));
-        _p1RotateCcwKeyboardKey = new Widget(wci, new KeyBindingWidget(_widgetManager, this));
-        _p1ThrustKeyboardKey = new Widget(wci, new KeyBindingWidget(_widgetManager, this));
-        _p1KickKeyboardKey = new Widget(wci, new KeyBindingWidget(_widgetManager, this));
-        _p1ShootKeyboardKey = new Widget(wci, new KeyBindingWidget(_widgetManager, this));
-        _p2RotateCwKeyboardKey = new Widget(wci, new KeyBindingWidget(_widgetManager, this));
-        _p2RotateCcwKeyboardKey = new Widget(wci, new KeyBindingWidget(_widgetManager, this));
-        _p2ThrustKeyboardKey = new Widget(wci, new KeyBindingWidget(_widgetManager, this));
-        _p2KickKeyboardKey = new Widget(wci, new KeyBindingWidget(_widgetManager, this));
-        _p2ShootKeyboardKey = new Widget(wci, new KeyBindingWidget(_widgetManager, this));
-        _resetToDefaultsButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
-        _mainMenuButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
+        WidgetCreateInfo child = wci.getChild(BACKGROUND_IMAGE, "ImageWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(child, new ImageWidget(_widgetManager)));
+        }
+        child = wci.getChild(ENABLE_SOUND_CHECK, "checkWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new CheckWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(SOUND_VOLUME_NUMERIC, "numericWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new NumericWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(ENABLE_MUSIC_CHECK, "checkWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new CheckWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(MUSIC_VOLUME_NUMERIC, "numericWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new NumericWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(P1_ROTATE_CW_KEYBOARD_KEY, "keyBindingWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(P1_ROTATE_CCW_KEYBOARD_KEY, "keyBindingWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(P1_THRUST_KEYBOARD_KEY, "keyBindingWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(P1_KICK_KEYBOARD_KEY, "keyBindingWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(P1_SHOOT_KEYBOARD_KEY, "keyBindingWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(P2_ROTATE_CW_KEYBOARD_KEY, "keyBindingWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(P2_ROTATE_CCW_KEYBOARD_KEY, "keyBindingWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(P2_THRUST_KEYBOARD_KEY, "keyBindingWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(P2_KICK_KEYBOARD_KEY, "keyBindingWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(P2_SHOOT_KEYBOARD_KEY, "keyBindingWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(RESET_TO_DEFAULTS_BUTTON, "buttonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(MAIN_MENU_BUTTON, "buttonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+        }
     }
 
     @Override
@@ -115,35 +147,17 @@ public class OptionsWidget extends WidgetObserver implements
 
     @Override
     public void keyBindingChanged(String widgetId, int key) {
-        if (widgetId.equals(P1_ROTATE_CW_KEYBOARD_KEY)) {
-            _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.ROTATE_CW, key);
-        }
-        else if (widgetId.equals(P1_ROTATE_CCW_KEYBOARD_KEY)) {
-            _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.ROTATE_CCW, key);
-        }
-        else if (widgetId.equals(P1_THRUST_KEYBOARD_KEY)) {
-            _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.THRUST, key);
-        }
-        else if (widgetId.equals(P1_KICK_KEYBOARD_KEY)) {
-            _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.KICK, key);
-        }
-        else if (widgetId.equals(P1_SHOOT_KEYBOARD_KEY)) {
-            _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.SHOOT, key);
-        }
-        else if (widgetId.equals(P2_ROTATE_CW_KEYBOARD_KEY)) {
-            _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.ROTATE_CW, key);
-        }
-        else if (widgetId.equals(P2_ROTATE_CCW_KEYBOARD_KEY)) {
-            _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.ROTATE_CCW, key);
-        }
-        else if (widgetId.equals(P2_THRUST_KEYBOARD_KEY)) {
-            _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.THRUST, key);
-        }
-        else if (widgetId.equals(P2_KICK_KEYBOARD_KEY)) {
-            _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.KICK, key);
-        }
-        else if (widgetId.equals(P2_SHOOT_KEYBOARD_KEY)) {
-            _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.SHOOT, key);
+        switch (widgetId) {
+            case P1_ROTATE_CW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.ROTATE_CW, key);
+            case P1_ROTATE_CCW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.ROTATE_CCW, key);
+            case P1_THRUST_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.THRUST, key);
+            case P1_KICK_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.KICK, key);
+            case P1_SHOOT_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.SHOOT, key);
+            case P2_ROTATE_CW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.ROTATE_CW, key);
+            case P2_ROTATE_CCW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.ROTATE_CCW, key);
+            case P2_THRUST_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.THRUST, key);
+            case P2_KICK_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.KICK, key);
+            case P2_SHOOT_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.SHOOT, key);
         }
     }
 }

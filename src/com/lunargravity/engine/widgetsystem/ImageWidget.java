@@ -17,5 +17,9 @@ public class ImageWidget extends WidgetObserver {
         // else throw
     }
 
+    public void setImage(String imageFileName) {
+        _texture = new GlTexture(imageFileName);
+    }
+
     // TODO: how is the painting done?
 }

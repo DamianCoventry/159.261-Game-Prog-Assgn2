@@ -1,5 +1,9 @@
 package com.lunargravity.race.controller;
 
 public interface IRaceControllerObserver {
-    void temp();
+    void startNewRaceRequested(int numPlayers);
+    void startNextRaceRequested();
+    void resumeRaceRequested();
+    void goToMainMenuRequested();
+    void goToRaceScoreboardRequested();
 }

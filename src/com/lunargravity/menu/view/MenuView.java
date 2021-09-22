@@ -162,21 +162,11 @@ public class MenuView implements
     @Override
     public void playerKeyBindingChanged(int player, Binding binding, int key) {
         switch (binding) {
-            case ROTATE_CW:
-                _controller.setPlayerRotateRightKey(player, key);
-                break;
-            case ROTATE_CCW:
-                _controller.setPlayerRotateLeftKey(player, key);
-                break;
-            case THRUST:
-                _controller.setPlayerThrustKey(player, key);
-                break;
-            case KICK:
-                _controller.setPlayerKickKey(player, key);
-                break;
-            case SHOOT:
-                _controller.setPlayerShootKey(player, key);
-                break;
+            case ROTATE_CW -> _controller.setPlayerRotateRightKey(player, key);
+            case ROTATE_CCW -> _controller.setPlayerRotateLeftKey(player, key);
+            case THRUST -> _controller.setPlayerThrustKey(player, key);
+            case KICK -> _controller.setPlayerKickKey(player, key);
+            case SHOOT -> _controller.setPlayerShootKey(player, key);
         }
     }
 

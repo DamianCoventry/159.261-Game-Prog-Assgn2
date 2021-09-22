@@ -16,8 +16,8 @@ public abstract class WidgetObserver implements IWidgetObserver {
 
     protected abstract void createChildWidgets(WidgetCreateInfo wci);
 
-    public String getWidgetId() {
-        return _widget.getId();
+    public Widget getWidget() {
+        return _widget;
     }
 
     @Override

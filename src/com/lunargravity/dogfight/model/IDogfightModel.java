@@ -3,5 +3,10 @@ package com.lunargravity.dogfight.model;
 import com.lunargravity.mvc.IModel;
 
 public interface IDogfightModel extends IModel {
-    void temp();
+    int getNumPlayers();
+    boolean isHighScore(int killCount);
+    void resetDogfightScoreboard();
+    boolean insertDogfightHighScore(int killCount);
+    void saveDogfightScoreboard(String fileName);
+    void loadDogfightScoreboard(String fileName);
 }

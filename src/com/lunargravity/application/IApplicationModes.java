@@ -8,6 +8,6 @@ public interface IApplicationModes {
     void startMenu(ISceneBuilderObserver sceneBuilderObserver);
     void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver, String fileName) throws IOException;
     void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException;
-    void startRaceGame(ISceneBuilderObserver sceneBuilderObserver);
-    void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver);
+    void startRaceGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers);
+    void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers);
 }

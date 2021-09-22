@@ -1,8 +1,14 @@
 package com.lunargravity.race.view;
 
-import com.lunargravity.engine.graphics.*;
+import com.lunargravity.engine.graphics.GlMaterial;
+import com.lunargravity.engine.graphics.GlStaticMesh;
+import com.lunargravity.engine.graphics.GlTexture;
+import com.lunargravity.engine.graphics.GlTransform;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
-import com.lunargravity.engine.widgetsystem.*;
+import com.lunargravity.engine.widgetsystem.ImageWidget;
+import com.lunargravity.engine.widgetsystem.Widget;
+import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
+import com.lunargravity.engine.widgetsystem.WidgetManager;
 import com.lunargravity.race.controller.IRaceController;
 import com.lunargravity.race.model.IRaceModel;
 import org.joml.Matrix4f;
@@ -52,11 +58,6 @@ public class RaceView implements
     }
 
     @Override
-    public void temp() {
-        // TODO
-    }
-
-    @Override
     public void onObjectLoaded(String name, String type, GlTransform transform) {
         // TODO
     }
@@ -74,6 +75,38 @@ public class RaceView implements
     @Override
     public void onTextureLoaded(GlTexture texture) {
         // TODO
+    }
+
+    @Override
+    public void showResultsWidget() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_raceResults, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showScoreboardWidget() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_raceScoreboard, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showPausedWidget() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_racePaused, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showGetReadyWidget(int countdown) {
+        ImageWidget imageWidget = (ImageWidget)_getReady.getObserver();
+        imageWidget.setImage(String.format("images/RaceGetReady%02d.png", countdown));
+        _widgetManager.hideAll();
+        _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showCompletedWidget() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_raceCompleted, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
@@ -97,41 +130,36 @@ public class RaceView implements
 
     @Override
     public void resumeRaceButtonClicked() {
-        // TODO: changeState();
-    }
-
-    @Override
-    public void quitRaceButtonClicked() {
-        // TODO: changeState();
-    }
-
-    @Override
-    public void startNextRaceButtonClicked() {
-        // TODO: changeState();
-    }
-
-    @Override
-    public void quitToRaceScoreboardButtonClicked() {
-        // TODO: changeState();
-    }
-
-    @Override
-    public void resetRaceScoreboardButtonClicked() {
-        // TODO
-    }
-
-    @Override
-    public void startSinglePlayerRaceButtonClicked() {
-        // TODO: changeState();
-    }
-
-    @Override
-    public void startTwoPlayersRaceButtonClicked() {
-        // TODO: changeState();
+        _controller.resumeRace();
     }
 
     @Override
     public void mainMenuButtonClicked() {
-        // TODO: changeState();
+        _controller.goToMainMenu();
+    }
+
+    @Override
+    public void startNextRaceButtonClicked() {
+        _controller.startNextRace();
+    }
+
+    @Override
+    public void quitToRaceScoreboardButtonClicked() {
+        _controller.goToRaceScoreboard();
+    }
+
+    @Override
+    public void resetRaceScoreboardButtonClicked() {
+        _controller.resetRaceScoreboard();
+    }
+
+    @Override
+    public void startSinglePlayerRaceButtonClicked() {
+        _controller.startNewRace(1);
+    }
+
+    @Override
+    public void startTwoPlayersRaceButtonClicked() {
+        _controller.startNewRace(2);
     }
 }

@@ -12,13 +12,6 @@ public class CampaignWidget extends WidgetObserver implements IButtonObserver, I
 
     private final ICampaignWidgetObserver _observer;
 
-    private Widget _backgroundImage;
-    private Widget _singlePlayerButton;
-    private Widget _twoPlayersButton;
-    private Widget _savedGamesList;
-    private Widget _loadSavedGameButton;
-    private Widget _mainMenuButton;
-
     public CampaignWidget(WidgetManager widgetManager, ICampaignWidgetObserver observer) {
         super(widgetManager);
         _observer = observer;
@@ -26,32 +19,45 @@ public class CampaignWidget extends WidgetObserver implements IButtonObserver, I
 
     @Override
     protected void createChildWidgets(WidgetCreateInfo wci) {
-        // TODO: need to examine the wci structure and pass the correct info to each of these ctor calls
-        _backgroundImage = new Widget(wci, new ImageWidget(_widgetManager));
-        _singlePlayerButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
-        _twoPlayersButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
-        _savedGamesList = new Widget(wci, new ListWidget(_widgetManager, this));
-        _loadSavedGameButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
-        _mainMenuButton = new Widget(wci, new ButtonWidget(_widgetManager, this));
+        WidgetCreateInfo child = wci.getChild(BACKGROUND_IMAGE, "ImageWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(child, new ImageWidget(_widgetManager)));
+        }
+        child = wci.getChild(SINGLE_PLAYER_BUTTON, "ButtonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(TWO_PLAYERS_BUTTON, "ButtonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(SAVED_GAMES_LIST, "ListWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new ListWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(LOAD_SAVED_GAME_BUTTON, "ButtonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+        }
+        child = wci.getChild(MAIN_MENU_BUTTON, "ButtonWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+        }
     }
 
     @Override
     public void buttonClicked(String widgetId) {
-        if (widgetId.equals(SINGLE_PLAYER_BUTTON)) {
-            _observer.singlePlayerCampaignButtonClicked();
-        }
-        else if (widgetId.equals(TWO_PLAYERS_BUTTON)) {
-            _observer.twoPlayersCampaignButtonClicked();
-        }
-        else if (widgetId.equals(LOAD_SAVED_GAME_BUTTON)) {
-            ListWidget list = (ListWidget)_savedGamesList.getObserver();
-            int index = list.getSelectedIndex();
-            if (index >= 0) {
-                _observer.loadSavedCampaignButtonClicked(list.getItem(index));
+        switch (widgetId) {
+            case SINGLE_PLAYER_BUTTON -> _observer.singlePlayerCampaignButtonClicked();
+            case TWO_PLAYERS_BUTTON -> _observer.twoPlayersCampaignButtonClicked();
+            case LOAD_SAVED_GAME_BUTTON -> {
+                ListWidget list = (ListWidget)getWidget().getChild(SAVED_GAMES_LIST).getObserver();
+                int index = list.getSelectedIndex();
+                if (index >= 0) {
+                    _observer.loadSavedCampaignButtonClicked(list.getItem(index));
+                }
             }
-        }
-        else if (widgetId.equals(MAIN_MENU_BUTTON)) {
-            _observer.mainMenuButtonClicked();
+            case MAIN_MENU_BUTTON -> _observer.mainMenuButtonClicked();
         }
     }
 
