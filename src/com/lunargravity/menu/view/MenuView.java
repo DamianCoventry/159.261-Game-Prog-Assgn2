@@ -8,6 +8,8 @@ import com.lunargravity.menu.model.IMenuModel;
 import com.lunargravity.mvc.IView;
 import org.joml.Matrix4f;
 
+import java.io.IOException;
+
 public class MenuView implements
         IView,
         ISceneAssetOwner,
@@ -49,7 +51,7 @@ public class MenuView implements
     }
 
     @Override
-    public void onObjectLoaded(String name, String type, GlTransform transform) {
+    public void onObjectLoaded(String name, String type, Transform transform) {
         // TODO
     }
 
@@ -69,7 +71,7 @@ public class MenuView implements
     }
 
     @Override
-    public void onWidgetLoaded(WidgetCreateInfo wci) {
+    public void onWidgetLoaded(WidgetCreateInfo wci) throws IOException {
         if (wci._id.equals(MAIN) && wci._type.equals("MainWidget")) {
             _main = new Widget(wci, new MainWidget(_widgetManager, this));
         }

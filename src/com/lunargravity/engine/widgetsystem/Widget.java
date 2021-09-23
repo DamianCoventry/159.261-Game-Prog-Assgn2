@@ -3,6 +3,7 @@ package com.lunargravity.engine.widgetsystem;
 import com.lunargravity.engine.core.IInputConsumer;
 import org.joml.Vector2f;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Widget implements IInputConsumer {
@@ -13,7 +14,7 @@ public class Widget implements IInputConsumer {
     private Vector2f _position;
     private Vector2f _size;
 
-    public Widget(WidgetCreateInfo wci, WidgetObserver observer) {
+    public Widget(WidgetCreateInfo wci, WidgetObserver observer) throws IOException {
         _children = new ArrayList<>();
         _id = wci._id;
         _type = wci._type;

@@ -4,16 +4,16 @@ import org.joml.Matrix4f;
 
 public class GlObject {
     public String _name;
-    public GlTransform _transform;
+    public Transform _transform;
     public GlStaticMesh _staticMesh;
 
-    public GlObject(String name, GlTransform transform) {
+    public GlObject(String name, Transform transform) {
         _name = name;
         _transform = transform;
         _staticMesh = null;
     }
 
-    public GlObject(String name, GlTransform transform, GlStaticMesh staticMesh) {
+    public GlObject(String name, Transform transform, GlStaticMesh staticMesh) {
         _name = name;
         _transform = transform;
         _staticMesh = staticMesh;
@@ -22,6 +22,7 @@ public class GlObject {
     public void draw(Matrix4f viewProjectionMatrix) {
         // TODO
     }
+
     public void draw(Matrix4f projectionMatrix, Matrix4f viewMatrix) {
         // TODO
     }

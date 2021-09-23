@@ -6,6 +6,7 @@ import com.lunargravity.engine.desktopwindow.*;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.lwjgl.glfw.*;
 
 import java.io.File;
@@ -46,7 +47,7 @@ public class Engine implements IEngine {
         resetFrameCounters();
         createDesktopWindow(windowConfig);
 
-        _renderer = new GlRenderer(new GlViewportConfig[] {
+        _renderer = new GlRenderer(new ViewportConfig[] {
                 createDefaultViewportConfig()
         });
     }
@@ -57,7 +58,7 @@ public class Engine implements IEngine {
     }
 
     @Override
-    public void run() {
+    public void run() throws IOException, InterruptedException {
         resetFrameCounters();
         while (!_window.shouldClose()) {
             _currentTimeMs = System.currentTimeMillis();
@@ -92,9 +93,19 @@ public class Engine implements IEngine {
 
     @Override
     public void setDefaultViewport() {
-        _renderer.setViewports(new GlViewportConfig[] {
+        _renderer.setViewports(new ViewportConfig[] {
                 createDefaultViewportConfig()
         });
+    }
+
+    @Override
+    public Vector2f[] getViewportSizes() {
+        Vector2f[] viewportSizes = new Vector2f[_renderer.getNumViewports()];
+        for (int i = 0; i < _renderer.getNumViewports(); ++i) {
+            ViewportConfig config = _renderer.getViewport(i).getConfig();
+            viewportSizes[i] = new Vector2f(config._width, config._height);
+        }
+        return viewportSizes;
     }
 
     @Override
@@ -225,7 +236,7 @@ public class Engine implements IEngine {
                     return;
                 }
                 for (int i = 0; i < _renderer.getNumViewports(); ++i) {
-                    GlViewportConfig newConfig = _viewportSizeObserver.onViewportSizeChanged(
+                    ViewportConfig newConfig = _viewportSizeObserver.onViewportSizeChanged(
                             i, _renderer.getViewport(i).getConfig(),
                             (int)_window.getWidth(), (int)_window.getHeight());
                     if (newConfig != null) {
@@ -286,8 +297,8 @@ public class Engine implements IEngine {
         }
     }
 
-    private GlViewportConfig createDefaultViewportConfig() {
-        GlViewportConfig config = new GlViewportConfig();
+    private ViewportConfig createDefaultViewportConfig() {
+        ViewportConfig config = new ViewportConfig();
         config._positionX = 0;
         config._positionY = 0;
         config._width = (int)_window.getWidth();

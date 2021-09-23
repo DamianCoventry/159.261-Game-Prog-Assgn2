@@ -39,9 +39,11 @@ public class EpisodeIntroState extends StateBase {
 
                 changeState(new MissionIntroState(getContext()));
             }
-            catch (IOException e) {
+            catch (IOException | InterruptedException e) {
                 // TODO: Is there something useful we can do with the exception?
             }
+
+            missionBuilderObserver.freeResources();
 
             _timeoutId = 0;
             return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;

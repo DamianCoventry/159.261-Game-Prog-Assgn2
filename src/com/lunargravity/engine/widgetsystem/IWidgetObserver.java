@@ -1,19 +1,24 @@
 package com.lunargravity.engine.widgetsystem;
 
+import org.joml.Matrix4f;
+
 public interface IWidgetObserver {
-    void onOpening();
-    void onOpened();
+    void freeResources();
+    void widgetOpening();
+    void widgetOpened();
     enum CloseResult { CANCEL_CLOSE, PROCEED_WITH_CLOSE }
-    CloseResult onClosing();
-    void onClosed();
-    void onShowing();
-    void onShown();
-    void onHiding();
-    void onHidden();
-    void onZOrderChanging();
-    void onZOrderChanged();
-    void onLoseKeyboardFocus();
-    void onGainKeyboardFocus();
-    void onLoseMouseCapture();
-    void onGainMouseCapture();
+    CloseResult widgetClosing();
+    void widgetClosed();
+    void widgetShowing();
+    void widgetShown();
+    void widgetHiding();
+    void widgetHidden();
+    void widgetZOrderChanging();
+    void widgetZOrderChanged();
+    void widgetLoseKeyboardFocus();
+    void widgetGainKeyboardFocus();
+    void widgetLoseMouseCapture();
+    void widgetGainMouseCapture();
+    void widgetThink();
+    void widgetDraw2d(int viewport, Matrix4f projectionMatrix);
 }

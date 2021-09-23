@@ -2,6 +2,8 @@ package com.lunargravity.menu.view;
 
 import com.lunargravity.engine.widgetsystem.*;
 
+import java.io.IOException;
+
 public class MainWidget extends WidgetObserver implements IButtonObserver {
     private static final String BACKGROUND_IMAGE = "backgroundImage";
     private static final String CAMPAIGN_BUTTON = "campaignButton";
@@ -18,7 +20,7 @@ public class MainWidget extends WidgetObserver implements IButtonObserver {
     }
 
     @Override
-    protected void createChildWidgets(WidgetCreateInfo wci) {
+    protected void createChildWidgets(WidgetCreateInfo wci) throws IOException {
         WidgetCreateInfo child = wci.getChild(BACKGROUND_IMAGE, "ImageWidget");
         if (child != null) {
             getWidget().addChild(new Widget(child, new ImageWidget(_widgetManager)));
@@ -54,5 +56,10 @@ public class MainWidget extends WidgetObserver implements IButtonObserver {
             case OPTIONS_BUTTON -> _observer.optionsButtonClicked();
             case EXIT_BUTTON -> _observer.exitApplicationButtonClicked();
         }
+    }
+
+    @Override
+    public void freeResources() {
+        // TODO
     }
 }

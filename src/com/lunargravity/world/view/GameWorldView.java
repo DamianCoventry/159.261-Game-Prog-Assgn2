@@ -3,11 +3,13 @@ package com.lunargravity.world.view;
 import com.lunargravity.engine.graphics.GlMaterial;
 import com.lunargravity.engine.graphics.GlStaticMesh;
 import com.lunargravity.engine.graphics.GlTexture;
-import com.lunargravity.engine.graphics.GlTransform;
+import com.lunargravity.engine.graphics.Transform;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
 import com.lunargravity.world.model.IGameWorldModel;
 import org.joml.Matrix4f;
+
+import java.io.IOException;
 
 public class GameWorldView implements IGameWorldView, ISceneAssetOwner {
     private final IGameWorldModel _model;
@@ -42,7 +44,7 @@ public class GameWorldView implements IGameWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void onObjectLoaded(String name, String type, GlTransform transform) {
+    public void onObjectLoaded(String name, String type, Transform transform) {
         // TODO
     }
 
@@ -62,7 +64,7 @@ public class GameWorldView implements IGameWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void onWidgetLoaded(WidgetCreateInfo wci) {
+    public void onWidgetLoaded(WidgetCreateInfo wci) throws IOException {
         // TODO
     }
 }

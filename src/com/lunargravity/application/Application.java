@@ -22,7 +22,7 @@ import com.lunargravity.dogfight.model.*;
 import com.lunargravity.dogfight.view.*;
 import com.lunargravity.engine.core.*;
 import com.lunargravity.engine.desktopwindow.GlfwWindowConfig;
-import com.lunargravity.engine.graphics.GlViewportConfig;
+import com.lunargravity.engine.graphics.ViewportConfig;
 import com.lunargravity.engine.scene.*;
 import com.lunargravity.engine.widgetsystem.WidgetManager;
 import com.lunargravity.menu.controller.*;
@@ -85,7 +85,7 @@ public class Application implements
 
     private final WidgetManager _widgetManager;
 
-    public Application() throws IOException {
+    public Application() throws IOException, InterruptedException {
         _frameNo = _nowMs = 0;
         _frameDelta = 0.0;
 
@@ -102,7 +102,7 @@ public class Application implements
 
         _engine = new Engine(this, this, this, createWindowConfig());
 
-        _widgetManager = new WidgetManager();
+        _widgetManager = new WidgetManager(_engine.getRenderer());
 
         initialisePlayerInputBindings();
 
@@ -117,7 +117,7 @@ public class Application implements
     }
 
     @Override
-    public void onFrameEnd() {
+    public void onFrameEnd() throws IOException, InterruptedException {
         if (_pendingState != null) {
             changeStateNow(_pendingState);
             _pendingState = null;
@@ -191,8 +191,8 @@ public class Application implements
     }
 
     @Override
-    public GlViewportConfig onViewportSizeChanged(int viewport, GlViewportConfig currentConfig, int windowWidth, int windowHeight) {
-        GlViewportConfig newViewportConfig = _currentState.onViewportSizeChanged(viewport, currentConfig, windowWidth, windowHeight);
+    public ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig currentConfig, int windowWidth, int windowHeight) {
+        ViewportConfig newViewportConfig = _currentState.onViewportSizeChanged(viewport, currentConfig, windowWidth, windowHeight);
         return _widgetManager.onViewportSizeChanged(viewport, newViewportConfig, windowWidth, windowHeight);
     }
 
@@ -257,7 +257,7 @@ public class Application implements
     }
 
     @Override
-    public void startMenu(ISceneBuilderObserver sceneBuilderObserver) {
+    public void startMenu(ISceneBuilderObserver sceneBuilderObserver) throws IOException, InterruptedException {
         _worldModel = new MenuWorldModel();
         _worldController = new MenuWorldController(this, (IMenuWorldModel)_worldModel);
         _worldView = new MenuWorldView((IMenuWorldModel)_worldModel);
@@ -277,7 +277,7 @@ public class Application implements
     }
 
     @Override
-    public void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver, String savedGameFileName) throws IOException {
+    public void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver, String savedGameFileName) throws IOException, InterruptedException {
         SavedGameFile savedGameFile = new SavedGameFile(savedGameFileName); // throws
 
         _worldModel = new GameWorldModel();
@@ -301,7 +301,7 @@ public class Application implements
     }
 
     @Override
-    public void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) {
+    public void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException {
         _worldModel = new GameWorldModel();
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
@@ -323,7 +323,7 @@ public class Application implements
     }
 
     @Override
-    public void startRaceGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) {
+    public void startRaceGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException {
         _worldModel = new GameWorldModel();
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
@@ -345,7 +345,7 @@ public class Application implements
     }
 
     @Override
-    public void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) {
+    public void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException {
         _worldModel = new GameWorldModel();
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
@@ -376,15 +376,16 @@ public class Application implements
         // TODO
     }
 
-    public void run() {
+    public void run() throws IOException, InterruptedException {
         _engine.run();
     }
 
     public void freeResources() {
+        _widgetManager.freeResources();
         _engine.freeResources();
     }
 
-    public void changeStateNow(IState state) {
+    public void changeStateNow(IState state) throws IOException, InterruptedException {
         if (_currentState != null) {
             _currentState.end();
         }

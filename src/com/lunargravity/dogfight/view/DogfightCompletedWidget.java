@@ -11,4 +11,9 @@ public class DogfightCompletedWidget extends WidgetObserver {
     protected void createChildWidgets(WidgetCreateInfo wci) {
         // TODO: need to examine the wci structure and pass the correct info to each of these ctor calls
     }
+
+    @Override
+    public void freeResources() {
+        // TODO
+    }
 }

@@ -4,9 +4,11 @@ import com.jme3.bullet.PhysicsSpace;
 import com.lunargravity.engine.graphics.GlRenderer;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
+import java.io.IOException;
+
 public interface IEngine extends IManualFrameUpdater {
     void freeResources();
-    void run();
+    void run() throws IOException, InterruptedException;
     void exit();
 
     void setDefaultViewport();

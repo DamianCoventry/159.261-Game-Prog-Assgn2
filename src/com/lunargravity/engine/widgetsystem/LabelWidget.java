@@ -10,5 +10,10 @@ public class LabelWidget extends WidgetObserver {
         // TODO: need to examine the wci structure and pass the correct info to each of these ctor calls
     }
 
+    @Override
+    public void freeResources() {
+        // TODO
+    }
+
     // TODO: get the text and the font in here.
 }

@@ -3,6 +3,8 @@ package com.lunargravity.engine.scene;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
 
+import java.io.IOException;
+
 public class SceneBuilder {
     private final ISceneBuilderObserver _observer;
     private final ISceneStateOwner _stateOwner; // model
@@ -16,24 +18,28 @@ public class SceneBuilder {
         _logicOwner = logicOwner;
     }
 
-    public void build(String fileName) {
-        _observer.onSceneBuildBeginning();
-        _observer.onSceneBuildProgressed(0, 100); // TODO
+    public void build(String fileName) throws IOException, InterruptedException {
+        _observer.sceneBuildBeginning();
+        _observer.sceneBuildProgressed(0, 100); // TODO
+        Thread.sleep(500); // Temp
 
         _stateOwner.onStateSettingLoaded("blah", "blah");
         _logicOwner.onLogicSettingLoaded("blah", "blah");
-        _observer.onSceneBuildProgressed(33, 100); // TODO
+        _observer.sceneBuildProgressed(33, 100); // TODO
+        Thread.sleep(500); // Temp
 
-        _assetOwner.onTextureLoaded(new GlTexture("blah"));
+        //_assetOwner.onTextureLoaded(new GlTexture("blah"));
         _assetOwner.onStaticMeshLoaded(new GlStaticMesh("blah"));
         _assetOwner.onWidgetLoaded(new WidgetCreateInfo("id", "type"));
-        _observer.onSceneBuildProgressed(66, 100); // TODO
+        _observer.sceneBuildProgressed(66, 100); // TODO
+        Thread.sleep(500); // Temp
 
-        _assetOwner.onObjectLoaded("blah", "blah", new GlTransform());
+        _assetOwner.onObjectLoaded("blah", "blah", new Transform());
         _assetOwner.onMaterialLoaded(new GlMaterial("blah"));
         _assetOwner.onWidgetLoaded(new WidgetCreateInfo("id", "type"));
-        _observer.onSceneBuildProgressed(100, 100); // TODO
+        _observer.sceneBuildProgressed(100, 100); // TODO
+        Thread.sleep(500); // Temp
 
-        _observer.onSceneBuildEnded();
+        _observer.sceneBuildEnded();
     }
 }

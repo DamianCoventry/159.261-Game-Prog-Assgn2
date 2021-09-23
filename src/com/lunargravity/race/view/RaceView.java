@@ -3,7 +3,7 @@ package com.lunargravity.race.view;
 import com.lunargravity.engine.graphics.GlMaterial;
 import com.lunargravity.engine.graphics.GlStaticMesh;
 import com.lunargravity.engine.graphics.GlTexture;
-import com.lunargravity.engine.graphics.GlTransform;
+import com.lunargravity.engine.graphics.Transform;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.ImageWidget;
 import com.lunargravity.engine.widgetsystem.Widget;
@@ -12,6 +12,8 @@ import com.lunargravity.engine.widgetsystem.WidgetManager;
 import com.lunargravity.race.controller.IRaceController;
 import com.lunargravity.race.model.IRaceModel;
 import org.joml.Matrix4f;
+
+import java.io.IOException;
 
 public class RaceView implements
         IRaceView,
@@ -58,7 +60,7 @@ public class RaceView implements
     }
 
     @Override
-    public void onObjectLoaded(String name, String type, GlTransform transform) {
+    public void onObjectLoaded(String name, String type, Transform transform) {
         // TODO
     }
 
@@ -96,7 +98,7 @@ public class RaceView implements
     }
 
     @Override
-    public void showGetReadyWidget(int countdown) {
+    public void showGetReadyWidget(int countdown) throws IOException {
         ImageWidget imageWidget = (ImageWidget)_getReady.getObserver();
         imageWidget.setImage(String.format("images/RaceGetReady%02d.png", countdown));
         _widgetManager.hideAll();
@@ -110,7 +112,7 @@ public class RaceView implements
     }
 
     @Override
-    public void onWidgetLoaded(WidgetCreateInfo wci) {
+    public void onWidgetLoaded(WidgetCreateInfo wci) throws IOException {
         if (wci._id.equals(RACE_SCOREBOARD) && wci._type.equals("RaceScoreboardWidget")) {
             _raceScoreboard = new Widget(wci, new RaceScoreboardWidget(_widgetManager, this));
         }

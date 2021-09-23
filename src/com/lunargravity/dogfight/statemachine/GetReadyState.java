@@ -5,6 +5,8 @@ import com.lunargravity.application.StateBase;
 import com.lunargravity.dogfight.view.IDogfightView;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
+import java.io.IOException;
+
 public class GetReadyState extends StateBase {
     private static final int NUM_COUNTDOWN_SECONDS = 3;
 
@@ -17,12 +19,16 @@ public class GetReadyState extends StateBase {
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getDogfightView().showGetReadyWidget(NUM_COUNTDOWN_SECONDS);
 
         addTimeout(1000, (callCount) -> {
             if (callCount < NUM_COUNTDOWN_SECONDS) {
-                getDogfightView().showGetReadyWidget(NUM_COUNTDOWN_SECONDS - callCount);
+                try {
+                    getDogfightView().showGetReadyWidget(NUM_COUNTDOWN_SECONDS - callCount);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 return TimeoutManager.CallbackResult.KEEP_CALLING;
             }
             changeState(new RunningDogfightState(getContext()));

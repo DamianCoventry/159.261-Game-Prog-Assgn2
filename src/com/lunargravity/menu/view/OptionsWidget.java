@@ -2,6 +2,8 @@ package com.lunargravity.menu.view;
 
 import com.lunargravity.engine.widgetsystem.*;
 
+import java.io.IOException;
+
 public class OptionsWidget extends WidgetObserver implements
         ICheckObserver,
         INumericObserver,
@@ -34,7 +36,7 @@ public class OptionsWidget extends WidgetObserver implements
     }
 
     @Override
-    protected void createChildWidgets(WidgetCreateInfo wci) {
+    protected void createChildWidgets(WidgetCreateInfo wci) throws IOException {
         WidgetCreateInfo child = wci.getChild(BACKGROUND_IMAGE, "ImageWidget");
         if (child != null) {
             getWidget().addChild(new Widget(child, new ImageWidget(_widgetManager)));
@@ -159,5 +161,10 @@ public class OptionsWidget extends WidgetObserver implements
             case P2_KICK_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.KICK, key);
             case P2_SHOOT_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.SHOOT, key);
         }
+    }
+
+    @Override
+    public void freeResources() {
+        // TODO
     }
 }

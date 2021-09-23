@@ -1,12 +1,19 @@
 package com.lunargravity.engine.graphics;
 
+import java.io.IOException;
+
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13C.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13C.glActiveTexture;
 
 public class GlRenderer {
+    private final GlDiffuseTextureProgram _diffuseTextureProgram;
     private GlViewport[] _viewports;
 
-    public GlRenderer(GlViewportConfig[] viewportConfigs) {
+    public GlRenderer(ViewportConfig[] viewportConfigs) throws IOException {
         setViewports(viewportConfigs);
+
+        _diffuseTextureProgram = new GlDiffuseTextureProgram();
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glEnable(GL_CULL_FACE);
@@ -15,11 +22,19 @@ public class GlRenderer {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
+    public GlDiffuseTextureProgram getDiffuseTextureProgram() {
+        return _diffuseTextureProgram;
+    }
+
+    public void freeResources() {
+        _diffuseTextureProgram.freeResources();
+    }
+
     public void clearBuffers() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    public void setViewports(GlViewportConfig[] viewportConfigs) {
+    public void setViewports(ViewportConfig[] viewportConfigs) {
         if (viewportConfigs == null || viewportConfigs.length == 0) {
             throw new IllegalArgumentException("viewportConfigs");
         }
@@ -39,5 +54,9 @@ public class GlRenderer {
             return _viewports[i];
         }
         return null;
+    }
+
+    public void activateTextureImageUnit(int unit) {
+        glActiveTexture(GL_TEXTURE0 + unit);
     }
 }

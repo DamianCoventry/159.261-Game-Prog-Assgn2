@@ -7,6 +7,8 @@ import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.*;
 import org.joml.Matrix4f;
 
+import java.io.IOException;
+
 public class CampaignView implements
         ICampaignView,
         ISceneAssetOwner,
@@ -73,7 +75,7 @@ public class CampaignView implements
     }
 
     @Override
-    public void onObjectLoaded(String name, String type, GlTransform transform) {
+    public void onObjectLoaded(String name, String type, Transform transform) {
         // TODO
     }
 
@@ -93,7 +95,7 @@ public class CampaignView implements
     }
 
     @Override
-    public void onWidgetLoaded(WidgetCreateInfo wci) {
+    public void onWidgetLoaded(WidgetCreateInfo wci) throws IOException {
         if (wci._id.equals(MISSION_PAUSED) && wci._type.equals("MissionPausedWidget")) {
             _missionPaused = new Widget(wci, new MissionPausedWidget(_widgetManager, this));
         }

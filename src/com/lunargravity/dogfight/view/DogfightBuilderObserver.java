@@ -12,17 +12,22 @@ public class DogfightBuilderObserver implements ISceneBuilderObserver {
     }
 
     @Override
-    public void onSceneBuildBeginning() {
+    public void freeResources() {
+        // TODO
+    }
+
+    @Override
+    public void sceneBuildBeginning() {
         // Anything to do here?
     }
 
     @Override
-    public void onSceneBuildEnded() {
+    public void sceneBuildEnded() {
         // Anything to do here?
     }
 
     @Override
-    public void onSceneBuildProgressed(int currentItem, int totalItems) {
+    public void sceneBuildProgressed(int currentItem, int totalItems) {
         _manualFrameUpdater.prepareNewFrame();
 
         Matrix4f perspectiveProjectionMatrix = _manualFrameUpdater.getPerspectiveProjectionMatrix();

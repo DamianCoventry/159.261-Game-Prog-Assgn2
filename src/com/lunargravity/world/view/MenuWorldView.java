@@ -8,6 +8,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
@@ -49,7 +50,7 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     public void onDrawView3d(int viewport, Matrix4f projectionMatrix) {
         if (_cameras.size() == 0) {
             // begin temp
-            _cameras.add(new GlObject("temp", new GlTransform(new Vector3f(), new Quaternionf())));
+            _cameras.add(new GlObject("temp", new Transform(new Vector3f(), new Quaternionf())));
             _currentCamera = _cameras.get(0);
             // end temp
             //throw new RuntimeException("No cameras are defined");
@@ -84,7 +85,7 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void onObjectLoaded(String name, String type, GlTransform transform) {
+    public void onObjectLoaded(String name, String type, Transform transform) {
         if (name.startsWith("Camera")) {
             _cameras.add(new GlObject(name, transform));
             _currentCamera = _cameras.get(0);
@@ -126,7 +127,7 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void onWidgetLoaded(WidgetCreateInfo wci) {
+    public void onWidgetLoaded(WidgetCreateInfo wci) throws IOException {
         // TODO
     }
 

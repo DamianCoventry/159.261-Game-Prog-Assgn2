@@ -39,4 +39,9 @@ public class ListWidget extends WidgetObserver {
     public void setSelectedIndex(int index) {
         // TODO
     }
+
+    @Override
+    public void freeResources() {
+        // TODO
+    }
 }

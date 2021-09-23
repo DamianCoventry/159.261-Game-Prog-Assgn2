@@ -1,10 +1,12 @@
 package com.lunargravity.application;
 
 import com.lunargravity.engine.core.IManualFrameUpdater;
-import com.lunargravity.engine.graphics.GlViewportConfig;
+import com.lunargravity.engine.graphics.GlRenderer;
+import com.lunargravity.engine.graphics.ViewportConfig;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 import org.joml.Matrix4f;
 
+import java.io.IOException;
 import java.util.function.Function;
 
 public class StateBase implements IState {
@@ -31,7 +33,7 @@ public class StateBase implements IState {
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException, InterruptedException {
         // TODO
     }
 
@@ -61,7 +63,12 @@ public class StateBase implements IState {
     }
 
     @Override
-    public GlViewportConfig onViewportSizeChanged(int viewport, GlViewportConfig currentConfig, int windowWidth, int windowHeight) {
+    public GlRenderer getRenderer() {
+        return _context.getEngine().getRenderer();
+    }
+
+    @Override
+    public ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig currentConfig, int windowWidth, int windowHeight) {
         // TODO
         return null;
     }

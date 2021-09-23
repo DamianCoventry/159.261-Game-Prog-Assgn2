@@ -1,7 +1,7 @@
 package com.lunargravity.engine.core;
 
-import com.lunargravity.engine.graphics.GlViewportConfig;
+import com.lunargravity.engine.graphics.ViewportConfig;
 
 public interface IViewportSizeObserver {
-    GlViewportConfig onViewportSizeChanged(int viewport, GlViewportConfig currentConfig, int windowWidth, int windowHeight);
+    ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig currentConfig, int windowWidth, int windowHeight);
 }

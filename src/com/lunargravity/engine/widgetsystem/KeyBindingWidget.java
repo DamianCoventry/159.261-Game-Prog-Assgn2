@@ -13,5 +13,10 @@ public class KeyBindingWidget extends WidgetObserver {
         // TODO: need to examine the wci structure and pass the correct info to each of these ctor calls
     }
 
+    @Override
+    public void freeResources() {
+        // TODO
+    }
+
     // TODO: get the list of images in here. maintain state for hovered, focused, pressed.
 }

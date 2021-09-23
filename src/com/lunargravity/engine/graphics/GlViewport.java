@@ -5,11 +5,11 @@ import org.joml.Matrix4f;
 import static org.lwjgl.opengl.GL11C.glViewport;
 
 public class GlViewport {
-    private GlViewportConfig _config;
+    private ViewportConfig _config;
     private Matrix4f _perspectiveMatrix;
     private Matrix4f _orthographicMatrix;
 
-    public GlViewport(GlViewportConfig config) {
+    public GlViewport(ViewportConfig config) {
         setConfig(config);
     }
 
@@ -25,12 +25,12 @@ public class GlViewport {
         glViewport(_config._positionX, _config._positionY, _config._width, _config._height);
     }
 
-    public void setConfig(GlViewportConfig config) {
+    public void setConfig(ViewportConfig config) {
         _config = config;
         _perspectiveMatrix = createPerspectiveMatrix();
         _orthographicMatrix = createOrthographicMatrix();
     }
-    public GlViewportConfig getConfig() {
+    public ViewportConfig getConfig() {
         return _config;
     }
 

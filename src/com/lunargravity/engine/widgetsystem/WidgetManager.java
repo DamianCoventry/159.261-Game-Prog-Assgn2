@@ -1,22 +1,41 @@
 package com.lunargravity.engine.widgetsystem;
 
 import com.lunargravity.engine.core.IInputConsumer;
-import com.lunargravity.engine.graphics.GlViewportConfig;
+import com.lunargravity.engine.graphics.*;
 import org.joml.Matrix4f;
 
 import java.util.LinkedList;
 
+import static org.lwjgl.opengl.GL11C.glDepthMask;
+
 public class WidgetManager implements IInputConsumer {
     private final LinkedList<Widget> _allWidgets;
     private final LinkedList<Widget> _visibleWidgets;
+    private final GlRenderer _renderer;
     private Widget _keyboardFocus;
     private Widget _mouseCapture;
 
-    public WidgetManager() {
+    public WidgetManager(GlRenderer renderer) {
         _allWidgets = new LinkedList<>();
         _visibleWidgets = new LinkedList<>();
+        _renderer = renderer;
         _keyboardFocus = null;
         _mouseCapture = null;
+    }
+
+    public GlRenderer getRenderer() {
+        return _renderer;
+    }
+
+    public void freeResources() {
+        for (var widget : _allWidgets) {
+            widget.getObserver().freeResources();
+        }
+        for (var widget : _visibleWidgets) {
+            widget.getObserver().freeResources();
+        }
+        _allWidgets.clear();
+        _visibleWidgets.clear();
     }
 
     public boolean isOpen(Widget widget) {
@@ -24,14 +43,20 @@ public class WidgetManager implements IInputConsumer {
     }
 
     public void think() {
-        // TODO
+        for (var widget : _allWidgets) {
+            widget.getObserver().widgetThink();
+        }
     }
 
     public void draw2d(int viewport, Matrix4f projectionMatrix) {
-        // TODO
+        glDepthMask(false);
+        for (var widget : _visibleWidgets) {
+            widget.getObserver().widgetDraw2d(viewport, projectionMatrix);
+        }
+        glDepthMask(true);
     }
 
-    public GlViewportConfig onViewportSizeChanged(int viewport, GlViewportConfig newViewportConfig, int windowWidth, int windowHeight) {
+    public ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig newViewportConfig, int windowWidth, int windowHeight) {
         // TODO
         return null;
     }
@@ -56,36 +81,36 @@ public class WidgetManager implements IInputConsumer {
             }
         }
 
-        widget.getObserver().onOpening();
+        widget.getObserver().widgetOpening();
         _allWidgets.add(widget);
 
-        widget.getObserver().onShowing();
+        widget.getObserver().widgetShowing();
         if (openAs == OpenAs.FIRST) {
             _visibleWidgets.addFirst(widget);
         }
         else {
             _visibleWidgets.addLast(widget);
         }
-        widget.getObserver().onShown();
+        widget.getObserver().widgetShown();
 
-        widget.getObserver().onOpened();
+        widget.getObserver().widgetOpened();
     }
 
     public void close(Widget widget) {
         if (!isOpen(widget)) {
             return;
         }
-        if (widget.getObserver().onClosing() == IWidgetObserver.CloseResult.CANCEL_CLOSE) {
+        if (widget.getObserver().widgetClosing() == IWidgetObserver.CloseResult.CANCEL_CLOSE) {
             return;
         }
 
         _allWidgets.remove(widget);
 
-        widget.getObserver().onHiding();
+        widget.getObserver().widgetHiding();
         _visibleWidgets.remove(widget);
-        widget.getObserver().onHidden();
+        widget.getObserver().widgetHidden();
 
-        widget.getObserver().onClosed();
+        widget.getObserver().widgetClosed();
     }
 
     public void closeAll() {
@@ -125,7 +150,7 @@ public class WidgetManager implements IInputConsumer {
             return;
         }
 
-        widget.getObserver().onShowing();
+        widget.getObserver().widgetShowing();
         if (showAs == ShowAs.FIRST) {
             _visibleWidgets.addFirst(widget);
             setKeyboardFocusToFrontOfList(); // this might end up too annoying
@@ -133,7 +158,7 @@ public class WidgetManager implements IInputConsumer {
         else {
             _visibleWidgets.addLast(widget);
         }
-        widget.getObserver().onShown();
+        widget.getObserver().widgetShown();
     }
 
     public void hide(Widget widget) {
@@ -141,10 +166,10 @@ public class WidgetManager implements IInputConsumer {
             return;
         }
 
-        widget.getObserver().onHiding();
+        widget.getObserver().widgetHiding();
         _visibleWidgets.remove(widget);
         setKeyboardFocusToFrontOfList(); // this might end up too annoying
-        widget.getObserver().onHidden();
+        widget.getObserver().widgetHidden();
     }
 
     public void hideAll() {
@@ -174,11 +199,11 @@ public class WidgetManager implements IInputConsumer {
 
         int i = _visibleWidgets.indexOf(widget);
         if (i >= 0) {
-            widget.getObserver().onZOrderChanging();
+            widget.getObserver().widgetZOrderChanging();
             _visibleWidgets.remove(i);
             _visibleWidgets.addFirst(widget);
             setKeyboardFocusToFrontOfList(); // this might end up too annoying
-            widget.getObserver().onZOrderChanged();
+            widget.getObserver().widgetZOrderChanged();
         }
     }
 
@@ -199,11 +224,11 @@ public class WidgetManager implements IInputConsumer {
 
         int i = _visibleWidgets.indexOf(widget);
         if (i >= 0) {
-            widget.getObserver().onZOrderChanging();
+            widget.getObserver().widgetZOrderChanging();
             _visibleWidgets.remove(i);
             _visibleWidgets.addLast(widget);
             setKeyboardFocusToFrontOfList(); // this might end up too annoying
-            widget.getObserver().onZOrderChanged();
+            widget.getObserver().widgetZOrderChanged();
         }
     }
 
@@ -215,11 +240,11 @@ public class WidgetManager implements IInputConsumer {
             return;
         }
         if (_keyboardFocus != null) {
-            _keyboardFocus.getObserver().onLoseKeyboardFocus();
+            _keyboardFocus.getObserver().widgetLoseKeyboardFocus();
         }
         _keyboardFocus = widget;
         if (_keyboardFocus != null) {
-            _keyboardFocus.getObserver().onGainKeyboardFocus();
+            _keyboardFocus.getObserver().widgetGainKeyboardFocus();
         }
     }
 
@@ -231,11 +256,11 @@ public class WidgetManager implements IInputConsumer {
             return;
         }
         if (_mouseCapture != null) {
-            _mouseCapture.getObserver().onLoseMouseCapture();
+            _mouseCapture.getObserver().widgetLoseMouseCapture();
         }
         _mouseCapture = widget;
         if (_mouseCapture != null) {
-            _mouseCapture.getObserver().onGainMouseCapture();
+            _mouseCapture.getObserver().widgetGainMouseCapture();
         }
     }
 

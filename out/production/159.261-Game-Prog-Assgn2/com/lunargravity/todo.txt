@@ -1,4 +1,3 @@
-create opengl textures from image files
 create opengl vertex buffers from .obj files
 create materials from .mtl files
 create sounds from .wav files

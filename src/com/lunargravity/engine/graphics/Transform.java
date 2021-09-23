@@ -3,20 +3,20 @@ package com.lunargravity.engine.graphics;
 import org.joml.*;
 import java.lang.Math;
 
-public class GlTransform {
+public class Transform {
     public Vector3f _position;
     public Quaternionf _rotation;
     public Matrix4f _modelMatrix;
     public Matrix4f _viewMatrix;
 
-    public GlTransform() {
+    public Transform() {
         _position = new Vector3f(); // initialised as (0, 0, 0)
         _rotation = new Quaternionf(); // initialised as (0, 0, 0, 1)
         _modelMatrix = new Matrix4f(); // initialised as the identity matrix
         _viewMatrix = new Matrix4f(); // initialised as the identity matrix
     }
 
-    public GlTransform(Vector3f position, Quaternionf rotation) {
+    public Transform(Vector3f position, Quaternionf rotation) {
         _position = position;
         _rotation = rotation;
         _modelMatrix = new Matrix4f(); // initialised as the identity matrix
@@ -25,7 +25,7 @@ public class GlTransform {
         calculateViewMatrix();
     }
 
-    public GlTransform(Vector3f position, Vector3f eulerDegrees, EulerOrder eulerOrder) {
+    public Transform(Vector3f position, Vector3f eulerDegrees, EulerOrder eulerOrder) {
         _position = position;
 
         Quaternionf xRot = new Quaternionf(); // initialised as (0, 0, 0, 1)
