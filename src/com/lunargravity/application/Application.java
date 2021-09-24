@@ -53,8 +53,8 @@ public class Application implements
 
     static final private String WINDOW_TITLE = "Lunar Gravity v1.0";
     static final private String PLAYER_INPUT_BINDINGS_FILE_NAME = "playerInputBindings.json";
-    static final private String MENU_SCENE_FILE_NAME = "menuScene.json";
-    static final private String MENU_WORLD_SCENE_FILE_NAME = "menuWorldScene.json";
+    static final private String MENU_SCENE_FILE_NAME = "scenes/menuScene.json";
+    static final private String MENU_WORLD_SCENE_FILE_NAME = "scenes/menuWorldScene.json";
 
     private static final int WINDOW_WIDTH = 1280;
     private static final int WINDOW_HEIGHT = 960;
@@ -102,7 +102,7 @@ public class Application implements
 
         _engine = new Engine(this, this, this, createWindowConfig());
 
-        _widgetManager = new WidgetManager(_engine.getRenderer());
+        _widgetManager = new WidgetManager(_engine);
 
         initialisePlayerInputBindings();
 
@@ -133,10 +133,10 @@ public class Application implements
             _logicController.onControllerThink();
         }
         if (_worldView != null) {
-            _worldView.onViewThink();
+            _worldView.viewThink();
         }
         if (_logicView != null) {
-            _logicView.onViewThink();
+            _logicView.viewThink();
         }
         _widgetManager.think();
         _currentState.think();
@@ -146,10 +146,10 @@ public class Application implements
     @Override
     public void onFrameDraw3d(int viewport, Matrix4f projectionMatrix) {
         if (_worldView != null) {
-            _worldView.onDrawView3d(viewport, projectionMatrix);
+            _worldView.drawView3d(viewport, projectionMatrix);
         }
         if (_logicView != null) {
-            _logicView.onDrawView3d(viewport, projectionMatrix);
+            _logicView.drawView3d(viewport, projectionMatrix);
         }
         _currentState.draw3d(viewport, projectionMatrix);
     }
@@ -157,37 +157,37 @@ public class Application implements
     @Override
     public void onFrameDraw2d(int viewport, Matrix4f projectionMatrix) {
         if (_worldView != null) {
-            _worldView.onDrawView2d(viewport, projectionMatrix);
+            _worldView.drawView2d(viewport, projectionMatrix);
         }
         if (_logicView != null) {
-            _logicView.onDrawView2d(viewport, projectionMatrix);
+            _logicView.drawView2d(viewport, projectionMatrix);
         }
-        _widgetManager.draw2d(viewport, projectionMatrix);
+        _widgetManager.draw(viewport, projectionMatrix);
         _currentState.draw2d(viewport, projectionMatrix);
     }
 
     @Override
-    public void onKeyboardKeyEvent(int key, int scancode, int action, int mods) {
-        _currentState.onKeyboardKeyEvent(key, scancode, action, mods); // TODO: consider adding a 'consumed' return code
-        _widgetManager.onKeyboardKeyEvent(key, scancode, action, mods);
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
+        _currentState.keyboardKeyEvent(key, scancode, action, mods); // TODO: consider adding a 'consumed' return code
+        _widgetManager.keyboardKeyEvent(key, scancode, action, mods);
     }
 
     @Override
-    public void onMouseButtonEvent(int button, int action, int mods) {
-        _currentState.onMouseButtonEvent(button, action, mods); // TODO: consider adding a 'consumed' return code
-        _widgetManager.onMouseButtonEvent(button, action, mods);
+    public void mouseButtonEvent(int button, int action, int mods) {
+        _currentState.mouseButtonEvent(button, action, mods); // TODO: consider adding a 'consumed' return code
+        _widgetManager.mouseButtonEvent(button, action, mods);
     }
 
     @Override
-    public void onMouseCursorMovedEvent(double xPos, double yPos) {
-        _currentState.onMouseCursorMovedEvent(xPos, yPos); // TODO: consider adding a 'consumed' return code
-        _widgetManager.onMouseCursorMovedEvent(xPos, yPos);
+    public void mouseCursorMovedEvent(double xPos, double yPos) {
+        _currentState.mouseCursorMovedEvent(xPos, yPos); // TODO: consider adding a 'consumed' return code
+        _widgetManager.mouseCursorMovedEvent(xPos, yPos);
     }
 
     @Override
-    public void onMouseWheelScrolledEvent(double xOffset, double yOffset) {
-        _currentState.onMouseWheelScrolledEvent(xOffset, yOffset); // TODO: consider adding a 'consumed' return code
-        _widgetManager.onMouseWheelScrolledEvent(xOffset, yOffset);
+    public void mouseWheelScrolledEvent(double xOffset, double yOffset) {
+        _currentState.mouseWheelScrolledEvent(xOffset, yOffset); // TODO: consider adding a 'consumed' return code
+        _widgetManager.mouseWheelScrolledEvent(xOffset, yOffset);
     }
 
     @Override
@@ -274,6 +274,9 @@ public class Application implements
 
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
         logicSceneBuilder.build(MENU_SCENE_FILE_NAME);
+
+        _worldView.initialLoadCompleted();
+        _logicView.initialLoadCompleted();
     }
 
     @Override
@@ -298,6 +301,9 @@ public class Application implements
         String logicSceneFileName = makeCampaignLogicSceneFileName(savedGameFile.getEpisode(), savedGameFile.getMission());
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
         logicSceneBuilder.build(logicSceneFileName);
+
+        _worldView.initialLoadCompleted();
+        _logicView.initialLoadCompleted();
     }
 
     @Override
@@ -320,6 +326,9 @@ public class Application implements
         String logicSceneFileName = makeCampaignLogicSceneFileName(FIRST_EPISODE, FIRST_MISSION);
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
         logicSceneBuilder.build(logicSceneFileName);
+
+        _worldView.initialLoadCompleted();
+        _logicView.initialLoadCompleted();
     }
 
     @Override
@@ -342,6 +351,9 @@ public class Application implements
         String logicSceneFileName = getFirstLogicRaceSceneFileName();
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
         logicSceneBuilder.build(logicSceneFileName);
+
+        _worldView.initialLoadCompleted();
+        _logicView.initialLoadCompleted();
     }
 
     @Override
@@ -364,6 +376,9 @@ public class Application implements
         String logicSceneFileName = getFirstLogicDogfightSceneFileName();
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
         logicSceneBuilder.build(logicSceneFileName);
+
+        _worldView.initialLoadCompleted();
+        _logicView.initialLoadCompleted();
     }
 
     @Override

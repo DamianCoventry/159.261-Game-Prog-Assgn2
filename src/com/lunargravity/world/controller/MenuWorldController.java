@@ -31,7 +31,7 @@ public class MenuWorldController implements IMenuWorldController, ISceneLogicOwn
     }
 
     @Override
-    public void onLogicSettingLoaded(String name, String value) {
+    public void logicSettingLoaded(String name, String value) {
         // TODO
     }
 }

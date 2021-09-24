@@ -1,9 +1,11 @@
 package com.lunargravity.engine.scene;
 
-import com.lunargravity.engine.graphics.*;
-import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
+import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class SceneBuilder {
     private final ISceneBuilderObserver _observer;
@@ -19,27 +21,41 @@ public class SceneBuilder {
     }
 
     public void build(String fileName) throws IOException, InterruptedException {
-        _observer.sceneBuildBeginning();
-        _observer.sceneBuildProgressed(0, 100); // TODO
-        Thread.sleep(500); // Temp
+        if (fileName == null) {
+            throw new IllegalArgumentException("fileName not supplied");
+        }
 
-        _stateOwner.onStateSettingLoaded("blah", "blah");
-        _logicOwner.onLogicSettingLoaded("blah", "blah");
-        _observer.sceneBuildProgressed(33, 100); // TODO
-        Thread.sleep(500); // Temp
+        String text = Files.readString(Paths.get(fileName), StandardCharsets.US_ASCII);
+        if (text.isEmpty()) {
+            throw new IllegalArgumentException("Scene file [" + fileName + "] is empty");
+        }
 
-        //_assetOwner.onTextureLoaded(new GlTexture("blah"));
-        _assetOwner.onStaticMeshLoaded(new GlStaticMesh("blah"));
-        _assetOwner.onWidgetLoaded(new WidgetCreateInfo("id", "type"));
-        _observer.sceneBuildProgressed(66, 100); // TODO
-        Thread.sleep(500); // Temp
+        Gson gson = new Gson();
+        Scene scene = gson.fromJson(text, Scene.class);
+        if (scene == null) {
+            throw new IllegalArgumentException("File [" + fileName + "] is an invalid scene file");
+        }
 
-        _assetOwner.onObjectLoaded("blah", "blah", new Transform());
-        _assetOwner.onMaterialLoaded(new GlMaterial("blah"));
-        _assetOwner.onWidgetLoaded(new WidgetCreateInfo("id", "type"));
-        _observer.sceneBuildProgressed(100, 100); // TODO
-        Thread.sleep(500); // Temp
+        if (scene._widgets != null) {
+            _observer.sceneBuildProgressed(0, scene._widgets.size());
+
+            for (int i = 0; i < scene._widgets.size(); ++i) {
+                _assetOwner.widgetLoaded(scene._widgets.get(i));
+                _observer.sceneBuildProgressed(i, scene._widgets.size());
+            }
+
+            _observer.sceneBuildProgressed(scene._widgets.size(), scene._widgets.size());
+        }
 
         _observer.sceneBuildEnded();
+
+
+//        _stateOwner.stateSettingLoaded("", "");
+//        _logicOwner.logicSettingLoaded("", "");
+//        _assetOwner.objectLoaded("name", "type", new Transform());
+//        _assetOwner.staticMeshLoaded(new GlStaticMesh("name"));
+//        _assetOwner.materialLoaded(new GlMaterial("name"));
+//        _assetOwner.textureLoaded(new GlTexture(BitmapImage.fromFile("fileName")));
+//        _assetOwner.widgetLoaded(new WidgetCreateInfo());
     }
 }

@@ -1,8 +1,13 @@
 package com.lunargravity.engine.widgetsystem;
 
+import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.engine.core.IInputConsumer;
-import com.lunargravity.engine.graphics.*;
+import com.lunargravity.engine.desktopwindow.GlfwWindow;
+import com.lunargravity.engine.graphics.GlRenderer;
+import com.lunargravity.engine.graphics.GlViewport;
+import com.lunargravity.engine.graphics.ViewportConfig;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 
 import java.util.LinkedList;
 
@@ -11,16 +16,20 @@ import static org.lwjgl.opengl.GL11C.glDepthMask;
 public class WidgetManager implements IInputConsumer {
     private final LinkedList<Widget> _allWidgets;
     private final LinkedList<Widget> _visibleWidgets;
+    private final IEngine _engine;
     private final GlRenderer _renderer;
     private Widget _keyboardFocus;
     private Widget _mouseCapture;
+    private Widget _hoveringOver;
 
-    public WidgetManager(GlRenderer renderer) {
+    public WidgetManager(IEngine engine) {
         _allWidgets = new LinkedList<>();
         _visibleWidgets = new LinkedList<>();
-        _renderer = renderer;
+        _engine = engine;
+        _renderer = _engine.getRenderer();
         _keyboardFocus = null;
         _mouseCapture = null;
+        _hoveringOver = null;
     }
 
     public GlRenderer getRenderer() {
@@ -48,10 +57,10 @@ public class WidgetManager implements IInputConsumer {
         }
     }
 
-    public void draw2d(int viewport, Matrix4f projectionMatrix) {
+    public void draw(int viewport, Matrix4f projectionMatrix) {
         glDepthMask(false);
         for (var widget : _visibleWidgets) {
-            widget.getObserver().widgetDraw2d(viewport, projectionMatrix);
+            widget.draw(viewport, projectionMatrix);
         }
         glDepthMask(true);
     }
@@ -264,41 +273,72 @@ public class WidgetManager implements IInputConsumer {
         }
     }
 
+    public Widget getHoveringOver() {
+        return _hoveringOver;
+    }
+
     @Override
-    public void onKeyboardKeyEvent(int key, int scancode, int action, int mods) {
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
         if (_keyboardFocus != null) {
-            _keyboardFocus.onKeyboardKeyEvent(key, scancode, action, mods);
+            _keyboardFocus.keyboardKeyEvent(key, scancode, action, mods);
         }
         else if (_visibleWidgets.getFirst() != null) {
-            _visibleWidgets.getFirst().onKeyboardKeyEvent(key, scancode, action, mods);
+            _visibleWidgets.getFirst().keyboardKeyEvent(key, scancode, action, mods);
         }
     }
 
     @Override
-    public void onMouseButtonEvent(int button, int action, int mods) {
-        if (_mouseCapture != null) {
-            _mouseCapture.onMouseButtonEvent(button, action, mods);
-            return;
+    public void mouseButtonEvent(int button, int action, int mods) {
+        Widget greatestDescendant = null;
+        Vector2f cursorPosition = toViewportCoordinates(_engine.getMouseCursorPosition());
+        if (cursorPosition != null) {
+            greatestDescendant = getGreatestDescendant(cursorPosition);
         }
-        // TODO: key widget under cursor
+
+        _hoveringOver = greatestDescendant;
+
+        if (_mouseCapture != null) {
+            _mouseCapture.mouseButtonEvent(button, action, mods);
+        }
+        else if (greatestDescendant != null) {
+            greatestDescendant.mouseButtonEvent(button, action, mods);
+        }
     }
 
     @Override
-    public void onMouseCursorMovedEvent(double xPos, double yPos) {
-        if (_mouseCapture != null) {
-            _mouseCapture.onMouseCursorMovedEvent(xPos, yPos);
-            return;
+    public void mouseCursorMovedEvent(double xPos, double yPos) {
+        Widget greatestDescendant = null;
+        Vector2f cursorPosition = toViewportCoordinates(_engine.getMouseCursorPosition());
+        if (cursorPosition != null) {
+            greatestDescendant = getGreatestDescendant(cursorPosition);
         }
-        // TODO: key widget under cursor
+
+        _hoveringOver = greatestDescendant;
+
+        if (_mouseCapture != null) {
+            _mouseCapture.mouseCursorMovedEvent(xPos, yPos);
+        }
+        else if (greatestDescendant != null) {
+            greatestDescendant.mouseCursorMovedEvent(xPos, yPos);
+        }
     }
 
     @Override
-    public void onMouseWheelScrolledEvent(double xOffset, double yOffset) {
-        if (_mouseCapture != null) {
-            _mouseCapture.onMouseWheelScrolledEvent(xOffset, yOffset);
-            return;
+    public void mouseWheelScrolledEvent(double xOffset, double yOffset) {
+        Widget greatestDescendant = null;
+        Vector2f cursorPosition = toViewportCoordinates(_engine.getMouseCursorPosition());
+        if (cursorPosition != null) {
+            greatestDescendant = getGreatestDescendant(cursorPosition);
         }
-        // TODO: key widget under cursor
+
+        _hoveringOver = greatestDescendant;
+
+        if (_mouseCapture != null) {
+            _mouseCapture.mouseWheelScrolledEvent(xOffset, yOffset);
+        }
+        else if (greatestDescendant != null) {
+            greatestDescendant.mouseWheelScrolledEvent(xOffset, yOffset);
+        }
     }
 
     private void setKeyboardFocusToFrontOfList() {
@@ -308,5 +348,31 @@ public class WidgetManager implements IInputConsumer {
         else {
             setKeyboardFocus(_visibleWidgets.getFirst());
         }
+    }
+
+    private Vector2f toViewportCoordinates(GlfwWindow.CursorPosition cursorPosition) {
+        // We flip the y coordinate because the mouse cursor is relative to the top left corner
+        // of the window but the viewports are relative to the bottom left.
+        final float yPosition = _engine.getDesktopWindowHeight() - cursorPosition.m_YPos;
+
+        for (int i = 0; i < _engine.getRenderer().getNumViewports(); ++i) {
+            GlViewport viewport = _engine.getRenderer().getViewport(i);
+            if (viewport.containsPoint(cursorPosition.m_XPos, yPosition)) {
+                return new Vector2f(cursorPosition.m_XPos - viewport.getConfig()._positionX,
+                                 yPosition - viewport.getConfig()._positionY);
+            }
+        }
+        return null;
+    }
+
+    private Widget getGreatestDescendant(Vector2f position) {
+        //System.out.println("Viewport Coordinates: " + position.x + ", " + position.y);
+        for (var widget : _visibleWidgets) {
+            if (widget.containsPoint(position)) {
+                Widget descendant = widget.getGreatestDescendant(position);
+                return descendant != null ? descendant : widget;
+            }
+        }
+        return null;
     }
 }

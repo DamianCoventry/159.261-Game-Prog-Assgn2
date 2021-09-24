@@ -74,22 +74,22 @@ public class StateBase implements IState {
     }
 
     @Override
-    public void onKeyboardKeyEvent(int key, int scancode, int action, int mods) {
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
         // TODO
     }
 
     @Override
-    public void onMouseButtonEvent(int button, int action, int mods) {
+    public void mouseButtonEvent(int button, int action, int mods) {
         // TODO
     }
 
     @Override
-    public void onMouseCursorMovedEvent(double xPos, double yPos) {
+    public void mouseCursorMovedEvent(double xPos, double yPos) {
         // TODO
     }
 
     @Override
-    public void onMouseWheelScrolledEvent(double xOffset, double yOffset) {
+    public void mouseWheelScrolledEvent(double xOffset, double yOffset) {
         // TODO
     }
 }

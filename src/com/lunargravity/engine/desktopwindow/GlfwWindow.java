@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_FALSE;
+import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class GlfwWindow {
@@ -19,8 +20,8 @@ public class GlfwWindow {
     private GlfwWindowConfig _config;
     private GLFWWindowSizeCallback _sizeCallback;
     private long _window;
-    private double _actualWidth;
-    private double _actualHeight;
+    private float _actualWidth;
+    private float _actualHeight;
     private HashMap<Integer, Long> _mouseCursors;
 
     public GlfwWindow(GlfwWindowConfig config, GLFWWindowSizeCallback sizeCallback) throws IOException {
@@ -148,11 +149,11 @@ public class GlfwWindow {
                 clampYCoordinate(y, (int)_actualHeight, vidMode));
     }
 
-    public double getWidth() {
+    public float getWidth() {
         return _actualWidth;
     }
 
-    public double getHeight() {
+    public float getHeight() {
         return _actualHeight;
     }
 

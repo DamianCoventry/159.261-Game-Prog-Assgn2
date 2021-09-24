@@ -13,7 +13,7 @@ public class AnnouncementWidget extends WidgetObserver {
     //   requires 1 or more fonts
 
     @Override
-    protected void createChildWidgets(WidgetCreateInfo wci) {
+    protected void initialiseChildren(WidgetCreateInfo wci) {
         // TODO: need to examine the wci structure and pass the correct info to each of these ctor calls
     }
 

@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class WidgetCreateInfo {
+    public WidgetCreateInfo() {
+    }
+
     public WidgetCreateInfo(String id, String type) {
         _id = id;
         _type = type;

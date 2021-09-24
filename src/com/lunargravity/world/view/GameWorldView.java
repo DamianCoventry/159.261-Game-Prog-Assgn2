@@ -19,17 +19,22 @@ public class GameWorldView implements IGameWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void onViewThink() {
+    public void initialLoadCompleted() {
         // TODO
     }
 
     @Override
-    public void onDrawView3d(int viewport, Matrix4f projectionMatrix) {
+    public void viewThink() {
         // TODO
     }
 
     @Override
-    public void onDrawView2d(int viewport, Matrix4f projectionMatrix) {
+    public void drawView3d(int viewport, Matrix4f projectionMatrix) {
+        // TODO
+    }
+
+    @Override
+    public void drawView2d(int viewport, Matrix4f projectionMatrix) {
         // TODO
     }
 
@@ -44,27 +49,27 @@ public class GameWorldView implements IGameWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void onObjectLoaded(String name, String type, Transform transform) {
+    public void objectLoaded(String name, String type, Transform transform) {
         // TODO
     }
 
     @Override
-    public void onStaticMeshLoaded(GlStaticMesh staticMesh) {
+    public void staticMeshLoaded(GlStaticMesh staticMesh) {
         // TODO
     }
 
     @Override
-    public void onMaterialLoaded(GlMaterial material) {
+    public void materialLoaded(GlMaterial material) {
         // TODO
     }
 
     @Override
-    public void onTextureLoaded(GlTexture texture) {
+    public void textureLoaded(GlTexture texture) {
         // TODO
     }
 
     @Override
-    public void onWidgetLoaded(WidgetCreateInfo wci) throws IOException {
+    public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
         // TODO
     }
 }

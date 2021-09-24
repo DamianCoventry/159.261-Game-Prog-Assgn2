@@ -10,7 +10,6 @@ public class OptionsWidget extends WidgetObserver implements
         IKeyBindingObserver,
         IButtonObserver
 {
-    private static final String BACKGROUND_IMAGE = "backgroundImage";
     private static final String ENABLE_SOUND_CHECK = "enableSoundCheck";
     private static final String SOUND_VOLUME_NUMERIC = "soundVolumeNumeric";
     private static final String ENABLE_MUSIC_CHECK = "enableMusicCheck";
@@ -36,74 +35,70 @@ public class OptionsWidget extends WidgetObserver implements
     }
 
     @Override
-    protected void createChildWidgets(WidgetCreateInfo wci) throws IOException {
-        WidgetCreateInfo child = wci.getChild(BACKGROUND_IMAGE, "ImageWidget");
+    protected void initialiseChildren(WidgetCreateInfo wci) throws IOException {
+        WidgetCreateInfo child = wci.getChild(ENABLE_SOUND_CHECK, "CheckWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(child, new ImageWidget(_widgetManager)));
+            getWidget().addChild(new Widget(_widget, child, new CheckWidget(_widgetManager, this)));
         }
-        child = wci.getChild(ENABLE_SOUND_CHECK, "checkWidget");
+        child = wci.getChild(SOUND_VOLUME_NUMERIC, "NumericWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new CheckWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new NumericWidget(_widgetManager, this)));
         }
-        child = wci.getChild(SOUND_VOLUME_NUMERIC, "numericWidget");
+        child = wci.getChild(ENABLE_MUSIC_CHECK, "CheckWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new NumericWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new CheckWidget(_widgetManager, this)));
         }
-        child = wci.getChild(ENABLE_MUSIC_CHECK, "checkWidget");
+        child = wci.getChild(MUSIC_VOLUME_NUMERIC, "NumericWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new CheckWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new NumericWidget(_widgetManager, this)));
         }
-        child = wci.getChild(MUSIC_VOLUME_NUMERIC, "numericWidget");
+        child = wci.getChild(P1_ROTATE_CW_KEYBOARD_KEY, "KeyBindingWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new NumericWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new KeyBindingWidget(_widgetManager, this)));
         }
-        child = wci.getChild(P1_ROTATE_CW_KEYBOARD_KEY, "keyBindingWidget");
+        child = wci.getChild(P1_ROTATE_CCW_KEYBOARD_KEY, "KeyBindingWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new KeyBindingWidget(_widgetManager, this)));
         }
-        child = wci.getChild(P1_ROTATE_CCW_KEYBOARD_KEY, "keyBindingWidget");
+        child = wci.getChild(P1_THRUST_KEYBOARD_KEY, "KeyBindingWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new KeyBindingWidget(_widgetManager, this)));
         }
-        child = wci.getChild(P1_THRUST_KEYBOARD_KEY, "keyBindingWidget");
+        child = wci.getChild(P1_KICK_KEYBOARD_KEY, "KeyBindingWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new KeyBindingWidget(_widgetManager, this)));
         }
-        child = wci.getChild(P1_KICK_KEYBOARD_KEY, "keyBindingWidget");
+        child = wci.getChild(P1_SHOOT_KEYBOARD_KEY, "KeyBindingWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new KeyBindingWidget(_widgetManager, this)));
         }
-        child = wci.getChild(P1_SHOOT_KEYBOARD_KEY, "keyBindingWidget");
+        child = wci.getChild(P2_ROTATE_CW_KEYBOARD_KEY, "KeyBindingWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new KeyBindingWidget(_widgetManager, this)));
         }
-        child = wci.getChild(P2_ROTATE_CW_KEYBOARD_KEY, "keyBindingWidget");
+        child = wci.getChild(P2_ROTATE_CCW_KEYBOARD_KEY, "KeyBindingWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new KeyBindingWidget(_widgetManager, this)));
         }
-        child = wci.getChild(P2_ROTATE_CCW_KEYBOARD_KEY, "keyBindingWidget");
+        child = wci.getChild(P2_THRUST_KEYBOARD_KEY, "KeyBindingWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new KeyBindingWidget(_widgetManager, this)));
         }
-        child = wci.getChild(P2_THRUST_KEYBOARD_KEY, "keyBindingWidget");
+        child = wci.getChild(P2_KICK_KEYBOARD_KEY, "KeyBindingWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new KeyBindingWidget(_widgetManager, this)));
         }
-        child = wci.getChild(P2_KICK_KEYBOARD_KEY, "keyBindingWidget");
+        child = wci.getChild(P2_SHOOT_KEYBOARD_KEY, "KeyBindingWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new KeyBindingWidget(_widgetManager, this)));
         }
-        child = wci.getChild(P2_SHOOT_KEYBOARD_KEY, "keyBindingWidget");
+        child = wci.getChild(RESET_TO_DEFAULTS_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new KeyBindingWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
-        child = wci.getChild(RESET_TO_DEFAULTS_BUTTON, "buttonWidget");
+        child = wci.getChild(MAIN_MENU_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
-        }
-        child = wci.getChild(MAIN_MENU_BUTTON, "buttonWidget");
-        if (child != null) {
-            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
     }
 
@@ -165,6 +160,7 @@ public class OptionsWidget extends WidgetObserver implements
 
     @Override
     public void freeResources() {
-        // TODO
+        super.freeResources();
+        // anything to do?
     }
 }

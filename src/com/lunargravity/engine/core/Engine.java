@@ -2,8 +2,11 @@ package com.lunargravity.engine.core;
 
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.system.NativeLibraryLoader;
-import com.lunargravity.engine.desktopwindow.*;
-import com.lunargravity.engine.graphics.*;
+import com.lunargravity.engine.desktopwindow.GlfwWindow;
+import com.lunargravity.engine.desktopwindow.GlfwWindowConfig;
+import com.lunargravity.engine.graphics.GlRenderer;
+import com.lunargravity.engine.graphics.GlViewport;
+import com.lunargravity.engine.graphics.ViewportConfig;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -160,6 +163,21 @@ public class Engine implements IEngine {
     }
 
     @Override
+    public GlfwWindow.CursorPosition getMouseCursorPosition() {
+        return _window.getMouseCursorPosition();
+    }
+
+    @Override
+    public float getDesktopWindowWidth() {
+        return _window.getWidth();
+    }
+
+    @Override
+    public float getDesktopWindowHeight() {
+        return _window.getHeight();
+    }
+
+    @Override
     public boolean isSoundEnabled() {
         // TODO
         return false;
@@ -250,7 +268,7 @@ public class Engine implements IEngine {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 if (_inputConsumer != null) {
-                    _inputConsumer.onKeyboardKeyEvent(key, scancode, action, mods);
+                    _inputConsumer.keyboardKeyEvent(key, scancode, action, mods);
                 }
             }
         });
@@ -259,7 +277,7 @@ public class Engine implements IEngine {
             @Override
             public void invoke(long window, int button, int action, int mods) {
                 if (_inputConsumer != null) {
-                    _inputConsumer.onMouseButtonEvent(button, action, mods);
+                    _inputConsumer.mouseButtonEvent(button, action, mods);
                 }
             }
         });
@@ -268,7 +286,7 @@ public class Engine implements IEngine {
             @Override
             public void invoke(long window, double xPos, double yPos) {
                 if (_inputConsumer != null) {
-                    _inputConsumer.onMouseCursorMovedEvent(xPos, yPos);
+                    _inputConsumer.mouseCursorMovedEvent(xPos, yPos);
                 }
             }
         });
@@ -277,7 +295,7 @@ public class Engine implements IEngine {
             @Override
             public void invoke(long window, double xOffset, double yOffset) {
                 if (_inputConsumer != null) {
-                    _inputConsumer.onMouseWheelScrolledEvent(xOffset, yOffset);
+                    _inputConsumer.mouseWheelScrolledEvent(xOffset, yOffset);
                 }
             }
         });

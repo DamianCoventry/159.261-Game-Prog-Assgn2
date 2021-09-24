@@ -5,7 +5,6 @@ import com.lunargravity.engine.widgetsystem.*;
 import java.io.IOException;
 
 public class MainWidget extends WidgetObserver implements IButtonObserver {
-    private static final String BACKGROUND_IMAGE = "backgroundImage";
     private static final String CAMPAIGN_BUTTON = "campaignButton";
     private static final String RACE_BUTTON = "raceButton";
     private static final String DOGFIGHT_BUTTON = "dogfightButton";
@@ -20,30 +19,26 @@ public class MainWidget extends WidgetObserver implements IButtonObserver {
     }
 
     @Override
-    protected void createChildWidgets(WidgetCreateInfo wci) throws IOException {
-        WidgetCreateInfo child = wci.getChild(BACKGROUND_IMAGE, "ImageWidget");
+    protected void initialiseChildren(WidgetCreateInfo wci) throws IOException {
+        WidgetCreateInfo child = wci.getChild(CAMPAIGN_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(child, new ImageWidget(_widgetManager)));
-        }
-        child = wci.getChild(CAMPAIGN_BUTTON, "ButtonWidget");
-        if (child != null) {
-            getWidget().addChild(new Widget(child, new ButtonWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
         child = wci.getChild(RACE_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(child, new ButtonWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
         child = wci.getChild(DOGFIGHT_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(child, new ButtonWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
         child = wci.getChild(OPTIONS_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(child, new ButtonWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
         child = wci.getChild(EXIT_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(child, new ButtonWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
     }
 
@@ -60,6 +55,7 @@ public class MainWidget extends WidgetObserver implements IButtonObserver {
 
     @Override
     public void freeResources() {
-        // TODO
+        super.freeResources();
+        // anything to do?
     }
 }

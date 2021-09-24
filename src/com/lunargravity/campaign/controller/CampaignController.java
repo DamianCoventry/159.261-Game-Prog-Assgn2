@@ -26,7 +26,7 @@ public class CampaignController implements ICampaignController, ISceneLogicOwner
     }
 
     @Override
-    public void onLogicSettingLoaded(String name, String value) {
+    public void logicSettingLoaded(String name, String value) {
         // TODO
     }
 }

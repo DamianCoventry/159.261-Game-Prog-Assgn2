@@ -12,7 +12,7 @@ public class LoadingMenuState extends StateBase {
 
     @Override
     public void begin() throws IOException, InterruptedException {
-        MenuBuilderObserver menuBuilderObserver = new MenuBuilderObserver(getRenderer(), getManualFrameUpdater());
+        MenuBuilderObserver menuBuilderObserver = new MenuBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
 
         getContext().startMenu(menuBuilderObserver);
 

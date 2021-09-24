@@ -20,5 +20,5 @@ public interface IWidgetObserver {
     void widgetLoseMouseCapture();
     void widgetGainMouseCapture();
     void widgetThink();
-    void widgetDraw2d(int viewport, Matrix4f projectionMatrix);
+    void widgetDraw(int viewport, Matrix4f projectionMatrix);
 }

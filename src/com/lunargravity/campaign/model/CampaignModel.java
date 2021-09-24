@@ -29,7 +29,7 @@ public class CampaignModel implements ICampaignModel, ISceneStateOwner {
     }
 
     @Override
-    public void onStateSettingLoaded(String name, String value) {
+    public void stateSettingLoaded(String name, String value) {
         // TODO
     }
 }

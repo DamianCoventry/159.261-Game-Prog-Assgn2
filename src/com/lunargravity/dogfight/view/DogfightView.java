@@ -45,37 +45,42 @@ public class DogfightView implements
     }
 
     @Override
-    public void onViewThink() {
+    public void initialLoadCompleted() {
+        _widgetManager.show(_dogfightScoreboard, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void viewThink() {
         // TODO
     }
 
     @Override
-    public void onDrawView3d(int viewport, Matrix4f projectionMatrix) {
+    public void drawView3d(int viewport, Matrix4f projectionMatrix) {
         // TODO
     }
 
     @Override
-    public void onDrawView2d(int viewport, Matrix4f projectionMatrix) {
+    public void drawView2d(int viewport, Matrix4f projectionMatrix) {
         // TODO
     }
 
     @Override
-    public void onObjectLoaded(String name, String type, Transform transform) {
+    public void objectLoaded(String name, String type, Transform transform) {
         // TODO
     }
 
     @Override
-    public void onStaticMeshLoaded(GlStaticMesh staticMesh) {
+    public void staticMeshLoaded(GlStaticMesh staticMesh) {
         // TODO
     }
 
     @Override
-    public void onMaterialLoaded(GlMaterial material) {
+    public void materialLoaded(GlMaterial material) {
         // TODO
     }
 
     @Override
-    public void onTextureLoaded(GlTexture texture) {
+    public void textureLoaded(GlTexture texture) {
         // TODO
     }
 
@@ -100,7 +105,7 @@ public class DogfightView implements
     @Override
     public void showGetReadyWidget(int countdown) throws IOException {
         ImageWidget imageWidget = (ImageWidget)_getReady.getObserver();
-        imageWidget.setImage(String.format("images/DogfightGetReady%02d.png", countdown));
+        imageWidget.setBackgroundImage(String.format("images/DogfightGetReady%02d.png", countdown));
         _widgetManager.hideAll();
         _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
     }
@@ -112,7 +117,7 @@ public class DogfightView implements
     }
 
     @Override
-    public void onWidgetLoaded(WidgetCreateInfo wci) throws IOException {
+    public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
         if (wci._id.equals(RACE_SCOREBOARD) && wci._type.equals("DogfightScoreboardWidget")) {
             _dogfightScoreboard = new Widget(wci, new DogfightScoreboardWidget(_widgetManager, this));
         }

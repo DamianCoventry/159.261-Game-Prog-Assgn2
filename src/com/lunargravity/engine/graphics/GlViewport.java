@@ -25,6 +25,11 @@ public class GlViewport {
         glViewport(_config._positionX, _config._positionY, _config._width, _config._height);
     }
 
+    public boolean containsPoint(float x, float y) {
+        return (x >= _config._positionX) && (x <= _config._positionX + _config._width) &&
+               (y >= _config._positionY) && (x <= _config._positionY + _config._height);
+    }
+
     public void setConfig(ViewportConfig config) {
         _config = config;
         _perspectiveMatrix = createPerspectiveMatrix();

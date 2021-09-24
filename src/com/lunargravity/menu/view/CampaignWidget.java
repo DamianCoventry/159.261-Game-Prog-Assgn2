@@ -1,11 +1,11 @@
 package com.lunargravity.menu.view;
 
 import com.lunargravity.engine.widgetsystem.*;
+import org.joml.Matrix4f;
 
 import java.io.IOException;
 
 public class CampaignWidget extends WidgetObserver implements IButtonObserver, IListObserver {
-    private static final String BACKGROUND_IMAGE = "backgroundImage";
     private static final String SINGLE_PLAYER_BUTTON = "singlePlayerButton";
     private static final String TWO_PLAYERS_BUTTON = "twoPlayersButton";
     private static final String SAVED_GAMES_LIST = "savedGamesList";
@@ -20,30 +20,26 @@ public class CampaignWidget extends WidgetObserver implements IButtonObserver, I
     }
 
     @Override
-    protected void createChildWidgets(WidgetCreateInfo wci) throws IOException {
-        WidgetCreateInfo child = wci.getChild(BACKGROUND_IMAGE, "ImageWidget");
+    protected void initialiseChildren(WidgetCreateInfo wci) throws IOException {
+        WidgetCreateInfo child = wci.getChild(SINGLE_PLAYER_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(child, new ImageWidget(_widgetManager)));
-        }
-        child = wci.getChild(SINGLE_PLAYER_BUTTON, "ButtonWidget");
-        if (child != null) {
-            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
         child = wci.getChild(TWO_PLAYERS_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
         child = wci.getChild(SAVED_GAMES_LIST, "ListWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new ListWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ListWidget(_widgetManager, this)));
         }
         child = wci.getChild(LOAD_SAVED_GAME_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
         child = wci.getChild(MAIN_MENU_BUTTON, "ButtonWidget");
         if (child != null) {
-            getWidget().addChild(new Widget(wci, new ButtonWidget(_widgetManager, this)));
+            getWidget().addChild(new Widget(_widget, child, new ButtonWidget(_widgetManager, this)));
         }
     }
 
@@ -85,6 +81,7 @@ public class CampaignWidget extends WidgetObserver implements IButtonObserver, I
 
     @Override
     public void freeResources() {
-        // TODO
+        super.freeResources();
+        // anything to do?
     }
 }

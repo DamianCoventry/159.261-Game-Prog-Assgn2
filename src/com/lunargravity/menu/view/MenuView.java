@@ -36,49 +36,54 @@ public class MenuView implements
     }
 
     @Override
-    public void onViewThink() {
+    public void initialLoadCompleted() {
+        _widgetManager.show(_main, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void viewThink() {
         // TODO
     }
 
     @Override
-    public void onDrawView3d(int viewport, Matrix4f projectionMatrix) {
+    public void drawView3d(int viewport, Matrix4f projectionMatrix) {
         // TODO
     }
 
     @Override
-    public void onDrawView2d(int viewport, Matrix4f projectionMatrix) {
+    public void drawView2d(int viewport, Matrix4f projectionMatrix) {
         // TODO
     }
 
     @Override
-    public void onObjectLoaded(String name, String type, Transform transform) {
+    public void objectLoaded(String name, String type, Transform transform) {
         // TODO
     }
 
     @Override
-    public void onStaticMeshLoaded(GlStaticMesh staticMesh) {
+    public void staticMeshLoaded(GlStaticMesh staticMesh) {
         // TODO
     }
 
     @Override
-    public void onMaterialLoaded(GlMaterial material) {
+    public void materialLoaded(GlMaterial material) {
         // TODO
     }
 
     @Override
-    public void onTextureLoaded(GlTexture texture) {
+    public void textureLoaded(GlTexture texture) {
         // TODO
     }
 
     @Override
-    public void onWidgetLoaded(WidgetCreateInfo wci) throws IOException {
+    public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
         if (wci._id.equals(MAIN) && wci._type.equals("MainWidget")) {
             _main = new Widget(wci, new MainWidget(_widgetManager, this));
         }
         else if (wci._id.equals(CAMPAIGN) && wci._type.equals("CampaignWidget")) {
             _campaign = new Widget(wci, new CampaignWidget(_widgetManager, this));
         }
-        else if (wci._id.equals(OPTIONS) && wci._type.equals("CampaignWidget")) {
+        else if (wci._id.equals(OPTIONS) && wci._type.equals("OptionsWidget")) {
             _options = new Widget(wci, new OptionsWidget(_widgetManager, this));
         }
     }

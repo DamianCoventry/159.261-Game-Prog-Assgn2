@@ -1,5 +1,5 @@
 package com.lunargravity.engine.scene;
 
 public interface ISceneLogicOwner {
-    void onLogicSettingLoaded(String name, String value);
+    void logicSettingLoaded(String name, String value);
 }

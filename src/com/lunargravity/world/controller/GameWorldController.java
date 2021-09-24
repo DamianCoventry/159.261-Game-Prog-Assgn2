@@ -31,7 +31,7 @@ public class GameWorldController implements IGameWorldController, ISceneLogicOwn
     }
 
     @Override
-    public void onLogicSettingLoaded(String name, String value) {
+    public void logicSettingLoaded(String name, String value) {
         // TODO
     }
 }

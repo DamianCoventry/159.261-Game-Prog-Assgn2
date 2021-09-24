@@ -42,12 +42,17 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void onViewThink() {
+    public void initialLoadCompleted() {
         // TODO
     }
 
     @Override
-    public void onDrawView3d(int viewport, Matrix4f projectionMatrix) {
+    public void viewThink() {
+        // TODO
+    }
+
+    @Override
+    public void drawView3d(int viewport, Matrix4f projectionMatrix) {
         if (_cameras.size() == 0) {
             // begin temp
             _cameras.add(new GlObject("temp", new Transform(new Vector3f(), new Quaternionf())));
@@ -70,7 +75,7 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void onDrawView2d(int viewport, Matrix4f projectionMatrix) {
+    public void drawView2d(int viewport, Matrix4f projectionMatrix) {
         // TODO
     }
 
@@ -85,7 +90,7 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void onObjectLoaded(String name, String type, Transform transform) {
+    public void objectLoaded(String name, String type, Transform transform) {
         if (name.startsWith("Camera")) {
             _cameras.add(new GlObject(name, transform));
             _currentCamera = _cameras.get(0);
@@ -110,24 +115,24 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void onStaticMeshLoaded(GlStaticMesh staticMesh) {
+    public void staticMeshLoaded(GlStaticMesh staticMesh) {
         staticMesh.bindMaterials(_materials);
         _staticMeshes.add(staticMesh);
     }
 
     @Override
-    public void onMaterialLoaded(GlMaterial material) {
+    public void materialLoaded(GlMaterial material) {
         material.bindTextures(_textures);
         _materials.add(material);
     }
 
     @Override
-    public void onTextureLoaded(GlTexture texture) {
+    public void textureLoaded(GlTexture texture) {
         _textures.add(texture);
     }
 
     @Override
-    public void onWidgetLoaded(WidgetCreateInfo wci) throws IOException {
+    public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
         // TODO
     }
 

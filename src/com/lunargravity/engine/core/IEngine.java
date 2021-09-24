@@ -1,6 +1,7 @@
 package com.lunargravity.engine.core;
 
 import com.jme3.bullet.PhysicsSpace;
+import com.lunargravity.engine.desktopwindow.GlfwWindow;
 import com.lunargravity.engine.graphics.GlRenderer;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
@@ -18,6 +19,9 @@ public interface IEngine extends IManualFrameUpdater {
     TimeoutManager getTimeoutManager();
     PhysicsSpace getPhysicsSpace();
     GlRenderer getRenderer();
+    GlfwWindow.CursorPosition getMouseCursorPosition();
+    float getDesktopWindowWidth();
+    float getDesktopWindowHeight();
 
     boolean isSoundEnabled();
     void enableSound();

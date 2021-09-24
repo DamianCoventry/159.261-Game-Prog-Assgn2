@@ -21,7 +21,7 @@ public class RaceController implements IRaceController, ISceneLogicOwner {
     }
 
     @Override
-    public void onLogicSettingLoaded(String name, String value) {
+    public void logicSettingLoaded(String name, String value) {
         // TODO
     }
 
