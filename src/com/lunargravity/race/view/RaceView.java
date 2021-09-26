@@ -19,11 +19,9 @@ public class RaceView implements
         IRaceView,
         ISceneAssetOwner,
         IRacePausedObserver,
-        IRaceScoreboardObserver,
         IRaceResultsObserver
 {
     private static final String RACE_RESULTS = "raceResults";
-    private static final String RACE_SCOREBOARD = "raceScoreboard";
     private static final String RACE_PAUSED = "racePaused";
     private static final String GET_READY = "getReady";
     private static final String RACE_COMPLETED = "raceCompleted";
@@ -33,7 +31,6 @@ public class RaceView implements
     private final IRaceModel _model;
 
     private Widget _raceResults;
-    private Widget _raceScoreboard;
     private Widget _racePaused;
     private Widget _getReady;
     private Widget _raceCompleted;
@@ -46,7 +43,7 @@ public class RaceView implements
 
     @Override
     public void initialLoadCompleted() {
-        _widgetManager.show(_raceScoreboard, WidgetManager.ShowAs.FIRST);
+        // TODO
     }
 
     @Override
@@ -91,12 +88,6 @@ public class RaceView implements
     }
 
     @Override
-    public void showScoreboardWidget() {
-        _widgetManager.hideAll();
-        _widgetManager.show(_raceScoreboard, WidgetManager.ShowAs.FIRST);
-    }
-
-    @Override
     public void showPausedWidget() {
         _widgetManager.hideAll();
         _widgetManager.show(_racePaused, WidgetManager.ShowAs.FIRST);
@@ -118,10 +109,11 @@ public class RaceView implements
 
     @Override
     public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
-        if (wci._id.equals(RACE_SCOREBOARD) && wci._type.equals("RaceScoreboardWidget")) {
-            _raceScoreboard = new Widget(wci, new RaceScoreboardWidget(_widgetManager, this));
+        if (wci == null) {
+            System.out.print("RaceView.widgetLoaded() was passed a null WidgetCreateInfo object");
+            return;
         }
-        else if (wci._id.equals(RACE_RESULTS) && wci._type.equals("RaceResultsWidget")) {
+        if (wci._id.equals(RACE_RESULTS) && wci._type.equals("RaceResultsWidget")) {
             _raceResults = new Widget(wci, new RaceResultsWidget(_widgetManager, this));
         }
         else if (wci._id.equals(RACE_PAUSED) && wci._type.equals("RacePausedWidget")) {
@@ -142,31 +134,11 @@ public class RaceView implements
 
     @Override
     public void mainMenuButtonClicked() {
-        _controller.goToMainMenu();
+        _controller.mainMenuRequested();
     }
 
     @Override
     public void startNextRaceButtonClicked() {
         _controller.startNextRace();
-    }
-
-    @Override
-    public void quitToRaceScoreboardButtonClicked() {
-        _controller.goToRaceScoreboard();
-    }
-
-    @Override
-    public void resetRaceScoreboardButtonClicked() {
-        _controller.resetRaceScoreboard();
-    }
-
-    @Override
-    public void startSinglePlayerRaceButtonClicked() {
-        _controller.startNewRace(1);
-    }
-
-    @Override
-    public void startTwoPlayersRaceButtonClicked() {
-        _controller.startNewRace(2);
     }
 }

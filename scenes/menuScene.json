@@ -21,8 +21,8 @@
                     "_id": "campaignButton",
                     "_type": "ButtonWidget",
                     "_position": {
-                        "x": 10.0,
-                        "y": 10.0
+                        "x": 125.0,
+                        "y": 230.0
                     },
                     "_size": {
                         "x": 150.0,
@@ -38,8 +38,8 @@
                     "_id": "raceButton",
                     "_type": "ButtonWidget",
                     "_position": {
-                        "x": 10.0,
-                        "y": 50.0
+                        "x": 125.0,
+                        "y": 190.0
                     },
                     "_size": {
                         "x": 150.0,
@@ -55,8 +55,8 @@
                     "_id": "dogfightButton",
                     "_type": "ButtonWidget",
                     "_position": {
-                        "x": 10.0,
-                        "y": 90.0
+                        "x": 125.0,
+                        "y": 150.0
                     },
                     "_size": {
                         "x": 150.0,
@@ -72,8 +72,8 @@
                     "_id": "optionsButton",
                     "_type": "ButtonWidget",
                     "_position": {
-                        "x": 10.0,
-                        "y": 130.0
+                        "x": 70.0,
+                        "y": 15.0
                     },
                     "_size": {
                         "x": 150.0,
@@ -89,8 +89,8 @@
                     "_id": "exitButton",
                     "_type": "ButtonWidget",
                     "_position": {
-                        "x": 10.0,
-                        "y": 170.0
+                        "x": 235.0,
+                        "y": 15.0
                     },
                     "_size": {
                         "x": 150.0,
@@ -121,11 +121,44 @@
             },
             "_children": [
                 {
+                    "_id": "savedGamesList",
+                    "_type": "ListWidget",
+                    "_position": {
+                        "x": 15.0,
+                        "y": 55.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 200.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/SavedGamesList_Normal.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "loadSavedGameButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 235.0,
+                        "y": 230.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/LoadSavedGameButton_Normal.png",
+                        "hoverImage": "images/LoadSavedGameButton_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
                     "_id": "singlePlayerButton",
                     "_type": "ButtonWidget",
                     "_position": {
-                        "x": 15.0,
-                        "y": 20.0
+                        "x": 235.0,
+                        "y": 190.0
                     },
                     "_size": {
                         "x": 150.0,
@@ -141,8 +174,8 @@
                     "_id": "twoPlayersButton",
                     "_type": "ButtonWidget",
                     "_position": {
-                        "x": 15.0,
-                        "y": 60.0
+                        "x": 235.0,
+                        "y": 150.0
                     },
                     "_size": {
                         "x": 150.0,
@@ -155,27 +188,11 @@
                     "_children": []
                 },
                 {
-                    "_id": "savedGamesList",
-                    "_type": "ListWidget",
-                    "_position": {
-                        "x": 180.0,
-                        "y": 20.0
-                    },
-                    "_size": {
-                        "x": 200.0,
-                        "y": 200.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/SavedGamesList_Normal.png"
-                    },
-                    "_children": []
-                },
-                {
                     "_id": "mainMenuButton",
                     "_type": "ButtonWidget",
                     "_position": {
-                        "x": 15.0,
-                        "y": 230.0
+                        "x": 235.0,
+                        "y": 15.0
                     },
                     "_size": {
                         "x": 150.0,
@@ -184,23 +201,6 @@
                     "_properties": {
                         "backgroundImage": "images/MainMenuButton_Normal.png",
                         "hoverImage": "images/MainMenuButton_Hover.png"
-                    },
-                    "_children": []
-                },
-                {
-                    "_id": "loadSavedGameButton",
-                    "_type": "ButtonWidget",
-                    "_position": {
-                        "x": 180.0,
-                        "y": 230.0
-                    },
-                    "_size": {
-                        "x": 150.0,
-                        "y": 30.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/LoadSavedGameButton_Normal.png",
-                        "hoverImage": "images/LoadSavedGameButton_Hover.png"
                     },
                     "_children": []
                 }
@@ -287,6 +287,552 @@
                     "_properties": {
                         "backgroundImage": "images/MusicVolumeNumeric_Normal.png",
                         "hoverImage": "images/MusicVolumeNumeric_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "p1RotateCwKeyboardKey",
+                    "_type": "KeyBindingWidget",
+                    "_position": {
+                        "x": 15.0,
+                        "y": 340.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/RotateCwKeyBinding_Normal.png",
+                        "hoverImage": "images/RotateCwKeyBinding_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "p1RotateCcwKeyboardKey",
+                    "_type": "KeyBindingWidget",
+                    "_position": {
+                        "x": 15.0,
+                        "y": 300.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/RotateCcwKeyBinding_Normal.png",
+                        "hoverImage": "images/RotateCcwKeyBinding_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "p1ThrustKeyboardKey",
+                    "_type": "KeyBindingWidget",
+                    "_position": {
+                        "x": 15.0,
+                        "y": 260.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/ThrustKeyBinding_Normal.png",
+                        "hoverImage": "images/ThrustKeyBinding_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "p1KickKeyboardKey",
+                    "_type": "KeyBindingWidget",
+                    "_position": {
+                        "x": 15.0,
+                        "y": 220.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/KickKeyBinding_Normal.png",
+                        "hoverImage": "images/KickKeyBinding_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "p1ShootKeyboardKey",
+                    "_type": "KeyBindingWidget",
+                    "_position": {
+                        "x": 15.0,
+                        "y": 180.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/ShootKeyBinding_Normal.png",
+                        "hoverImage": "images/ShootKeyBinding_Hover.png"
+                    },
+                    "_children": []
+                },
+                 {
+                    "_id": "p2RotateCwKeyboardKey",
+                    "_type": "KeyBindingWidget",
+                    "_position": {
+                        "x": 230.0,
+                        "y": 340.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/RotateCwKeyBinding_Normal.png",
+                        "hoverImage": "images/RotateCwKeyBinding_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "p2RotateCcwKeyboardKey",
+                    "_type": "KeyBindingWidget",
+                    "_position": {
+                        "x": 230.0,
+                        "y": 300.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/RotateCcwKeyBinding_Normal.png",
+                        "hoverImage": "images/RotateCcwKeyBinding_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "p2ThrustKeyboardKey",
+                    "_type": "KeyBindingWidget",
+                    "_position": {
+                        "x": 230.0,
+                        "y": 260.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/ThrustKeyBinding_Normal.png",
+                        "hoverImage": "images/ThrustKeyBinding_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "p2KickKeyboardKey",
+                    "_type": "KeyBindingWidget",
+                    "_position": {
+                        "x": 230.0,
+                        "y": 220.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/KickKeyBinding_Normal.png",
+                        "hoverImage": "images/KickKeyBinding_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "p2ShootKeyboardKey",
+                    "_type": "KeyBindingWidget",
+                    "_position": {
+                        "x": 230.0,
+                        "y": 180.0
+                    },
+                    "_size": {
+                        "x": 200.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/ShootKeyBinding_Normal.png",
+                        "hoverImage": "images/ShootKeyBinding_Hover.png"
+                    },
+                    "_children": []
+                },
+               {
+                    "_id": "mainMenuButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 235.0,
+                        "y": 15.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/MainMenuButton_Normal.png",
+                        "hoverImage": "images/MainMenuButton_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "resetToDefaultsButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 70.0,
+                        "y": 15.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/ResetToDefaultsButton_Normal.png",
+                        "hoverImage": "images/ResetToDefaultsButton_Hover.png"
+                    },
+                    "_children": []
+                }
+            ]
+        },
+        {
+            "_id": "raceScoreboard",
+            "_type": "RaceScoreboardWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 400.0,
+                "y": 350.0
+            },
+            "_properties": {
+                "backgroundImage": "images/RaceScoreboardWidget_Normal.png",
+                "initialPosition": "centerInViewport"
+            },
+            "_children": [
+                {
+                    "_id": "raceHighScore0",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 75.0,
+                        "y": 260.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "raceHighScore1",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 75.0,
+                        "y": 230.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "raceHighScore2",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 75.0,
+                        "y": 200.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "raceHighScore3",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 75.0,
+                        "y": 170.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "raceHighScore4",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 75.0,
+                        "y": 140.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "mainMenuButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 235.0,
+                        "y": 15.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/MainMenuButton_Normal.png",
+                        "hoverImage": "images/MainMenuButton_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "resetScoreboardButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 70.0,
+                        "y": 15.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/ResetScoreboardButton_Normal.png",
+                        "hoverImage": "images/ResetScoreboardButton_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "singlePlayerRaceButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 70.0,
+                        "y": 60.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/SinglePlayerRaceButton_Normal.png",
+                        "hoverImage": "images/SinglePlayerRaceButton_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "twoPlayersRaceButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 235.0,
+                        "y": 60.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/TwoPlayersRaceButton_Normal.png",
+                        "hoverImage": "images/TwoPlayersRaceButton_Hover.png"
+                    },
+                    "_children": []
+                }
+            ]
+        },
+        {
+            "_id": "dogfightScoreboard",
+            "_type": "DogfightScoreboardWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 400.0,
+                "y": 350.0
+            },
+            "_properties": {
+                "backgroundImage": "images/DogfightScoreboardWidget_Normal.png",
+                "initialPosition": "centerInViewport"
+            },
+            "_children": [
+                {
+                    "_id": "dogfightHighScore0",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 75.0,
+                        "y": 260.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "dogfightHighScore1",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 75.0,
+                        "y": 230.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "dogfightHighScore2",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 75.0,
+                        "y": 200.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "dogfightHighScore3",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 75.0,
+                        "y": 170.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "dogfightHighScore4",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 75.0,
+                        "y": 140.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "mainMenuButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 235.0,
+                        "y": 15.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/MainMenuButton_Normal.png",
+                        "hoverImage": "images/MainMenuButton_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "resetScoreboardButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 70.0,
+                        "y": 15.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/ResetScoreboardButton_Normal.png",
+                        "hoverImage": "images/ResetScoreboardButton_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "singlePlayerDogfightButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 70.0,
+                        "y": 60.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/SinglePlayerDogfightButton_Normal.png",
+                        "hoverImage": "images/SinglePlayerDogfightButton_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "twoPlayersDogfightButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 235.0,
+                        "y": 60.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/TwoPlayersDogfightButton_Normal.png",
+                        "hoverImage": "images/TwoPlayersDogfightButton_Hover.png"
                     },
                     "_children": []
                 }

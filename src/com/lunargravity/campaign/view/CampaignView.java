@@ -2,7 +2,11 @@ package com.lunargravity.campaign.view;
 
 import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.model.ICampaignModel;
-import com.lunargravity.engine.graphics.*;
+import com.lunargravity.campaign.statemachine.GetReadyState;
+import com.lunargravity.engine.graphics.GlMaterial;
+import com.lunargravity.engine.graphics.GlStaticMesh;
+import com.lunargravity.engine.graphics.GlTexture;
+import com.lunargravity.engine.graphics.Transform;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.*;
 import org.joml.Matrix4f;
@@ -19,34 +23,25 @@ public class CampaignView implements
     private static final String EPISODE_INTRO_ANNOUNCEMENT = "episodeIntro";
     private static final String EPISODE_OUTRO_ANNOUNCEMENT = "episodeOutro";
     private static final String GAME_OVER_ANNOUNCEMENT = "gameOver";
-    private static final String GAME_WON_ANNOUNCEMENT = "gameWon";
+    private static final String GAME_WON_ANNOUNCEMENT = "gameCompleted";
     private static final String MISSION_INTRO_ANNOUNCEMENT = "missionIntro";
     private static final String MISSION_COMPLETED = "missionCompleted";
     private static final String GET_READY = "getReady";
-    private static final String BOTH_PLAYERS_DIED = "bothPlayersDied";
-    private static final String PLAYER1_DIED = "player1Died";
-    private static final String PLAYER2_DIED = "player2Died";
+    private static final String PLAYER_DIED = "playerDied";
 
     private final WidgetManager _widgetManager;
     private final ICampaignController _controller;
     private final ICampaignModel _model;
 
-    // These 5 widgets are announcements that fill the viewport
     private Widget _episodeIntro;
     private Widget _episodeOutro;
     private Widget _gameOver;
     private Widget _gameWon;
     private Widget _missionIntro;
-
-    // This widget is a dialog box, with 2 buttons and a background image
     private Widget _missionPaused;
-
-    // These 5 widgets are images centered within the viewport
     private Widget _missionCompleted;
     private Widget _getReady;
-    private Widget _bothPlayersDied;
-    private Widget _player1Died;
-    private Widget _player2Died;
+    private Widget _playerDied;
 
     public CampaignView(WidgetManager widgetManager, ICampaignController controller, ICampaignModel model) {
         _widgetManager = widgetManager;
@@ -56,7 +51,7 @@ public class CampaignView implements
 
     @Override
     public void initialLoadCompleted() {
-        // TODO
+        _widgetManager.show(_episodeIntro, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
@@ -75,8 +70,69 @@ public class CampaignView implements
     }
 
     @Override
-    public void temp() {
-        // TODO
+    public void showEpisodeIntro() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_episodeIntro, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showEpisodeOutro() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_episodeOutro, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showMissionIntro() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_missionIntro, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showGameWon() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_gameWon, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showGameOver() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_gameOver, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showMissionPaused() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_missionPaused, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showMissionCompleted() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_missionCompleted, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showGetReady(int i) throws IOException {
+        if (_widgetManager.isVisible(_getReady)) {
+            int clamped = Math.min(GetReadyState.MAX_SECONDS, Math.max(GetReadyState.MIN_SECONDS, i));
+            _getReady.getObserver().setBackgroundImage(String.format("images/GetReady%d.png", clamped));
+        }
+        else {
+            _widgetManager.hideAll();
+            _getReady.getObserver().setBackgroundImage("images/GetReady3.png");
+            _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
+        }
+    }
+
+    @Override
+    public void showPlayerDied(WhichPlayer whichPlayer) throws IOException {
+        switch (whichPlayer) {
+            case PLAYER_1 -> _playerDied.getObserver().setBackgroundImage("images/Player1Died.png");
+            case PLAYER_2 -> _playerDied.getObserver().setBackgroundImage("images/Player2Died.png");
+            case BOTH_PLAYERS -> _playerDied.getObserver().setBackgroundImage("images/BothPlayersDied.png");
+        }
+        _widgetManager.hideAll();
+        _widgetManager.show(_playerDied, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
@@ -101,6 +157,10 @@ public class CampaignView implements
 
     @Override
     public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
+        if (wci == null) {
+            System.out.print("CampaignView.widgetLoaded() was passed a null WidgetCreateInfo object");
+            return;
+        }
         if (wci._id.equals(MISSION_PAUSED) && wci._type.equals("MissionPausedWidget")) {
             _missionPaused = new Widget(wci, new MissionPausedWidget(_widgetManager, this));
         }
@@ -111,13 +171,13 @@ public class CampaignView implements
             _episodeOutro = new Widget(wci, new AnnouncementWidget(_widgetManager, this));
         }
         else if (wci._id.equals(GAME_OVER_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            _missionIntro = new Widget(wci, new AnnouncementWidget(_widgetManager, this));
-        }
-        else if (wci._id.equals(GAME_WON_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
             _gameOver = new Widget(wci, new AnnouncementWidget(_widgetManager, this));
         }
-        else if (wci._id.equals(MISSION_INTRO_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
+        else if (wci._id.equals(GAME_WON_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
             _gameWon = new Widget(wci, new AnnouncementWidget(_widgetManager, this));
+        }
+        else if (wci._id.equals(MISSION_INTRO_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
+            _missionIntro = new Widget(wci, new AnnouncementWidget(_widgetManager, this));
         }
         else if (wci._id.equals(MISSION_COMPLETED) && wci._type.equals("ImageWidget")) {
             _missionCompleted = new Widget(wci, new ImageWidget(_widgetManager));
@@ -125,43 +185,29 @@ public class CampaignView implements
         else if (wci._id.equals(GET_READY) && wci._type.equals("ImageWidget")) {
             _getReady = new Widget(wci, new ImageWidget(_widgetManager));
         }
-        else if (wci._id.equals(BOTH_PLAYERS_DIED) && wci._type.equals("ImageWidget")) {
-            _bothPlayersDied = new Widget(wci, new ImageWidget(_widgetManager));
-        }
-        else if (wci._id.equals(PLAYER1_DIED) && wci._type.equals("ImageWidget")) {
-            _player1Died = new Widget(wci, new ImageWidget(_widgetManager));
-        }
-        else if (wci._id.equals(PLAYER2_DIED) && wci._type.equals("ImageWidget")) {
-            _player2Died = new Widget(wci, new ImageWidget(_widgetManager));
+        else if (wci._id.equals(PLAYER_DIED) && wci._type.equals("ImageWidget")) {
+            _playerDied = new Widget(wci, new ImageWidget(_widgetManager));
         }
     }
 
     @Override
     public void resumeMissionButtonClicked() {
-        // TODO: changeState();
+        _controller.resumeMission();
     }
 
     @Override
-    public void quitCampaignButtonClicked() {
-        // TODO: changeState();
+    public void mainMenuButtonClicked() {
+        _controller.quitCampaign();
     }
 
     @Override
-    public void announcementClicked(String widgetId) {
-        if (widgetId == EPISODE_INTRO_ANNOUNCEMENT) {
-            // TODO: changeState();
-        }
-        else if (widgetId == EPISODE_OUTRO_ANNOUNCEMENT) {
-            // TODO: changeState();
-        }
-        else if (widgetId == GAME_OVER_ANNOUNCEMENT) {
-            // TODO: changeState();
-        }
-        else if (widgetId == GAME_WON_ANNOUNCEMENT) {
-            // TODO: changeState();
-        }
-        else if (widgetId == MISSION_INTRO_ANNOUNCEMENT) {
-            // TODO: changeState();
+    public void announcementClicked(String widgetId) throws IOException, InterruptedException {
+        switch (widgetId) {
+            case EPISODE_INTRO_ANNOUNCEMENT -> _controller.episodeIntroAborted();
+            case EPISODE_OUTRO_ANNOUNCEMENT -> _controller.episodeOutroAborted();
+            case GAME_OVER_ANNOUNCEMENT -> _controller.gameOverAborted();
+            case GAME_WON_ANNOUNCEMENT -> _controller.gameWonAborted();
+            case MISSION_INTRO_ANNOUNCEMENT -> _controller.missionIntroAborted();
         }
     }
 }

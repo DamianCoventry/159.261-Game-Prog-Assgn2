@@ -55,17 +55,27 @@ public class MenuController implements IMenuController, ISceneLogicOwner {
     }
 
     @Override
-    public void viewRaceScoreboard() {
+    public void startNewRace(int numPlayers) {
         for (var observer : _observers) {
-            observer.viewRaceScoreboardRequested();
+            observer.startNewRaceRequested(numPlayers);
         }
     }
 
     @Override
-    public void viewDogfightScoreboard() {
+    public void resetRaceScoreboard() {
+        _model.resetRaceScoreboard();
+    }
+
+    @Override
+    public void startNewDogfight(int numPlayers) {
         for (var observer : _observers) {
-            observer.viewDogfightScoreboardRequested();
+            observer.startNewDogfightRequested(numPlayers);
         }
+    }
+
+    @Override
+    public void resetDogfightScoreboard() {
+        _model.resetDogfightScoreboard();
     }
 
     @Override

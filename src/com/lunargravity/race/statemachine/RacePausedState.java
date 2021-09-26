@@ -31,11 +31,6 @@ public class RacePausedState extends StateBase implements IRaceControllerObserve
     }
 
     @Override
-    public void startNewRaceRequested(int numPlayers) {
-
-    }
-
-    @Override
     public void startNextRaceRequested() {
 
     }
@@ -46,12 +41,7 @@ public class RacePausedState extends StateBase implements IRaceControllerObserve
     }
 
     @Override
-    public void goToMainMenuRequested() {
+    public void mainMenuRequested() {
         changeState(new LoadingMenuState(getContext()));
-    }
-
-    @Override
-    public void goToRaceScoreboardRequested() {
-
     }
 }

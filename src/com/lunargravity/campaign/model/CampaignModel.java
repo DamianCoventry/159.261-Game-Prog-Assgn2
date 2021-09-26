@@ -1,15 +1,22 @@
 package com.lunargravity.campaign.model;
 
 import com.lunargravity.engine.scene.ISceneStateOwner;
-import org.joml.Vector2f;
-
-import java.util.HashMap;
 
 public class CampaignModel implements ICampaignModel, ISceneStateOwner {
+    private static final int INITIAL_SHIP_COUNT = 3;
+
+    private int _episode;
+    private int _mission;
+    private int[] _playerShipCounts;
     private final int _numPlayers;
 
-    public CampaignModel(int numPlayers) {
+    public CampaignModel(int episode, int mission, int numPlayers) {
+        _episode = episode;
+        _mission = mission;
         _numPlayers = numPlayers;
+        _playerShipCounts = new int[2];
+        _playerShipCounts[0] = INITIAL_SHIP_COUNT;
+        _playerShipCounts[1] = INITIAL_SHIP_COUNT;
     }
 
     @Override
@@ -24,12 +31,71 @@ public class CampaignModel implements ICampaignModel, ISceneStateOwner {
     }
 
     @Override
-    public void temp() {
+    public void stateSettingLoaded(String name, String value) {
         // TODO
     }
 
     @Override
-    public void stateSettingLoaded(String name, String value) {
-        // TODO
+    public int getEpisode() {
+        return _episode;
+    }
+
+    @Override
+    public int getMission() {
+        return _mission;
+    }
+
+    @Override
+    public int getNumPlayers() {
+        return _numPlayers;
+    }
+
+    @Override
+    public DecrementPlayerShipResult decrementPlayerShip(int player) {
+        if (player < 0 || player > 1) {
+            throw new IllegalArgumentException("player index is invalid");
+        }
+        if (_playerShipCounts[player] == 0) {
+            return DecrementPlayerShipResult.SHIPS_EXHAUSTED;
+        }
+        --_playerShipCounts[player];
+        return DecrementPlayerShipResult.SHIP_AVAILABLE;
+    }
+
+    @Override
+    public IncrementEpisodeResult incrementEpisode() {
+        if (_episode == NUM_EPISODES) {
+            return IncrementEpisodeResult.GAME_COMPLETED;
+        }
+        ++_episode;
+        return _episode == NUM_EPISODES ?
+                IncrementEpisodeResult.GAME_COMPLETED :
+                IncrementEpisodeResult.START_NEXT_EPISODE;
+    }
+
+    @Override
+    public IncrementMissionResult incrementMission() {
+        if (_mission == NUM_MISSIONS_PER_EPISODE) {
+            return IncrementMissionResult.EPISODE_COMPLETED;
+        }
+        ++_mission;
+        return _mission == NUM_MISSIONS_PER_EPISODE ?
+                IncrementMissionResult.EPISODE_COMPLETED :
+                IncrementMissionResult.START_NEXT_MISSION;
+    }
+
+    @Override
+    public String getWorldMissionScene() {
+        return String.format("scenes/CampaignWorldE%02dM%02d.json", _episode, _mission);
+    }
+
+    @Override
+    public String getLogicMissionScene() {
+        return String.format("scenes/CampaignLogicE%02dM%02d.json", _episode, _mission);
+    }
+
+    @Override
+    public String getEpisodeIntroScene() {
+        return String.format("scenes/CampaignE%dIntro.json", _episode);
     }
 }

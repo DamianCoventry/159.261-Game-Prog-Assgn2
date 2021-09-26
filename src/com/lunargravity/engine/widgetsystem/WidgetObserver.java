@@ -1,6 +1,6 @@
 package com.lunargravity.engine.widgetsystem;
 
-import com.lunargravity.engine.core.IInputConsumer;
+import com.lunargravity.engine.core.IInputObserver;
 import com.lunargravity.engine.graphics.BitmapImage;
 import com.lunargravity.engine.graphics.GlDiffuseTextureProgram;
 import com.lunargravity.engine.graphics.GlTexture;
@@ -15,7 +15,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 
-public class WidgetObserver implements IWidgetObserver, IInputConsumer {
+public class WidgetObserver implements IWidgetObserver, IInputObserver {
     public static final String BACKGROUND_IMAGE = "backgroundImage";
     public static final String HOVER_IMAGE = "hoverImage";
 
@@ -219,7 +219,7 @@ public class WidgetObserver implements IWidgetObserver, IInputConsumer {
     }
 
     @Override
-    public void mouseButtonEvent(int button, int action, int mods) {
+    public void mouseButtonEvent(int button, int action, int mods) throws IOException, InterruptedException {
         if (action == GLFW_PRESS) {
             _widgetManager.setMouseCapture(_widget);
         }

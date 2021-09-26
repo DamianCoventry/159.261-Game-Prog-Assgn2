@@ -1,8 +1,13 @@
 package com.lunargravity.menu.view;
 
-import com.lunargravity.engine.graphics.*;
+import com.lunargravity.engine.graphics.GlMaterial;
+import com.lunargravity.engine.graphics.GlStaticMesh;
+import com.lunargravity.engine.graphics.GlTexture;
+import com.lunargravity.engine.graphics.Transform;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
-import com.lunargravity.engine.widgetsystem.*;
+import com.lunargravity.engine.widgetsystem.Widget;
+import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
+import com.lunargravity.engine.widgetsystem.WidgetManager;
 import com.lunargravity.menu.controller.IMenuController;
 import com.lunargravity.menu.model.IMenuModel;
 import com.lunargravity.mvc.IView;
@@ -15,11 +20,15 @@ public class MenuView implements
         ISceneAssetOwner,
         IMainWidgetObserver,
         ICampaignWidgetObserver,
-        IOptionsWidgetObserver
+        IOptionsWidgetObserver,
+        IRaceScoreboardObserver,
+        IDogfightScoreboardObserver
 {
     private static final String MAIN = "main";
     private static final String CAMPAIGN = "campaign";
     private static final String OPTIONS = "options";
+    private static final String RACE_SCOREBOARD = "raceScoreboard";
+    private static final String DOGFIGHT_SCOREBOARD = "dogfightScoreboard";
 
     private final WidgetManager _widgetManager;
     private final IMenuController _controller;
@@ -28,6 +37,8 @@ public class MenuView implements
     private Widget _main;
     private Widget _campaign;
     private Widget _options;
+    private Widget _raceScoreboard;
+    private Widget _dogfightScoreboard;
 
     public MenuView(WidgetManager widgetManager, IMenuController controller, IMenuModel model) {
         _widgetManager = widgetManager;
@@ -77,6 +88,10 @@ public class MenuView implements
 
     @Override
     public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
+        if (wci == null) {
+            System.out.print("MenuView.widgetLoaded() was passed a null WidgetCreateInfo object");
+            return;
+        }
         if (wci._id.equals(MAIN) && wci._type.equals("MainWidget")) {
             _main = new Widget(wci, new MainWidget(_widgetManager, this));
         }
@@ -85,6 +100,12 @@ public class MenuView implements
         }
         else if (wci._id.equals(OPTIONS) && wci._type.equals("OptionsWidget")) {
             _options = new Widget(wci, new OptionsWidget(_widgetManager, this));
+        }
+        else if (wci._id.equals(RACE_SCOREBOARD) && wci._type.equals("RaceScoreboardWidget")) {
+            _raceScoreboard = new Widget(wci, new RaceScoreboardWidget(_widgetManager, this));
+        }
+        else if (wci._id.equals(DOGFIGHT_SCOREBOARD) && wci._type.equals("DogfightScoreboardWidget")) {
+            _dogfightScoreboard = new Widget(wci, new DogfightScoreboardWidget(_widgetManager, this));
         }
     }
 
@@ -96,12 +117,14 @@ public class MenuView implements
 
     @Override
     public void raceGameButtonClicked() {
-        _controller.viewRaceScoreboard(); // this changes the application's current state
+        _widgetManager.hideAll();
+        _widgetManager.show(_raceScoreboard, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
     public void dogfightGameButtonClicked() {
-        _controller.viewDogfightScoreboard(); // this changes the application's current state
+        _widgetManager.hideAll();
+        _widgetManager.show(_dogfightScoreboard, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
@@ -128,6 +151,36 @@ public class MenuView implements
     @Override
     public void loadSavedCampaignButtonClicked(String fileName) {
         _controller.loadExistingCampaign(fileName); // this changes the application's current state
+    }
+
+    @Override
+    public void resetRaceScoreboardButtonClicked() {
+        _controller.resetRaceScoreboard();
+    }
+
+    @Override
+    public void startSinglePlayerRaceButtonClicked() {
+        _controller.startNewRace(1);
+    }
+
+    @Override
+    public void startTwoPlayersRaceButtonClicked() {
+        _controller.startNewRace(2);
+    }
+
+    @Override
+    public void resetDogfightScoreboardButtonClicked() {
+        _controller.resetDogfightScoreboard();
+    }
+
+    @Override
+    public void startSinglePlayerDogfightButtonClicked() {
+        _controller.startNewDogfight(1);
+    }
+
+    @Override
+    public void startTwoPlayersDogfightButtonClicked() {
+        _controller.startNewDogfight(2);
     }
 
     @Override

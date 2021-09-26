@@ -70,6 +70,10 @@ public class GameWorldView implements IGameWorldView, ISceneAssetOwner {
 
     @Override
     public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
+        if (wci == null) {
+            System.out.print("GameWorldView.widgetLoaded() was passed a null WidgetCreateInfo object");
+            return;
+        }
         // TODO
     }
 }

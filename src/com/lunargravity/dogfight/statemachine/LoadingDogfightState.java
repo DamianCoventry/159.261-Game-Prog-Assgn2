@@ -15,12 +15,12 @@ public class LoadingDogfightState extends StateBase {
 
     @Override
     public void begin() throws IOException, InterruptedException {
-        DogfightBuilderObserver raceBuilderObserver = new DogfightBuilderObserver(getManualFrameUpdater());
+        DogfightBuilderObserver dogfightBuilderObserver = new DogfightBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
 
-        getContext().startDogfightGame(raceBuilderObserver, _numPlayers);
+        getContext().startDogfightGame(dogfightBuilderObserver, _numPlayers);
 
         changeState(new GetReadyState(getContext()));
 
-        raceBuilderObserver.freeResources();
+        dogfightBuilderObserver.freeResources();
     }
 }

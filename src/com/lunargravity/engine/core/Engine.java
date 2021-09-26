@@ -18,8 +18,8 @@ import java.io.IOException;
 public class Engine implements IEngine {
     static private final float PHYSICS_TIME_STEP = 0.01666666f; // which is 60 FPS
 
-    private final IFrameConsumer _frameConsumer;
-    private final IInputConsumer _inputConsumer;
+    private final IFrameObserver _frameObserver;
+    private final IInputObserver _inputObserver;
     private final IViewportSizeObserver _viewportSizeObserver;
 
     private final GlRenderer _renderer;
@@ -36,13 +36,13 @@ public class Engine implements IEngine {
     private double _frameDelta;
     private long _fps;
 
-    public Engine(IFrameConsumer frameConsumer, IInputConsumer inputConsumer, IViewportSizeObserver viewportSizeObserver,
+    public Engine(IFrameObserver frameObserver, IInputObserver inputObserver, IViewportSizeObserver viewportSizeObserver,
                   GlfwWindowConfig windowConfig) throws IOException {
 
         loadBullet3RuntimeLibrary();
 
-        _frameConsumer = frameConsumer;
-        _inputConsumer = inputConsumer;
+        _frameObserver = frameObserver;
+        _inputObserver = inputObserver;
         _viewportSizeObserver = viewportSizeObserver;
         _timeoutManager = new TimeoutManager();
         _physicsSpace = new PhysicsSpace(PhysicsSpace.BroadphaseType.DBVT);
@@ -68,23 +68,23 @@ public class Engine implements IEngine {
             _previousTimeMs = updateFrameTime(_currentTimeMs, _previousTimeMs);
 
             _timeoutManager.dispatchTimeouts(_currentTimeMs);
-            _frameConsumer.onFrameBegin(_currentFrameNo, _currentTimeMs, _frameDelta);
+            _frameObserver.onFrameBegin(_currentFrameNo, _currentTimeMs, _frameDelta);
 
             _physicsSpace.update(PHYSICS_TIME_STEP, 0);
-            _frameConsumer.onFrameThink();
+            _frameObserver.onFrameThink();
 
             _renderer.clearBuffers();
             for (int i = 0; i < _renderer.getNumViewports(); ++i) {
                 GlViewport viewport = _renderer.getViewport(i);
                 if (viewport != null) {
                     viewport.activate();
-                    _frameConsumer.onFrameDraw3d(i, viewport.getPerspectiveMatrix());
-                    _frameConsumer.onFrameDraw2d(i, viewport.getOrthographicMatrix());
+                    _frameObserver.onFrameDraw3d(i, viewport.getPerspectiveMatrix());
+                    _frameObserver.onFrameDraw2d(i, viewport.getOrthographicMatrix());
                 }
             }
 
             _window.flipPages();
-            _frameConsumer.onFrameEnd();
+            _frameObserver.onFrameEnd();
             updateFps();
         }
     }
@@ -267,8 +267,8 @@ public class Engine implements IEngine {
         _window.setKeyCallback(new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
-                if (_inputConsumer != null) {
-                    _inputConsumer.keyboardKeyEvent(key, scancode, action, mods);
+                if (_inputObserver != null) {
+                    _inputObserver.keyboardKeyEvent(key, scancode, action, mods);
                 }
             }
         });
@@ -276,8 +276,12 @@ public class Engine implements IEngine {
         _window.setMouseButtonCallback(new GLFWMouseButtonCallback() {
             @Override
             public void invoke(long window, int button, int action, int mods) {
-                if (_inputConsumer != null) {
-                    _inputConsumer.mouseButtonEvent(button, action, mods);
+                if (_inputObserver != null) {
+                    try {
+                        _inputObserver.mouseButtonEvent(button, action, mods);
+                    } catch (IOException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -285,8 +289,8 @@ public class Engine implements IEngine {
         _window.setMouseCursorMovementCallback(new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xPos, double yPos) {
-                if (_inputConsumer != null) {
-                    _inputConsumer.mouseCursorMovedEvent(xPos, yPos);
+                if (_inputObserver != null) {
+                    _inputObserver.mouseCursorMovedEvent(xPos, yPos);
                 }
             }
         });
@@ -294,8 +298,8 @@ public class Engine implements IEngine {
         _window.setMouseWheelCallback(new GLFWScrollCallback() {
             @Override
             public void invoke(long window, double xOffset, double yOffset) {
-                if (_inputConsumer != null) {
-                    _inputConsumer.mouseWheelScrolledEvent(xOffset, yOffset);
+                if (_inputObserver != null) {
+                    _inputObserver.mouseWheelScrolledEvent(xOffset, yOffset);
                 }
             }
         });

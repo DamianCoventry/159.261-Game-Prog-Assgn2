@@ -1,6 +1,6 @@
 package com.lunargravity.engine.widgetsystem;
 
-import com.lunargravity.engine.core.IInputConsumer;
+import com.lunargravity.engine.core.IInputObserver;
 import com.lunargravity.engine.graphics.GlRenderer;
 import com.lunargravity.engine.graphics.ViewportConfig;
 import org.joml.Matrix4f;
@@ -9,10 +9,11 @@ import org.joml.Vector2f;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Widget implements IInputConsumer {
+public class Widget implements IInputObserver {
     public static final String INITIAL_POSITION = "initialPosition";
     public static final String CENTER_IN_VIEWPORT = "centerInViewport";
     public static final String CENTER_IN_PARENT = "centerInParent";
+    public static final String FULL_VIEWPORT = "fullViewport";
 
     private final WidgetObserver _observer;
     private final Widget _parent;
@@ -156,7 +157,7 @@ public class Widget implements IInputConsumer {
     }
 
     @Override
-    public void mouseButtonEvent(int button, int action, int mods) {
+    public void mouseButtonEvent(int button, int action, int mods) throws IOException, InterruptedException {
         if (_observer != null) {
             _observer.mouseButtonEvent(button, action, mods);
         }
@@ -183,6 +184,12 @@ public class Widget implements IInputConsumer {
                 ViewportConfig viewportConfig = renderer.getViewport(0).getConfig();
                 wci._position.x = (viewportConfig._width / 2.0f) - (wci._size.x / 2.0f);
                 wci._position.y = (viewportConfig._height / 2.0f) - (wci._size.y / 2.0f);
+            }
+            else if (initialPosition.equals(FULL_VIEWPORT) && renderer.getNumViewports() > 0) {
+                ViewportConfig viewportConfig = renderer.getViewport(0).getConfig();
+                wci._position.x = wci._position.y = 0.0f;
+                wci._size.x = viewportConfig._width;
+                wci._size.y = viewportConfig._height;
             }
             else if (initialPosition.equals(CENTER_IN_PARENT) && _parent != null) {
                 wci._position.x = (_parent.getSize().x / 2.0f) - (wci._size.x / 2.0f);

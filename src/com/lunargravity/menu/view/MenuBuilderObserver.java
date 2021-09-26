@@ -35,6 +35,7 @@ public class MenuBuilderObserver implements ISceneBuilderObserver {
         wci._size = _manualFrameUpdater.getViewportSizes()[0];
         wci._properties = new HashMap<>();
         wci._properties.put(ImageWidget.BACKGROUND_IMAGE, "images/LoadingMenu.png");
+        wci._properties.put(Widget.INITIAL_POSITION, Widget.FULL_VIEWPORT);
         return new Widget(wci, new ImageWidget(_widgetManager));
     }
 

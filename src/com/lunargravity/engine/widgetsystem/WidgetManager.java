@@ -1,7 +1,7 @@
 package com.lunargravity.engine.widgetsystem;
 
 import com.lunargravity.engine.core.IEngine;
-import com.lunargravity.engine.core.IInputConsumer;
+import com.lunargravity.engine.core.IInputObserver;
 import com.lunargravity.engine.desktopwindow.GlfwWindow;
 import com.lunargravity.engine.graphics.GlRenderer;
 import com.lunargravity.engine.graphics.GlViewport;
@@ -9,11 +9,12 @@ import com.lunargravity.engine.graphics.ViewportConfig;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
+import java.io.IOException;
 import java.util.LinkedList;
 
 import static org.lwjgl.opengl.GL11C.glDepthMask;
 
-public class WidgetManager implements IInputConsumer {
+public class WidgetManager implements IInputObserver {
     private final LinkedList<Widget> _allWidgets;
     private final LinkedList<Widget> _visibleWidgets;
     private final IEngine _engine;
@@ -288,11 +289,11 @@ public class WidgetManager implements IInputConsumer {
     }
 
     @Override
-    public void mouseButtonEvent(int button, int action, int mods) {
+    public void mouseButtonEvent(int button, int action, int mods) throws IOException, InterruptedException {
         Widget greatestDescendant = null;
-        Vector2f cursorPosition = toViewportCoordinates(_engine.getMouseCursorPosition());
-        if (cursorPosition != null) {
-            greatestDescendant = getGreatestDescendant(cursorPosition);
+        Vector2f viewportCoordinates = toViewportCoordinates(_engine.getMouseCursorPosition());
+        if (viewportCoordinates != null) {
+            greatestDescendant = getGreatestDescendant(viewportCoordinates);
         }
 
         _hoveringOver = greatestDescendant;
@@ -308,9 +309,9 @@ public class WidgetManager implements IInputConsumer {
     @Override
     public void mouseCursorMovedEvent(double xPos, double yPos) {
         Widget greatestDescendant = null;
-        Vector2f cursorPosition = toViewportCoordinates(_engine.getMouseCursorPosition());
-        if (cursorPosition != null) {
-            greatestDescendant = getGreatestDescendant(cursorPosition);
+        Vector2f viewportCoordinates = toViewportCoordinates(_engine.getMouseCursorPosition());
+        if (viewportCoordinates != null) {
+            greatestDescendant = getGreatestDescendant(viewportCoordinates);
         }
 
         _hoveringOver = greatestDescendant;
@@ -326,9 +327,9 @@ public class WidgetManager implements IInputConsumer {
     @Override
     public void mouseWheelScrolledEvent(double xOffset, double yOffset) {
         Widget greatestDescendant = null;
-        Vector2f cursorPosition = toViewportCoordinates(_engine.getMouseCursorPosition());
-        if (cursorPosition != null) {
-            greatestDescendant = getGreatestDescendant(cursorPosition);
+        Vector2f viewportCoordinates = toViewportCoordinates(_engine.getMouseCursorPosition());
+        if (viewportCoordinates != null) {
+            greatestDescendant = getGreatestDescendant(viewportCoordinates);
         }
 
         _hoveringOver = greatestDescendant;

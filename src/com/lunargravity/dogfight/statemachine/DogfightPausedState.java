@@ -32,11 +32,6 @@ public class DogfightPausedState extends StateBase implements IDogfightControlle
     }
 
     @Override
-    public void startNewDogfightRequested(int numPlayers) {
-
-    }
-
-    @Override
     public void startNextDogfightRequested() {
 
     }
@@ -47,12 +42,7 @@ public class DogfightPausedState extends StateBase implements IDogfightControlle
     }
 
     @Override
-    public void goToMainMenuRequested() {
+    public void mainMenuRequested() {
         changeState(new LoadingMenuState(getContext()));
-    }
-
-    @Override
-    public void goToDogfightScoreboardRequested() {
-
     }
 }

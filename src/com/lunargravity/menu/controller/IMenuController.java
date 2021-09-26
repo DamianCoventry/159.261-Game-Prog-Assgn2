@@ -8,8 +8,10 @@ public interface IMenuController extends IController {
 
     void startNewCampaign(int numPlayers);
     void loadExistingCampaign(String fileName);
-    void viewRaceScoreboard();
-    void viewDogfightScoreboard();
+    void startNewRace(int numPlayers);
+    void resetRaceScoreboard();
+    void startNewDogfight(int numPlayers);
+    void resetDogfightScoreboard();
 
     void enableSound();
     void disableSound();

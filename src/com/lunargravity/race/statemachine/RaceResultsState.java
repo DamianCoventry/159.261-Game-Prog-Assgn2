@@ -31,11 +31,6 @@ public class RaceResultsState extends StateBase implements IRaceControllerObserv
     }
 
     @Override
-    public void startNewRaceRequested(int numPlayers) {
-
-    }
-
-    @Override
     public void startNextRaceRequested() {
         // TODO: will need the controller/model to bump the level number
         //   perhaps add a startNextRaceGame() method?
@@ -48,12 +43,7 @@ public class RaceResultsState extends StateBase implements IRaceControllerObserv
     }
 
     @Override
-    public void goToMainMenuRequested() {
+    public void mainMenuRequested() {
         changeState(new LoadingMenuState(getContext()));
-    }
-
-    @Override
-    public void goToRaceScoreboardRequested() {
-        changeState(new RaceScoreboardState(getContext()));
     }
 }

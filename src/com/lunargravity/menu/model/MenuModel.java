@@ -21,6 +21,16 @@ public class MenuModel implements IMenuModel, ISceneStateOwner {
     }
 
     @Override
+    public void resetRaceScoreboard() {
+        // TODO
+    }
+
+    @Override
+    public void resetDogfightScoreboard() {
+        // TODO
+    }
+
+    @Override
     public void stateSettingLoaded(String name, String value) {
         // TODO
     }

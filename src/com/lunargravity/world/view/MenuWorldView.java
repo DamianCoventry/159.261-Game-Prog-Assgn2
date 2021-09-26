@@ -133,6 +133,10 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
 
     @Override
     public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
+        if (wci == null) {
+            System.out.print("MenuWorldView.widgetLoaded() was passed a null WidgetCreateInfo object");
+            return;
+        }
         // TODO
     }
 

@@ -16,8 +16,11 @@ public class LoadingMenuState extends StateBase {
 
         getContext().startMenu(menuBuilderObserver);
 
-        changeState(new RunningMenuState(getContext()));
-
         menuBuilderObserver.freeResources();
+    }
+
+    @Override
+    public void think() {
+        changeState(new RunningMenuState(getContext()));
     }
 }

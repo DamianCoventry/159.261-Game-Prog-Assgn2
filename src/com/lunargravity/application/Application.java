@@ -43,13 +43,12 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class Application implements
-        IFrameConsumer,
-        IInputConsumer,
+        IFrameObserver,
+        IInputObserver,
         IViewportSizeObserver,
         IStateMachineContext,
         IMenuWorldControllerObserver,
-        IGameWorldControllerObserver,
-        ICampaignControllerObserver {
+        IGameWorldControllerObserver {
 
     static final private String WINDOW_TITLE = "Lunar Gravity v1.0";
     static final private String PLAYER_INPUT_BINDINGS_FILE_NAME = "playerInputBindings.json";
@@ -173,7 +172,7 @@ public class Application implements
     }
 
     @Override
-    public void mouseButtonEvent(int button, int action, int mods) {
+    public void mouseButtonEvent(int button, int action, int mods) throws IOException, InterruptedException {
         _currentState.mouseButtonEvent(button, action, mods); // TODO: consider adding a 'consumed' return code
         _widgetManager.mouseButtonEvent(button, action, mods);
     }
@@ -280,52 +279,55 @@ public class Application implements
     }
 
     @Override
-    public void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver, String savedGameFileName) throws IOException, InterruptedException {
+    public void createCampaignMvc(String savedGameFileName) throws IOException, InterruptedException {
         SavedGameFile savedGameFile = new SavedGameFile(savedGameFileName); // throws
 
         _worldModel = new GameWorldModel();
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
 
-        _logicModel = new CampaignModel(savedGameFile.getNumPlayers());
-        _logicController = new CampaignController(this, (ICampaignModel)_logicModel);
+        _logicModel = new CampaignModel(savedGameFile.getEpisode(), savedGameFile.getMission(), savedGameFile.getNumPlayers());
+        _logicController = new CampaignController(_engine, (ICampaignModel)_logicModel);
         _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
+    }
 
+    @Override
+    public void createCampaignMvc(int numPlayers) {
+        _worldModel = new GameWorldModel();
+        _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
+        _worldView = new GameWorldView((IGameWorldModel)_worldModel);
+
+        _logicModel = new CampaignModel(FIRST_EPISODE, FIRST_MISSION, numPlayers);
+        _logicController = new CampaignController(_engine, (ICampaignModel)_logicModel);
+        _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
+    }
+
+    @Override
+    public void loadCampaignEpisode(ISceneBuilderObserver sceneBuilderObserver) throws IOException, InterruptedException {
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
-        String worldSceneFileName = makeCampaignWorldSceneFileName(savedGameFile.getEpisode(), savedGameFile.getMission());
-        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
-        worldSceneBuilder.build(worldSceneFileName);
+        ICampaignModel model = (ICampaignModel)_logicModel;
 
-        String logicSceneFileName = makeCampaignLogicSceneFileName(savedGameFile.getEpisode(), savedGameFile.getMission());
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
-        logicSceneBuilder.build(logicSceneFileName);
+        logicSceneBuilder.build(model.getEpisodeIntroScene());
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
     }
 
     @Override
-    public void startCampaignGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException {
-        _worldModel = new GameWorldModel();
-        _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
-        _worldView = new GameWorldView((IGameWorldModel)_worldModel);
-
-        _logicModel = new CampaignModel(numPlayers);
-        _logicController = new CampaignController(this, (ICampaignModel)_logicModel);
-        _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
-
+    public void loadCampaignMission(ISceneBuilderObserver sceneBuilderObserver) throws IOException, InterruptedException {
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
-        String worldSceneFileName = makeCampaignWorldSceneFileName(FIRST_EPISODE, FIRST_MISSION);
-        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
-        worldSceneBuilder.build(worldSceneFileName);
+        ICampaignModel model = (ICampaignModel)_logicModel;
 
-        String logicSceneFileName = makeCampaignLogicSceneFileName(FIRST_EPISODE, FIRST_MISSION);
+        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
+        worldSceneBuilder.build(model.getWorldMissionScene());
+
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
-        logicSceneBuilder.build(logicSceneFileName);
+        logicSceneBuilder.build(model.getLogicMissionScene());
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
@@ -449,14 +451,6 @@ public class Application implements
                 // TODO: Is there something useful we can do with the exception?
             }
         }
-    }
-
-    static private String makeCampaignWorldSceneFileName(int episode, int mission) {
-        return String.format("scenes/CampaignWorldE%02dM%02d.json", episode, mission);
-    }
-
-    static private String makeCampaignLogicSceneFileName(int episode, int mission) {
-        return String.format("scenes/CampaignLogicE%02dM%02d.json", episode, mission);
     }
 
     static private String getFirstWorldRaceSceneFileName() {

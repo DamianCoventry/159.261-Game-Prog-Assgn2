@@ -1,10 +1,12 @@
 package com.lunargravity.menu.statemachine;
 
-import com.lunargravity.application.*;
-import com.lunargravity.campaign.statemachine.EpisodeIntroState;
-import com.lunargravity.dogfight.statemachine.DogfightScoreboardState;
-import com.lunargravity.menu.controller.*;
-import com.lunargravity.race.statemachine.RaceScoreboardState;
+import com.lunargravity.application.IStateMachineContext;
+import com.lunargravity.application.StateBase;
+import com.lunargravity.campaign.statemachine.LoadingCampaignState;
+import com.lunargravity.dogfight.statemachine.LoadingDogfightState;
+import com.lunargravity.menu.controller.IMenuController;
+import com.lunargravity.menu.controller.IMenuControllerObserver;
+import com.lunargravity.race.statemachine.LoadingRaceState;
 import com.lunargravity.world.controller.IMenuWorldController;
 
 // TODO: allow the user to move the camera around the 3d scene
@@ -34,21 +36,21 @@ public class RunningMenuState extends StateBase implements IMenuControllerObserv
 
     @Override
     public void startNewCampaignRequested(int numPlayers) {
-        changeState(new EpisodeIntroState(getContext(), numPlayers));
+        changeState(new LoadingCampaignState(getContext(), numPlayers));
     }
 
     @Override
     public void loadExistingCampaignRequested(String fileName) {
-        changeState(new EpisodeIntroState(getContext(), fileName));
+        changeState(new LoadingCampaignState(getContext(), fileName));
     }
 
     @Override
-    public void viewRaceScoreboardRequested() {
-        changeState(new RaceScoreboardState(getContext()));
+    public void startNewRaceRequested(int numPlayers) {
+        changeState(new LoadingRaceState(getContext(), numPlayers));
     }
 
     @Override
-    public void viewDogfightScoreboardRequested() {
-        changeState(new DogfightScoreboardState(getContext()));
+    public void startNewDogfightRequested(int numPlayers) {
+        changeState(new LoadingDogfightState(getContext(), numPlayers));
     }
 }

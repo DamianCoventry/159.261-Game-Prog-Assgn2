@@ -19,11 +19,9 @@ public class DogfightView implements
         IDogfightView,
         ISceneAssetOwner,
         IDogfightPausedObserver,
-        IDogfightScoreboardObserver,
         IDogfightResultsObserver
 {
     private static final String RACE_RESULTS = "dogfightResults";
-    private static final String RACE_SCOREBOARD = "dogfightScoreboard";
     private static final String RACE_PAUSED = "dogfightPaused";
     private static final String GET_READY = "getReady";
     private static final String RACE_COMPLETED = "dogfightCompleted";
@@ -33,7 +31,6 @@ public class DogfightView implements
     private final IDogfightModel _model;
 
     private Widget _dogfightResults;
-    private Widget _dogfightScoreboard;
     private Widget _dogfightPaused;
     private Widget _getReady;
     private Widget _dogfightCompleted;
@@ -46,7 +43,7 @@ public class DogfightView implements
 
     @Override
     public void initialLoadCompleted() {
-        _widgetManager.show(_dogfightScoreboard, WidgetManager.ShowAs.FIRST);
+        // TODO
     }
 
     @Override
@@ -91,12 +88,6 @@ public class DogfightView implements
     }
 
     @Override
-    public void showScoreboardWidget() {
-        _widgetManager.hideAll();
-        _widgetManager.show(_dogfightScoreboard, WidgetManager.ShowAs.FIRST);
-    }
-
-    @Override
     public void showPausedWidget() {
         _widgetManager.hideAll();
         _widgetManager.show(_dogfightPaused, WidgetManager.ShowAs.FIRST);
@@ -118,10 +109,11 @@ public class DogfightView implements
 
     @Override
     public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
-        if (wci._id.equals(RACE_SCOREBOARD) && wci._type.equals("DogfightScoreboardWidget")) {
-            _dogfightScoreboard = new Widget(wci, new DogfightScoreboardWidget(_widgetManager, this));
+        if (wci == null) {
+            System.out.print("DogfightView.widgetLoaded() was passed a null WidgetCreateInfo object");
+            return;
         }
-        else if (wci._id.equals(RACE_RESULTS) && wci._type.equals("DogfightResultsWidget")) {
+        if (wci._id.equals(RACE_RESULTS) && wci._type.equals("DogfightResultsWidget")) {
             _dogfightResults = new Widget(wci, new DogfightResultsWidget(_widgetManager, this));
         }
         else if (wci._id.equals(RACE_PAUSED) && wci._type.equals("DogfightPausedWidget")) {
@@ -142,31 +134,11 @@ public class DogfightView implements
 
     @Override
     public void mainMenuButtonClicked() {
-        _controller.goToMainMenu();
+        _controller.mainMenuRequested();
     }
 
     @Override
     public void startNextDogfightButtonClicked() {
         _controller.startNextDogfight();
-    }
-
-    @Override
-    public void quitToDogfightScoreboardButtonClicked() {
-        _controller.goToDogfightScoreboard();
-    }
-
-    @Override
-    public void resetDogfightScoreboardButtonClicked() {
-        _controller.resetDogfightScoreboard();
-    }
-
-    @Override
-    public void startSinglePlayerDogfightButtonClicked() {
-        _controller.startNewDogfight(1);
-    }
-
-    @Override
-    public void startTwoPlayersDogfightButtonClicked() {
-        _controller.startNewDogfight(2);
     }
 }

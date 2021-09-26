@@ -36,13 +36,6 @@ public class RaceController implements IRaceController, ISceneLogicOwner {
     }
 
     @Override
-    public void startNewRace(int numPlayers) {
-        for (var observer : _observers) {
-            observer.startNewRaceRequested(numPlayers);
-        }
-    }
-
-    @Override
     public void startNextRace() {
         for (var observer : _observers) {
             observer.startNextRaceRequested();
@@ -57,27 +50,15 @@ public class RaceController implements IRaceController, ISceneLogicOwner {
     }
 
     @Override
-    public void goToMainMenu() {
+    public void mainMenuRequested() {
         for (var observer : _observers) {
-            observer.goToMainMenuRequested();
-        }
-    }
-
-    @Override
-    public void goToRaceScoreboard() {
-        for (var observer : _observers) {
-            observer.goToRaceScoreboardRequested();
+            observer.mainMenuRequested();
         }
     }
 
     @Override
     public boolean isHighScore(LocalTime elapsedTime) {
         return _model.isHighScore(elapsedTime);
-    }
-
-    @Override
-    public void resetRaceScoreboard() {
-        _model.resetRaceScoreboard();
     }
 
     @Override

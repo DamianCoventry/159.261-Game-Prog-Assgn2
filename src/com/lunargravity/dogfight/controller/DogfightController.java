@@ -35,13 +35,6 @@ public class DogfightController implements IDogfightController, ISceneLogicOwner
     }
 
     @Override
-    public void startNewDogfight(int numPlayers) {
-        for (var observer : _observers) {
-            observer.startNewDogfightRequested(numPlayers);
-        }
-    }
-
-    @Override
     public void startNextDogfight() {
         for (var observer : _observers) {
             observer.startNextDogfightRequested();
@@ -56,27 +49,15 @@ public class DogfightController implements IDogfightController, ISceneLogicOwner
     }
 
     @Override
-    public void goToMainMenu() {
+    public void mainMenuRequested() {
         for (var observer : _observers) {
-            observer.goToMainMenuRequested();
-        }
-    }
-
-    @Override
-    public void goToDogfightScoreboard() {
-        for (var observer : _observers) {
-            observer.goToDogfightScoreboardRequested();
+            observer.mainMenuRequested();
         }
     }
 
     @Override
     public boolean isHighScore(int killCount) {
         return _model.isHighScore(killCount);
-    }
-
-    @Override
-    public void resetDogfightScoreboard() {
-        _model.resetDogfightScoreboard();
     }
 
     @Override

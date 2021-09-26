@@ -1,50 +1,29 @@
 package com.lunargravity.campaign.statemachine;
 
-import com.lunargravity.application.*;
+import com.lunargravity.application.IStateMachineContext;
+import com.lunargravity.application.StateBase;
+import com.lunargravity.campaign.controller.ICampaignController;
+import com.lunargravity.campaign.controller.ICampaignControllerObserver;
+import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
 import java.io.IOException;
 
-public class EpisodeIntroState extends StateBase {
-    private final int _numPlayers;
-    private final String _fileName;
+public class EpisodeIntroState extends StateBase implements ICampaignControllerObserver {
     private int _timeoutId;
 
-    public EpisodeIntroState(IStateMachineContext context, int numPlayers) {
+    public EpisodeIntroState(IStateMachineContext context) {
         super(context);
-        _numPlayers = numPlayers;
-        _fileName = null;
-        _timeoutId = 0;
-    }
-    public EpisodeIntroState(IStateMachineContext context, String fileName) {
-        super(context);
-        _numPlayers = 0; // this value will be loaded from the file
-        _fileName = fileName;
         _timeoutId = 0;
     }
 
     @Override
     public void begin() {
-        // TODO: load a few widgets into the widget system to represent the episode intro
+        getCampaignController().addObserver(this);
+        getCampaignView().showEpisodeIntro();
 
         _timeoutId = addTimeout(3000, (callCount) -> {
-            MissionBuilderObserver missionBuilderObserver = new MissionBuilderObserver(getManualFrameUpdater());
-
-            try {
-                if (_fileName != null) {
-                    getContext().startCampaignGame(missionBuilderObserver, _fileName);
-                } else {
-                    getContext().startCampaignGame(missionBuilderObserver, _numPlayers);
-                }
-
-                changeState(new MissionIntroState(getContext()));
-            }
-            catch (IOException | InterruptedException e) {
-                // TODO: Is there something useful we can do with the exception?
-            }
-
-            missionBuilderObserver.freeResources();
-
+            loadCampaignMission();
             _timeoutId = 0;
             return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;
         });
@@ -52,9 +31,102 @@ public class EpisodeIntroState extends StateBase {
 
     @Override
     public void end() {
+        getCampaignController().removeObserver(this);
         if (_timeoutId > 0) {
             removeTimeout(_timeoutId);
             _timeoutId = 0;
+        }
+    }
+
+    @Override
+    public void startNextEpisode() {
+        // Nothing to do
+    }
+
+    @Override
+    public void episodeIntroAborted() {
+        loadCampaignMission();
+    }
+
+    @Override
+    public void episodeOutroAborted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void episodeCompleted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void startNextMission() {
+        // Nothing to do
+    }
+
+    @Override
+    public void gameOver() {
+        // Nothing to do
+    }
+
+    @Override
+    public void gameOverAborted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void gameCompleted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void gameCompletedAborted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void resumeMission() {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerShipSpawned() {
+        // Nothing to do
+    }
+
+    @Override
+    public void quitCampaign() {
+        // Nothing to do
+    }
+
+    @Override
+    public void missionIntroAborted() {
+        // Nothing to do
+    }
+
+    private ICampaignView getCampaignView() {
+        return (ICampaignView)getContext().getLogicView();
+    }
+
+    private ICampaignController getCampaignController() {
+        return (ICampaignController)getContext().getLogicController();
+    }
+
+    private void loadCampaignMission() {
+        MissionBuilderObserver missionBuilderObserver = null;
+
+        try {
+            missionBuilderObserver = new MissionBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
+
+            getContext().loadCampaignMission(missionBuilderObserver);
+
+            changeState(new MissionIntroState(getContext()));
+        }
+        catch (IOException | InterruptedException e) {
+            // TODO: Is there something useful we can do with the exception?
+        }
+
+        if (missionBuilderObserver != null) {
+            missionBuilderObserver.freeResources();
         }
     }
 }

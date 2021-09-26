@@ -14,7 +14,7 @@
 
 package com.lunargravity.application;
 
-import com.lunargravity.engine.core.IInputConsumer;
+import com.lunargravity.engine.core.IInputObserver;
 import com.lunargravity.engine.core.IManualFrameUpdater;
 import com.lunargravity.engine.graphics.GlRenderer;
 import com.lunargravity.engine.graphics.ViewportConfig;
@@ -22,7 +22,7 @@ import org.joml.Matrix4f;
 
 import java.io.IOException;
 
-public interface IState extends IInputConsumer {
+public interface IState extends IInputObserver {
     void begin() throws IOException, InterruptedException;
     void end();
     void think();

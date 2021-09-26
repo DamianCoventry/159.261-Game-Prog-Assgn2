@@ -21,6 +21,8 @@ public class SceneBuilder {
     }
 
     public void build(String fileName) throws IOException, InterruptedException {
+        _observer.sceneBuildBeginning();
+
         if (fileName == null) {
             throw new IllegalArgumentException("fileName not supplied");
         }
@@ -40,11 +42,16 @@ public class SceneBuilder {
             _observer.sceneBuildProgressed(0, scene._widgets.size());
 
             for (int i = 0; i < scene._widgets.size(); ++i) {
+                Thread.sleep(100); // temp
                 _assetOwner.widgetLoaded(scene._widgets.get(i));
                 _observer.sceneBuildProgressed(i, scene._widgets.size());
             }
 
             _observer.sceneBuildProgressed(scene._widgets.size(), scene._widgets.size());
+        }
+        else {
+            _observer.sceneBuildProgressed(0, 100);
+            Thread.sleep(1000); // temp
         }
 
         _observer.sceneBuildEnded();

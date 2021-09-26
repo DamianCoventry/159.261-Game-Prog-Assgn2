@@ -1,8 +1,24 @@
+Put a header at the top of each file
+Optimise the import statements within all files
+Change from interfaces to abstract classes
+Handle a resizing window in the menus
+Remove usage of InterruptedException
+Create menu world objects
+Allow the user to move the camera around the menu world
+Create Campaign world objects
+Create Race world objects
+Save player's progress during campaign
+Create a font for the menu?
+Complete the menu widgets:
+    Saved Game list widget
+    Sound + music check widgets
+    Sound + music numeric widgets
+    Player keys Key binding widgets
 create opengl vertex buffers from .obj files
 create materials from .mtl files
 create sounds from .wav files
 create music from .mp3 files
 create rigid bodies from .obj files
 create collisions shapes from .obj files
-create gui objects from textures and 2d rectangles
 create animations from FCurves
+check all TODOs within the source

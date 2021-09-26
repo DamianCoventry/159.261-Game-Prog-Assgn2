@@ -8,15 +8,12 @@ public interface IRaceController extends IController {
     void addObserver(IRaceControllerObserver observer);
     void removeObserver(IRaceControllerObserver observer);
 
-    void startNewRace(int numPlayers);
     void startNextRace();
     void resumeRace();
 
-    void goToMainMenu();
-    void goToRaceScoreboard();
+    void mainMenuRequested();
 
     boolean isHighScore(LocalTime elapsedTime);
-    void resetRaceScoreboard();
     boolean insertRaceHighScore(LocalTime elapsedTime);
     void saveRaceScoreboard(String fileName);
     void loadRaceScoreboard(String fileName);

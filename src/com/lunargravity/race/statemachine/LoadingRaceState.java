@@ -1,6 +1,7 @@
 package com.lunargravity.race.statemachine;
 
-import com.lunargravity.application.*;
+import com.lunargravity.application.IStateMachineContext;
+import com.lunargravity.application.StateBase;
 import com.lunargravity.race.view.RaceBuilderObserver;
 
 import java.io.IOException;
@@ -13,14 +14,10 @@ public class LoadingRaceState extends StateBase {
     }
 
     @Override
-    public void begin() throws IOException {
-        RaceBuilderObserver raceBuilderObserver = new RaceBuilderObserver(getManualFrameUpdater());
+    public void begin() throws IOException, InterruptedException {
+        RaceBuilderObserver raceBuilderObserver = new RaceBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
 
-        try {
-            getContext().startRaceGame(raceBuilderObserver, _numPlayers);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        getContext().startRaceGame(raceBuilderObserver, _numPlayers);
 
         changeState(new GetReadyState(getContext()));
 
