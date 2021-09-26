@@ -96,7 +96,7 @@ public class RaceView implements
     @Override
     public void showGetReadyWidget(int countdown) throws IOException {
         ImageWidget imageWidget = (ImageWidget)_getReady.getObserver();
-        imageWidget.setBackgroundImage(String.format("images/RaceGetReady%02d.png", countdown));
+        imageWidget.setBackgroundImage(String.format("images/RaceGetReady%d.png", countdown));
         _widgetManager.hideAll();
         _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
     }

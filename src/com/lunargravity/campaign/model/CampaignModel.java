@@ -68,6 +68,7 @@ public class CampaignModel implements ICampaignModel, ISceneStateOwner {
             return IncrementEpisodeResult.GAME_COMPLETED;
         }
         ++_episode;
+        _mission = 0;
         return _episode == NUM_EPISODES ?
                 IncrementEpisodeResult.GAME_COMPLETED :
                 IncrementEpisodeResult.START_NEXT_EPISODE;
@@ -86,12 +87,12 @@ public class CampaignModel implements ICampaignModel, ISceneStateOwner {
 
     @Override
     public String getWorldMissionScene() {
-        return String.format("scenes/CampaignWorldE%02dM%02d.json", _episode, _mission);
+        return String.format("scenes/CampaignWorldE%dM%d.json", _episode, _mission);
     }
 
     @Override
     public String getLogicMissionScene() {
-        return String.format("scenes/CampaignLogicE%02dM%02d.json", _episode, _mission);
+        return String.format("scenes/CampaignLogicE%dM%d.json", _episode, _mission);
     }
 
     @Override

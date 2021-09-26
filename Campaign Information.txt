@@ -1,0 +1,46 @@
+Episodes:
+    1) Planet: Earth
+       Natual Satellite: Moon
+       Missions:
+            1) Vallis Capella
+            2) Mare Nubium
+            3) Sinus Iridum
+            4) Lacus Timoris
+            5) Mons Usov
+            6) Montes Spitzbergen
+    2) Planet: Mars
+       Natual Satellite: Phobos
+       Missions:
+            1) Laputa Regio
+            2) Reldresal Crater
+            3) Grildrig Crater
+            4) Lagado Planitia
+            5) Wendell Crater
+            6) Kepler Dorsum
+    3) Planet: Jupiter
+       Natual Satellite: Ganymede
+       Missions:
+            1) Nineveh Sulcus
+            2) Heliopolis Facula
+            3) Lakhmu Fossae
+            4) Nanshe Catena
+            5) Natrun Patera
+            6) Marius Regio
+    4) Planet: Saturn
+       Natual Satellite: Titan
+       Missions:
+            1) Irensaga Montes
+            2) Lampadas Labyrinthus
+            3) Kalseru Virga
+            4) Maizuru Sinus
+            5) Giedi Planitia
+            6) Notus Undae
+    5) Planet: Neptune
+       Natual Satellite: Proteus
+       Missions:
+            1) Northern Hemisphere
+            2) View of Nereid
+            3) Pharos Crater
+            4) Neptune's Shadow
+            5) Tidally locked
+            6) Southern Hemisphere

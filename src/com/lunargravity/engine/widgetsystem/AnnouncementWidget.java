@@ -12,17 +12,12 @@ public class AnnouncementWidget extends WidgetObserver {
     private static final String SUB_TITLE_IMAGE = "subTitleImage";
     private static final String SUB_TITLE_BLEND_IMAGE = "subTitleBlendImage";
 
-    private IAnnouncementObserver _observer;
+    private final IAnnouncementObserver _observer;
 
     public AnnouncementWidget(WidgetManager widgetManager, IAnnouncementObserver observer) {
         super(widgetManager);
         _observer = observer;
     }
-
-    // TODO: requires 1 or more LabelWidgets to be centered vertically and horizontally
-    //   requires 1 ore more LabelWidgets to be anchored to the bottom right of the viewport
-    //   requires 1 background ImageWidget
-    //   requires 1 or more fonts
 
     @Override
     protected void initialiseChildren(WidgetCreateInfo wci) throws IOException {

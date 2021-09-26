@@ -13,7 +13,7 @@
                 "y": 1024.0
             },
             "_properties": {
-                "backgroundImage": "images/Episode0Announcement.png",
+                "backgroundImage": "images/EarthMoonBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [
@@ -45,7 +45,7 @@
                         "y": 168.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/Episode0SubTitleBlend.png"
+                        "backgroundImage": "images/EpisodeSubTitleBlend.png"
                     },
                     "_children": []
                 },
@@ -68,18 +68,18 @@
             ]
         },
         {
-            "_id": "gameOver",
+            "_id": "missionIntro",
             "_type": "AnnouncementWidget",
             "_position": {
                 "x": 0.0,
                 "y": 0.0
             },
             "_size": {
-                "x": 1920.0,
-                "y": 1024.0
+                "x": 1024.0,
+                "y": 768.0
             },
             "_properties": {
-                "backgroundImage": "images/Episode0Announcement.png",
+                "backgroundImage": "images/EarthMoonBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [
@@ -111,7 +111,73 @@
                         "y": 168.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/Episode0SubTitleBlend.png"
+                        "backgroundImage": "images/EpisodeSubTitleBlend.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "majorTitleImage",
+                    "_type": "ImageWidget",
+                    "_position": {
+                        "x": 400.0,
+                        "y": 400.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 50.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/GrildrigCrater.png"
+                    },
+                    "_children": []
+                }
+            ]
+        },
+        {
+            "_id": "gameOver",
+            "_type": "AnnouncementWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 1920.0,
+                "y": 1024.0
+            },
+            "_properties": {
+                "backgroundImage": "images/EarthMoonBackground.png",
+                "initialPosition": "fullViewport"
+            },
+            "_children": [
+                {
+                    "_id": "subTitleImage",
+                    "_type": "ImageWidget",
+                    "_position": {
+                        "x": 800.0,
+                        "y": 16.0
+                    },
+                    "_size": {
+                        "x": 342.0,
+                        "y": 168.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/Episode0SubTitle.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "subTitleBlendImage",
+                    "_type": "ImageWidget",
+                    "_position": {
+                        "x": 800.0,
+                        "y": 16.0
+                    },
+                    "_size": {
+                        "x": 342.0,
+                        "y": 168.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/EpisodeSubTitleBlend.png"
                     },
                     "_children": []
                 },
@@ -161,7 +227,7 @@
                 "y": 1024.0
             },
             "_properties": {
-                "backgroundImage": "images/Episode0Announcement.png",
+                "backgroundImage": "images/EarthMoonBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [

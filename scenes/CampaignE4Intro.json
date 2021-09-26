@@ -13,7 +13,7 @@
                 "y": 1024.0
             },
             "_properties": {
-                "backgroundImage": "images/Episode4Announcement.png",
+                "backgroundImage": "images/ProteusNeptuneBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [
@@ -21,7 +21,7 @@
                     "_id": "subTitleImage",
                     "_type": "ImageWidget",
                     "_position": {
-                        "x": 800.0,
+                        "x": 400.0,
                         "y": 16.0
                     },
                     "_size": {
@@ -37,7 +37,7 @@
                     "_id": "subTitleBlendImage",
                     "_type": "ImageWidget",
                     "_position": {
-                        "x": 800.0,
+                        "x": 400.0,
                         "y": 16.0
                     },
                     "_size": {
@@ -45,7 +45,7 @@
                         "y": 168.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/Episode4SubTitleBlend.png"
+                        "backgroundImage": "images/EpisodeSubTitleBlend.png"
                     },
                     "_children": []
                 }

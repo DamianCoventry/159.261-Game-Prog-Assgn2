@@ -283,7 +283,7 @@ public class WidgetManager implements IInputObserver {
         if (_keyboardFocus != null) {
             _keyboardFocus.keyboardKeyEvent(key, scancode, action, mods);
         }
-        else if (_visibleWidgets.getFirst() != null) {
+        else if (!_visibleWidgets.isEmpty() && _visibleWidgets.getFirst() != null) {
             _visibleWidgets.getFirst().keyboardKeyEvent(key, scancode, action, mods);
         }
     }

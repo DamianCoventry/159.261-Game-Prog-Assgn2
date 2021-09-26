@@ -96,7 +96,7 @@ public class DogfightView implements
     @Override
     public void showGetReadyWidget(int countdown) throws IOException {
         ImageWidget imageWidget = (ImageWidget)_getReady.getObserver();
-        imageWidget.setBackgroundImage(String.format("images/DogfightGetReady%02d.png", countdown));
+        imageWidget.setBackgroundImage(String.format("images/DogfightGetReady%d.png", countdown));
         _widgetManager.hideAll();
         _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
     }

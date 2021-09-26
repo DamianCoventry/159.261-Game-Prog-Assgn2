@@ -2,6 +2,7 @@ package com.lunargravity.engine.scene;
 
 import com.google.gson.Gson;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -21,11 +22,18 @@ public class SceneBuilder {
     }
 
     public void build(String fileName) throws IOException, InterruptedException {
-        _observer.sceneBuildBeginning();
-
         if (fileName == null) {
-            throw new IllegalArgumentException("fileName not supplied");
+            throw new IllegalArgumentException("fileName argument is null");
         }
+        File file = new File(fileName);
+        if (!file.exists()) {
+            throw new IllegalArgumentException("There is no file system item with name [" + fileName + "]");
+        }
+        if (!file.isFile()) {
+            throw new IllegalArgumentException("The file system item [" + fileName + "] is not a file");
+        }
+
+        _observer.sceneBuildBeginning();
 
         String text = Files.readString(Paths.get(fileName), StandardCharsets.US_ASCII);
         if (text.isEmpty()) {

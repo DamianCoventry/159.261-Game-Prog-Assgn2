@@ -12,6 +12,7 @@ public interface ICampaignView extends IView {
     void showGameOver();
     void showMissionPaused();
     void showMissionCompleted();
+    void showMissionStatusBar();
     void showGetReady(int i) throws IOException;
     enum WhichPlayer { PLAYER_1, PLAYER_2, BOTH_PLAYERS }
     void showPlayerDied(WhichPlayer whichPlayer) throws IOException;
