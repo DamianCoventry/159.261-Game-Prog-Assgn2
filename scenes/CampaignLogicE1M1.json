@@ -130,7 +130,7 @@
                         "y": 50.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/GrildrigCrater.png",
+                        "backgroundImage": "images/ReldresalCrater.png",
                         "initialPosition": "centerInViewport"
                     },
                     "_children": []
@@ -190,16 +190,15 @@
                     "_id": "majorTitleImage",
                     "_type": "ImageWidget",
                     "_position": {
-                        "x": 400.0,
-                        "y": 400.0
+                        "x": 415.0,
+                        "y": 480.0
                     },
                     "_size": {
                         "x": 450.0,
                         "y": 100.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/GameOver.png",
-                        "initialPosition": "centerInViewport"
+                        "backgroundImage": "images/GameOver.png"
                     },
                     "_children": []
                 },
@@ -207,15 +206,15 @@
                     "_id": "minorTitleImage",
                     "_type": "ImageWidget",
                     "_position": {
-                        "x": 400.0,
-                        "y": 350.0
+                        "x": 515.0,
+                        "y": 430.0
                     },
                     "_size": {
                         "x": 250.0,
                         "y": 50.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/GrildrigCrater.png"
+                        "backgroundImage": "images/ReldresalCrater.png"
                     },
                     "_children": []
                 }
@@ -241,16 +240,15 @@
                     "_id": "majorTitleImage",
                     "_type": "ImageWidget",
                     "_position": {
-                        "x": 400.0,
-                        "y": 400.0
+                        "x": 415.0,
+                        "y": 480.0
                     },
                     "_size": {
                         "x": 450.0,
                         "y": 100.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/Congratulations.png",
-                        "initialPosition": "centerInViewport"
+                        "backgroundImage": "images/Congratulations.png"
                     },
                     "_children": []
                 },
@@ -258,8 +256,8 @@
                     "_id": "minorTitleImage",
                     "_type": "ImageWidget",
                     "_position": {
-                        "x": 400.0,
-                        "y": 350.0
+                        "x": 515.0,
+                        "y": 430.0
                     },
                     "_size": {
                         "x": 250.0,

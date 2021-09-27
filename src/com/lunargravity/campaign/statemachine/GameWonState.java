@@ -21,7 +21,7 @@ public class GameWonState extends StateBase implements ICampaignControllerObserv
         getCampaignController().addObserver(this);
         getCampaignView().showGameWon();
 
-        _timeoutId = addTimeout(3000, (callCount) -> {
+        _timeoutId = addTimeout(5000, (callCount) -> {
             changeState(new LoadingMenuState(getContext()));
             _timeoutId = 0;
             return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;

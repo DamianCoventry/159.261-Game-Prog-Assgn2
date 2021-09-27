@@ -1,9 +1,3 @@
- Make first cut of announcement screens for all episodes:
-    Episode Intro
-    Episode Outro
-    Mission Intro
-    Game Over
-    Game Won
 Make first cut of centered images:
     Get ready 3-2-1
     Player 1/2/both died

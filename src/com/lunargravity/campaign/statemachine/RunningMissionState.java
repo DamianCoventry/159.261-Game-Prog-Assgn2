@@ -3,6 +3,7 @@ package com.lunargravity.campaign.statemachine;
 import com.lunargravity.application.IStateMachineContext;
 import com.lunargravity.application.LargeNumberFont;
 import com.lunargravity.application.StateBase;
+import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.campaign.view.ICampaignView;
 import org.joml.Matrix4f;
@@ -49,6 +50,10 @@ public class RunningMissionState extends StateBase {
             case GLFW_KEY_1 -> changeState(new PlayerDiedState(getContext(), ICampaignView.WhichPlayer.PLAYER_1));
             // Detecting this key press is temporary
             case GLFW_KEY_2 -> changeState(new MissionCompletedState(getContext()));
+            // Detecting this key press is temporary
+            case GLFW_KEY_3 -> changeState(new GameWonState(getContext()));
+            // Detecting this key press is temporary
+            case GLFW_KEY_4 -> changeState(new GameOverState(getContext()));
             case GLFW_KEY_ESCAPE -> changeState(new MissionPausedState(getContext()));
         }
     }

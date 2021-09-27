@@ -20,7 +20,7 @@ public class CampaignView implements
     private static final String EPISODE_INTRO_ANNOUNCEMENT = "episodeIntro";
     private static final String EPISODE_OUTRO_ANNOUNCEMENT = "episodeOutro";
     private static final String GAME_OVER_ANNOUNCEMENT = "gameOver";
-    private static final String GAME_WON_ANNOUNCEMENT = "gameCompleted";
+    private static final String GAME_WON_ANNOUNCEMENT = "gameWon";
     private static final String MISSION_INTRO_ANNOUNCEMENT = "missionIntro";
     private static final String MISSION_COMPLETED = "missionCompleted";
     private static final String GET_READY = "getReady";
