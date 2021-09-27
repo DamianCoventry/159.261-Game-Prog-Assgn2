@@ -41,6 +41,7 @@ public class GlRenderer {
 
         _viewports = new GlViewport[viewportConfigs.length];
         for (int i = 0; i < viewportConfigs.length; ++i) {
+            viewportConfigs[i]._viewportIndex = i;
             _viewports[i] = new GlViewport(viewportConfigs[i]);
         }
     }

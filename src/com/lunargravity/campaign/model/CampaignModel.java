@@ -7,7 +7,7 @@ public class CampaignModel implements ICampaignModel, ISceneStateOwner {
 
     private int _episode;
     private int _mission;
-    private int[] _playerShipCounts;
+    private final int[] _playerShipCounts;
     private final int _numPlayers;
 
     public CampaignModel(int episode, int mission, int numPlayers) {
@@ -15,8 +15,8 @@ public class CampaignModel implements ICampaignModel, ISceneStateOwner {
         _mission = mission;
         _numPlayers = numPlayers;
         _playerShipCounts = new int[2];
-        _playerShipCounts[0] = INITIAL_SHIP_COUNT;
-        _playerShipCounts[1] = INITIAL_SHIP_COUNT;
+        _playerShipCounts[0] = INITIAL_SHIP_COUNT - 1; // Allocate a ship immediately
+        _playerShipCounts[1] = INITIAL_SHIP_COUNT - 1;
     }
 
     @Override

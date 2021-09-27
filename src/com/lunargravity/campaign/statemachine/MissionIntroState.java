@@ -2,22 +2,21 @@ package com.lunargravity.campaign.statemachine;
 
 import com.lunargravity.application.IStateMachineContext;
 import com.lunargravity.application.StateBase;
+import com.lunargravity.campaign.controller.ICampaignController;
+import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
-public class MissionIntroState extends StateBase {
+public class MissionIntroState extends StateBase implements ICampaignControllerObserver {
     private int _timeoutId;
 
     public MissionIntroState(IStateMachineContext context) {
         super(context);
     }
 
-    private ICampaignView getCampaignView() {
-        return (ICampaignView)getContext().getLogicView();
-    }
-
     @Override
     public void begin() {
+        getCampaignController().addObserver(this);
         getCampaignView().showMissionIntro();
 
         _timeoutId = addTimeout(3000, (callCount) -> {
@@ -30,9 +29,83 @@ public class MissionIntroState extends StateBase {
 
     @Override
     public void end() {
+        getCampaignController().removeObserver(this);
         if (_timeoutId > 0) {
             removeTimeout(_timeoutId);
             _timeoutId = 0;
         }
+    }
+
+    @Override
+    public void startNextEpisode() {
+        // Nothing to do
+    }
+
+    @Override
+    public void episodeIntroAborted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void episodeOutroAborted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void episodeCompleted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void startNextMission() {
+        // Nothing to do
+    }
+
+    @Override
+    public void gameOver() {
+        // Nothing to do
+    }
+
+    @Override
+    public void gameOverAborted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void gameCompleted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void gameCompletedAborted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void resumeMission() {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerShipSpawned() {
+        // Nothing to do
+    }
+
+    @Override
+    public void quitCampaign() {
+        // Nothing to do
+    }
+
+    @Override
+    public void missionIntroAborted() {
+        changeState(new GetReadyState(getContext()));
+    }
+
+    private ICampaignView getCampaignView() {
+        return (ICampaignView)getContext().getLogicView();
+    }
+
+    private ICampaignController getCampaignController() {
+        return (ICampaignController)getContext().getLogicController();
     }
 }

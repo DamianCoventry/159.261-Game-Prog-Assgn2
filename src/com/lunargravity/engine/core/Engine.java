@@ -321,6 +321,7 @@ public class Engine implements IEngine {
 
     private ViewportConfig createDefaultViewportConfig() {
         ViewportConfig config = new ViewportConfig();
+        config._viewportIndex = 0;
         config._positionX = 0;
         config._positionY = 0;
         config._width = (int)_window.getWidth();

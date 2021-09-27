@@ -190,9 +190,9 @@ public class Application implements
     }
 
     @Override
-    public ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig currentConfig, int windowWidth, int windowHeight) {
-        ViewportConfig newViewportConfig = _currentState.onViewportSizeChanged(viewport, currentConfig, windowWidth, windowHeight);
-        return _widgetManager.onViewportSizeChanged(viewport, newViewportConfig, windowWidth, windowHeight);
+    public ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig viewportConfig, int windowWidth, int windowHeight) {
+        ViewportConfig vpc = _currentState.onViewportSizeChanged(viewport, viewportConfig, windowWidth, windowHeight);
+        return _widgetManager.onViewportSizeChanged(viewport, vpc, windowWidth, windowHeight);
     }
 
     @Override
@@ -267,12 +267,13 @@ public class Application implements
 
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
+        ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
 
         SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
-        worldSceneBuilder.build(MENU_WORLD_SCENE_FILE_NAME);
+        worldSceneBuilder.build(viewportConfig, MENU_WORLD_SCENE_FILE_NAME);
 
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
-        logicSceneBuilder.build(MENU_SCENE_FILE_NAME);
+        logicSceneBuilder.build(viewportConfig, MENU_SCENE_FILE_NAME);
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
@@ -308,9 +309,10 @@ public class Application implements
         _widgetManager.closeAll();
 
         ICampaignModel model = (ICampaignModel)_logicModel;
+        ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
 
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
-        logicSceneBuilder.build(model.getEpisodeIntroScene());
+        logicSceneBuilder.build(viewportConfig, model.getEpisodeIntroScene());
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
@@ -322,12 +324,13 @@ public class Application implements
         _widgetManager.closeAll();
 
         ICampaignModel model = (ICampaignModel)_logicModel;
+        ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
 
         SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
-        worldSceneBuilder.build(model.getWorldMissionScene());
+        worldSceneBuilder.build(viewportConfig, model.getWorldMissionScene());
 
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
-        logicSceneBuilder.build(model.getLogicMissionScene());
+        logicSceneBuilder.build(viewportConfig, model.getLogicMissionScene());
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
@@ -345,14 +348,15 @@ public class Application implements
 
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
+        ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
 
         String worldSceneFileName = getFirstWorldRaceSceneFileName();
         SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
-        worldSceneBuilder.build(worldSceneFileName);
+        worldSceneBuilder.build(viewportConfig, worldSceneFileName);
 
         String logicSceneFileName = getFirstLogicRaceSceneFileName();
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
-        logicSceneBuilder.build(logicSceneFileName);
+        logicSceneBuilder.build(viewportConfig, logicSceneFileName);
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
@@ -370,14 +374,15 @@ public class Application implements
 
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
+        ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
 
         String worldSceneFileName = getFirstWorldDogfightSceneFileName();
         SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
-        worldSceneBuilder.build(worldSceneFileName);
+        worldSceneBuilder.build(viewportConfig, worldSceneFileName);
 
         String logicSceneFileName = getFirstLogicDogfightSceneFileName();
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
-        logicSceneBuilder.build(logicSceneFileName);
+        logicSceneBuilder.build(viewportConfig, logicSceneFileName);
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
@@ -419,7 +424,7 @@ public class Application implements
         windowConfig._positionY = 0;
         windowConfig._width = WINDOW_WIDTH;
         windowConfig._height = WINDOW_HEIGHT;
-        windowConfig._resizeable = true;
+        windowConfig._resizeable = false;
         windowConfig._centered = true;
         windowConfig._iconFileNames = new String[] {
             "images/Moon16x16.png",

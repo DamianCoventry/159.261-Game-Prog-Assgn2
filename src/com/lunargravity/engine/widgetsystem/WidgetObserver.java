@@ -7,6 +7,7 @@ import com.lunargravity.engine.graphics.GlTexture;
 import com.lunargravity.engine.graphics.PolyhedraVxTc;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 import java.io.IOException;
 
@@ -17,7 +18,9 @@ import static org.lwjgl.opengl.GL11.glBindTexture;
 
 public class WidgetObserver implements IWidgetObserver, IInputObserver {
     public static final String BACKGROUND_IMAGE = "backgroundImage";
+    public static final String BACKGROUND_ALPHA = "backgroundAlpha";
     public static final String HOVER_IMAGE = "hoverImage";
+    private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     protected WidgetManager _widgetManager;
     private final GlDiffuseTextureProgram _program;
@@ -26,10 +29,12 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     protected GlTexture _hoverTexture;
     protected PolyhedraVxTc _polyhedra;
     protected Matrix4f _modelMatrix;
+    protected Vector4f _backGroundColour;
 
     protected WidgetObserver(WidgetManager widgetManager) {
         _widgetManager = widgetManager;
         _widget = null;
+        _backGroundColour = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
         _program = _widgetManager.getRenderer().getDiffuseTextureProgram();
         _modelMatrix = new Matrix4f();
     }
@@ -45,15 +50,22 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
             throw new RuntimeException("Widget create info does not contain any properties");
         }
 
-        String imageFileName = wci._properties.get(BACKGROUND_IMAGE);
-        if (imageFileName == null) {
+        String stringValue = wci._properties.get(BACKGROUND_IMAGE);
+        if (stringValue == null) {
             throw new RuntimeException("Widget create info does not contain an entry for [" + BACKGROUND_IMAGE + "]");
         }
-        _backgroundTexture = new GlTexture(BitmapImage.fromFile(imageFileName));
+        _backgroundTexture = new GlTexture(BitmapImage.fromFile(stringValue));
 
-        imageFileName = wci._properties.get(HOVER_IMAGE);
-        if (imageFileName != null) {
-            _hoverTexture = new GlTexture(BitmapImage.fromFile(imageFileName));
+        float alpha = 1.0f;
+        stringValue = wci._properties.get(BACKGROUND_ALPHA);
+        if (stringValue != null) {
+            alpha = Math.min(1.0f, Math.max(0.0f, Float.parseFloat(stringValue)));
+        }
+        _backGroundColour.w = alpha;
+
+        stringValue = wci._properties.get(HOVER_IMAGE);
+        if (stringValue != null) {
+            _hoverTexture = new GlTexture(BitmapImage.fromFile(stringValue));
         }
 
         _polyhedra = createPolyhedraVxTc(wci._size.x, wci._size.y);
@@ -195,22 +207,29 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
             return;
         }
 
-        _widgetManager.getRenderer().activateTextureImageUnit(0);
-        if (_hoverTexture != null && _widget == _widgetManager.getHoveringOver()) {
-            glBindTexture(GL_TEXTURE_2D, _hoverTexture.getId());
-        }
-        else {
-            glBindTexture(GL_TEXTURE_2D, _backgroundTexture.getId());
-        }
-
         Vector2f viewportPosition = _widget.toViewportCoordinates(_widget.getPosition());
 
         _modelMatrix = _modelMatrix.identity().translate(viewportPosition.x, viewportPosition.y, 0.0f);
         // there is no view matrix when using an orthographic projection matrix
         Matrix4f mvpMatrix = projectionMatrix.mul(_modelMatrix);
 
+        _widgetManager.getRenderer().activateTextureImageUnit(0);
+        if (_hoverTexture != null && _widget == _widgetManager.getHoveringOver()) {
+            glBindTexture(GL_TEXTURE_2D, _hoverTexture.getId());
+            _program.setDiffuseColour(WHITE);
+        }
+        else {
+            glBindTexture(GL_TEXTURE_2D, _backgroundTexture.getId());
+            _program.setDiffuseColour(_backGroundColour);
+        }
+
         _program.activate(mvpMatrix);
         _polyhedra.draw();
+    }
+
+    @Override
+    public void widgetParentResized(float width, float height) {
+        // TODO: Any standard behaviour?
     }
 
     @Override

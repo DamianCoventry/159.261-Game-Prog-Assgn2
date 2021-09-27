@@ -68,9 +68,27 @@ public class StateBase implements IState {
     }
 
     @Override
-    public ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig currentConfig, int windowWidth, int windowHeight) {
+    public ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig viewportConfig, int windowWidth, int windowHeight) {
+        //  1. if we're in the menu then
+        //       there's one viewport and it occupies the entire window always
+        //  2. else if it's a single player game then
+        //       there's one viewport and it occupies the entire window always
+        //  3. else if it's a two players game then
+        //       if the current state is 'get ready', running, 'player died' or completed then
+        //           there's two viewports that split the window vertically
+        //       else
+        //           there's one viewport and it occupies the entire window
         // TODO
-        return null;
+        ViewportConfig vpc = new ViewportConfig();
+        vpc._viewportIndex = 0; // TODO: this is temporary
+        vpc._positionX = 0;
+        vpc._positionY = 0;
+        vpc._width = windowWidth;
+        vpc._height = windowHeight;
+        vpc._verticalFovDegrees = viewportConfig._verticalFovDegrees;
+        vpc._perspectiveNcp = viewportConfig._perspectiveNcp;
+        vpc._perspectiveFcp = viewportConfig._perspectiveFcp;
+        return vpc;
     }
 
     @Override

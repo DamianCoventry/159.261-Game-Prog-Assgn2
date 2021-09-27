@@ -2,10 +2,7 @@ package com.lunargravity.dogfight.view;
 
 import com.lunargravity.dogfight.controller.IDogfightController;
 import com.lunargravity.dogfight.model.IDogfightModel;
-import com.lunargravity.engine.graphics.GlMaterial;
-import com.lunargravity.engine.graphics.GlStaticMesh;
-import com.lunargravity.engine.graphics.GlTexture;
-import com.lunargravity.engine.graphics.Transform;
+import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.ImageWidget;
 import com.lunargravity.engine.widgetsystem.Widget;
@@ -108,22 +105,22 @@ public class DogfightView implements
     }
 
     @Override
-    public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
+    public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException {
         if (wci == null) {
             System.out.print("DogfightView.widgetLoaded() was passed a null WidgetCreateInfo object");
             return;
         }
         if (wci._id.equals(RACE_RESULTS) && wci._type.equals("DogfightResultsWidget")) {
-            _dogfightResults = new Widget(wci, new DogfightResultsWidget(_widgetManager, this));
+            _dogfightResults = new Widget(viewportConfig, wci, new DogfightResultsWidget(_widgetManager, this));
         }
         else if (wci._id.equals(RACE_PAUSED) && wci._type.equals("DogfightPausedWidget")) {
-            _dogfightPaused = new Widget(wci, new DogfightPausedWidget(_widgetManager, this));
+            _dogfightPaused = new Widget(viewportConfig, wci, new DogfightPausedWidget(_widgetManager, this));
         }
         else if (wci._id.equals(RACE_COMPLETED) && wci._type.equals("ImageWidget")) {
-            _dogfightCompleted = new Widget(wci, new ImageWidget(_widgetManager));
+            _dogfightCompleted = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
         else if (wci._id.equals(GET_READY) && wci._type.equals("ImageWidget")) {
-            _getReady = new Widget(wci, new ImageWidget(_widgetManager));
+            _getReady = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
     }
 

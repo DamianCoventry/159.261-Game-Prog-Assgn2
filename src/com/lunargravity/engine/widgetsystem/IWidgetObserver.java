@@ -21,4 +21,5 @@ public interface IWidgetObserver {
     void widgetGainMouseCapture();
     void widgetThink();
     void widgetDraw(int viewport, Matrix4f projectionMatrix);
+    void widgetParentResized(float width, float height);
 }

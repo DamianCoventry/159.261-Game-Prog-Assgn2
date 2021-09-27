@@ -1,7 +1,26 @@
+ Make first cut of announcement screens for all episodes:
+    Episode Intro
+    Episode Outro
+    Mission Intro
+    Game Over
+    Game Won
+Make first cut of centered images:
+    Get ready 3-2-1
+    Player 1/2/both died
+    Mission completed
+    Race completed
+    Dogfight completed
+Make first cut of loading screens:
+    Mission Loading
+    Race Loading
+    Dogfight Loading
+Check can go through all Race states
+Check can go through all Dogfight states
+Handle desktop window resizing
+
 Put a header at the top of each file
 Optimise the import statements within all files
 Change from interfaces to abstract classes
-Handle a resizing window in the menus
 Remove usage of InterruptedException
 Create menu world objects
 Allow the user to move the camera around the menu world
@@ -22,3 +41,12 @@ create rigid bodies from .obj files
 create collisions shapes from .obj files
 create animations from FCurves
 check all TODOs within the source
+
+Refactor a piece of the Widget system:
+    Remove the background image from the widget class
+    Replace it with view layers, where each layer has a diffuse texture and a blending parameter
+    Make the view layer order explicit
+    Make the order of the child widgets explicit
+    Make an explicit hit box size in the widget instead of using the old diffuse texture as the size
+    Use the centre of the hit box as the origin for drawing
+    Each view layer must calculate its own center and put that center on the origin

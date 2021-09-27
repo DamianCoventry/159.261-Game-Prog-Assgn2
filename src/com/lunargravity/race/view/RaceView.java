@@ -1,9 +1,6 @@
 package com.lunargravity.race.view;
 
-import com.lunargravity.engine.graphics.GlMaterial;
-import com.lunargravity.engine.graphics.GlStaticMesh;
-import com.lunargravity.engine.graphics.GlTexture;
-import com.lunargravity.engine.graphics.Transform;
+import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.ImageWidget;
 import com.lunargravity.engine.widgetsystem.Widget;
@@ -108,22 +105,22 @@ public class RaceView implements
     }
 
     @Override
-    public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
+    public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException {
         if (wci == null) {
             System.out.print("RaceView.widgetLoaded() was passed a null WidgetCreateInfo object");
             return;
         }
         if (wci._id.equals(RACE_RESULTS) && wci._type.equals("RaceResultsWidget")) {
-            _raceResults = new Widget(wci, new RaceResultsWidget(_widgetManager, this));
+            _raceResults = new Widget(viewportConfig, wci, new RaceResultsWidget(_widgetManager, this));
         }
         else if (wci._id.equals(RACE_PAUSED) && wci._type.equals("RacePausedWidget")) {
-            _racePaused = new Widget(wci, new RacePausedWidget(_widgetManager, this));
+            _racePaused = new Widget(viewportConfig, wci, new RacePausedWidget(_widgetManager, this));
         }
         else if (wci._id.equals(RACE_COMPLETED) && wci._type.equals("ImageWidget")) {
-            _raceCompleted = new Widget(wci, new ImageWidget(_widgetManager));
+            _raceCompleted = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
         else if (wci._id.equals(GET_READY) && wci._type.equals("ImageWidget")) {
-            _getReady = new Widget(wci, new ImageWidget(_widgetManager));
+            _getReady = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
     }
 

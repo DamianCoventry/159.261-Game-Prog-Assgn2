@@ -1,9 +1,6 @@
 package com.lunargravity.world.view;
 
-import com.lunargravity.engine.graphics.GlMaterial;
-import com.lunargravity.engine.graphics.GlStaticMesh;
-import com.lunargravity.engine.graphics.GlTexture;
-import com.lunargravity.engine.graphics.Transform;
+import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
 import com.lunargravity.world.model.IGameWorldModel;
@@ -69,7 +66,7 @@ public class GameWorldView implements IGameWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
+    public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException {
         if (wci == null) {
             System.out.print("GameWorldView.widgetLoaded() was passed a null WidgetCreateInfo object");
             return;

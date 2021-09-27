@@ -21,15 +21,11 @@ public class AnnouncementWidget extends WidgetObserver {
 
     @Override
     protected void initialiseChildren(WidgetCreateInfo wci) throws IOException {
-        WidgetCreateInfo child = wci.getChild(MAJOR_TITLE_IMAGE, "ImageWidget");
+        WidgetCreateInfo child = wci.getChild(MAJOR_TITLE_BLEND_IMAGE, "ImageWidget");
         if (child != null) {
             getWidget().addChild(new Widget(_widget, child, new ImageWidget(_widgetManager)));
         }
-        child = wci.getChild(MAJOR_TITLE_BLEND_IMAGE, "ImageWidget");
-        if (child != null) {
-            getWidget().addChild(new Widget(_widget, child, new ImageWidget(_widgetManager)));
-        }
-        child = wci.getChild(MINOR_TITLE_IMAGE, "ImageWidget");
+        child = wci.getChild(MAJOR_TITLE_IMAGE, "ImageWidget");
         if (child != null) {
             getWidget().addChild(new Widget(_widget, child, new ImageWidget(_widgetManager)));
         }
@@ -37,11 +33,15 @@ public class AnnouncementWidget extends WidgetObserver {
         if (child != null) {
             getWidget().addChild(new Widget(_widget, child, new ImageWidget(_widgetManager)));
         }
-        child = wci.getChild(SUB_TITLE_IMAGE, "ImageWidget");
+        child = wci.getChild(MINOR_TITLE_IMAGE, "ImageWidget");
         if (child != null) {
             getWidget().addChild(new Widget(_widget, child, new ImageWidget(_widgetManager)));
         }
         child = wci.getChild(SUB_TITLE_BLEND_IMAGE, "ImageWidget");
+        if (child != null) {
+            getWidget().addChild(new Widget(_widget, child, new ImageWidget(_widgetManager)));
+        }
+        child = wci.getChild(SUB_TITLE_IMAGE, "ImageWidget");
         if (child != null) {
             getWidget().addChild(new Widget(_widget, child, new ImageWidget(_widgetManager)));
         }

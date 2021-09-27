@@ -1,6 +1,7 @@
 package com.lunargravity.engine.scene;
 
 import com.google.gson.Gson;
+import com.lunargravity.engine.graphics.ViewportConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class SceneBuilder {
         _logicOwner = logicOwner;
     }
 
-    public void build(String fileName) throws IOException, InterruptedException {
+    public void build(ViewportConfig viewportConfig, String fileName) throws IOException, InterruptedException {
         if (fileName == null) {
             throw new IllegalArgumentException("fileName argument is null");
         }
@@ -51,7 +52,7 @@ public class SceneBuilder {
 
             for (int i = 0; i < scene._widgets.size(); ++i) {
                 Thread.sleep(100); // temp
-                _assetOwner.widgetLoaded(scene._widgets.get(i));
+                _assetOwner.widgetLoaded(viewportConfig, scene._widgets.get(i));
                 _observer.sceneBuildProgressed(i, scene._widgets.size());
             }
 
@@ -59,7 +60,7 @@ public class SceneBuilder {
         }
         else {
             _observer.sceneBuildProgressed(0, 100);
-            Thread.sleep(1000); // temp
+            Thread.sleep(500); // temp
         }
 
         _observer.sceneBuildEnded();

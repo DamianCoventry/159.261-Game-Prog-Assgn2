@@ -10,7 +10,7 @@ public interface ISceneAssetOwner {
     void staticMeshLoaded(GlStaticMesh staticMesh);
     void materialLoaded(GlMaterial material);
     void textureLoaded(GlTexture texture);
-    void widgetLoaded(WidgetCreateInfo wci) throws IOException;
+    void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException;
     // TODO: handle sounds
     // TODO: handle music
     // TODO: handle sprites

@@ -9,8 +9,8 @@
                 "y": 0.0
             },
             "_size": {
-                "x": 1920.0,
-                "y": 1024.0
+                "x": 1280.0,
+                "y": 960.0
             },
             "_properties": {
                 "backgroundImage": "images/EarthMoonBackground.png",
@@ -21,7 +21,7 @@
                     "_id": "subTitleImage",
                     "_type": "ImageWidget",
                     "_position": {
-                        "x": 800.0,
+                        "x": 920.0,
                         "y": 16.0
                     },
                     "_size": {
@@ -37,7 +37,7 @@
                     "_id": "subTitleBlendImage",
                     "_type": "ImageWidget",
                     "_position": {
-                        "x": 800.0,
+                        "x": 920.0,
                         "y": 16.0
                     },
                     "_size": {
@@ -45,139 +45,8 @@
                         "y": 168.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/EpisodeSubTitleBlend.png"
-                    },
-                    "_children": []
-                },
-                {
-                    "_id": "majorTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 400.0,
-                        "y": 400.0
-                    },
-                    "_size": {
-                        "x": 342.0,
-                        "y": 168.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/EpisodeCompleted.png"
-                    },
-                    "_children": []
-                }
-            ]
-        },
-        {
-            "_id": "missionIntro",
-            "_type": "AnnouncementWidget",
-            "_position": {
-                "x": 0.0,
-                "y": 0.0
-            },
-            "_size": {
-                "x": 1024.0,
-                "y": 768.0
-            },
-            "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
-                "initialPosition": "fullViewport"
-            },
-            "_children": [
-                {
-                    "_id": "subTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 800.0,
-                        "y": 16.0
-                    },
-                    "_size": {
-                        "x": 342.0,
-                        "y": 168.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/Episode0SubTitle.png"
-                    },
-                    "_children": []
-                },
-                {
-                    "_id": "subTitleBlendImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 800.0,
-                        "y": 16.0
-                    },
-                    "_size": {
-                        "x": 342.0,
-                        "y": 168.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/EpisodeSubTitleBlend.png"
-                    },
-                    "_children": []
-                },
-                {
-                    "_id": "majorTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 400.0,
-                        "y": 400.0
-                    },
-                    "_size": {
-                        "x": 250.0,
-                        "y": 50.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/GrildrigCrater.png"
-                    },
-                    "_children": []
-                }
-            ]
-        },
-        {
-            "_id": "gameOver",
-            "_type": "AnnouncementWidget",
-            "_position": {
-                "x": 0.0,
-                "y": 0.0
-            },
-            "_size": {
-                "x": 1920.0,
-                "y": 1024.0
-            },
-            "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
-                "initialPosition": "fullViewport"
-            },
-            "_children": [
-                {
-                    "_id": "subTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 800.0,
-                        "y": 16.0
-                    },
-                    "_size": {
-                        "x": 342.0,
-                        "y": 168.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/Episode0SubTitle.png"
-                    },
-                    "_children": []
-                },
-                {
-                    "_id": "subTitleBlendImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 800.0,
-                        "y": 16.0
-                    },
-                    "_size": {
-                        "x": 342.0,
-                        "y": 168.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/EpisodeSubTitleBlend.png"
+                        "backgroundImage": "images/EpisodeSubTitleBlend.png",
+                        "backgroundAlpha": "0.5"
                     },
                     "_children": []
                 },
@@ -193,7 +62,144 @@
                         "y": 100.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/GameOver.png"
+                        "backgroundImage": "images/EpisodeCompleted.png",
+                        "initialPosition": "centerInViewport"
+                    },
+                    "_children": []
+                }
+            ]
+        },
+        {
+            "_id": "missionIntro",
+            "_type": "AnnouncementWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 1280.0,
+                "y": 960.0
+            },
+            "_properties": {
+                "backgroundImage": "images/EarthMoonBackground.png",
+                "initialPosition": "fullViewport"
+            },
+            "_children": [
+                {
+                    "_id": "subTitleImage",
+                    "_type": "ImageWidget",
+                    "_position": {
+                        "x": 920.0,
+                        "y": 16.0
+                    },
+                    "_size": {
+                        "x": 342.0,
+                        "y": 168.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/Episode0SubTitle.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "subTitleBlendImage",
+                    "_type": "ImageWidget",
+                    "_position": {
+                        "x": 920.0,
+                        "y": 16.0
+                    },
+                    "_size": {
+                        "x": 342.0,
+                        "y": 168.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/EpisodeSubTitleBlend.png",
+                        "backgroundAlpha": "0.5"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "majorTitleImage",
+                    "_type": "ImageWidget",
+                    "_position": {
+                        "x": 400.0,
+                        "y": 400.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 50.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/VallisCapella.png",
+                        "initialPosition": "centerInViewport"
+                    },
+                    "_children": []
+                }
+            ]
+        },
+        {
+            "_id": "gameOver",
+            "_type": "AnnouncementWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 1280.0,
+                "y": 960.0
+            },
+            "_properties": {
+                "backgroundImage": "images/EarthMoonBackground.png",
+                "initialPosition": "fullViewport"
+            },
+            "_children": [
+                {
+                    "_id": "subTitleImage",
+                    "_type": "ImageWidget",
+                    "_position": {
+                        "x": 920.0,
+                        "y": 16.0
+                    },
+                    "_size": {
+                        "x": 342.0,
+                        "y": 168.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/Episode0SubTitle.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "subTitleBlendImage",
+                    "_type": "ImageWidget",
+                    "_position": {
+                        "x": 920.0,
+                        "y": 16.0
+                    },
+                    "_size": {
+                        "x": 342.0,
+                        "y": 168.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/EpisodeSubTitleBlend.png",
+                        "backgroundAlpha": "0.5"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "majorTitleImage",
+                    "_type": "ImageWidget",
+                    "_position": {
+                        "x": 400.0,
+                        "y": 400.0
+                    },
+                    "_size": {
+                        "x": 450.0,
+                        "y": 100.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/GameOver.png",
+                        "initialPosition": "centerInViewport"
                     },
                     "_children": []
                 },
@@ -209,7 +215,7 @@
                         "y": 50.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/GrildrigCrater.png"
+                        "backgroundImage": "images/VallisCapella.png"
                     },
                     "_children": []
                 }
@@ -223,8 +229,8 @@
                 "y": 0.0
             },
             "_size": {
-                "x": 1920.0,
-                "y": 1024.0
+                "x": 1280.0,
+                "y": 960.0
             },
             "_properties": {
                 "backgroundImage": "images/EarthMoonBackground.png",
@@ -243,7 +249,8 @@
                         "y": 100.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/Congratulations.png"
+                        "backgroundImage": "images/Congratulations.png",
+                        "initialPosition": "centerInViewport"
                     },
                     "_children": []
                 },

@@ -66,8 +66,8 @@ public class WidgetManager implements IInputObserver {
         glDepthMask(true);
     }
 
-    public ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig newViewportConfig, int windowWidth, int windowHeight) {
-        // TODO
+    public ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig viewportConfig, int windowWidth, int windowHeight) {
+        // Anything to do?
         return null;
     }
 

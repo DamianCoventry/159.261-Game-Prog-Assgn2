@@ -1,9 +1,6 @@
 package com.lunargravity.menu.view;
 
-import com.lunargravity.engine.graphics.GlMaterial;
-import com.lunargravity.engine.graphics.GlStaticMesh;
-import com.lunargravity.engine.graphics.GlTexture;
-import com.lunargravity.engine.graphics.Transform;
+import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.Widget;
 import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
@@ -87,25 +84,25 @@ public class MenuView implements
     }
 
     @Override
-    public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
+    public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException {
         if (wci == null) {
             System.out.print("MenuView.widgetLoaded() was passed a null WidgetCreateInfo object");
             return;
         }
         if (wci._id.equals(MAIN) && wci._type.equals("MainWidget")) {
-            _main = new Widget(wci, new MainWidget(_widgetManager, this));
+            _main = new Widget(viewportConfig, wci, new MainWidget(_widgetManager, this));
         }
         else if (wci._id.equals(CAMPAIGN) && wci._type.equals("CampaignWidget")) {
-            _campaign = new Widget(wci, new CampaignWidget(_widgetManager, this));
+            _campaign = new Widget(viewportConfig, wci, new CampaignWidget(_widgetManager, this));
         }
         else if (wci._id.equals(OPTIONS) && wci._type.equals("OptionsWidget")) {
-            _options = new Widget(wci, new OptionsWidget(_widgetManager, this));
+            _options = new Widget(viewportConfig, wci, new OptionsWidget(_widgetManager, this));
         }
         else if (wci._id.equals(RACE_SCOREBOARD) && wci._type.equals("RaceScoreboardWidget")) {
-            _raceScoreboard = new Widget(wci, new RaceScoreboardWidget(_widgetManager, this));
+            _raceScoreboard = new Widget(viewportConfig, wci, new RaceScoreboardWidget(_widgetManager, this));
         }
         else if (wci._id.equals(DOGFIGHT_SCOREBOARD) && wci._type.equals("DogfightScoreboardWidget")) {
-            _dogfightScoreboard = new Widget(wci, new DogfightScoreboardWidget(_widgetManager, this));
+            _dogfightScoreboard = new Widget(viewportConfig, wci, new DogfightScoreboardWidget(_widgetManager, this));
         }
     }
 

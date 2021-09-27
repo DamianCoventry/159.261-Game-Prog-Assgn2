@@ -5,6 +5,7 @@ import com.lunargravity.engine.graphics.GlRenderer;
 import com.lunargravity.engine.graphics.ViewportConfig;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,11 +22,13 @@ public class Widget implements IInputObserver {
     private final String _id;
     private final String _type;
     private final Matrix4f _projectionMatrix;
+    private final int _viewportIndex;
     private Vector2f _position;
     private Vector2f _size;
 
-    public Widget(WidgetCreateInfo wci, WidgetObserver observer) throws IOException {
+    public Widget(ViewportConfig viewportConfig, WidgetCreateInfo wci, WidgetObserver observer) throws IOException {
         _parent = null;
+        _viewportIndex = viewportConfig._viewportIndex;
         _children = new ArrayList<>();
         _projectionMatrix = new Matrix4f();
         _id = wci._id;
@@ -39,6 +42,7 @@ public class Widget implements IInputObserver {
 
     public Widget(Widget parent, WidgetCreateInfo wci, WidgetObserver observer) throws IOException {
         _parent = parent;
+        _viewportIndex = -1;
         _children = new ArrayList<>();
         _projectionMatrix = new Matrix4f();
         _id = wci._id;

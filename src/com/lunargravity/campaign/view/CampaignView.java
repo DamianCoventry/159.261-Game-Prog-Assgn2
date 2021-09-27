@@ -3,10 +3,7 @@ package com.lunargravity.campaign.view;
 import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.campaign.statemachine.GetReadyState;
-import com.lunargravity.engine.graphics.GlMaterial;
-import com.lunargravity.engine.graphics.GlStaticMesh;
-import com.lunargravity.engine.graphics.GlTexture;
-import com.lunargravity.engine.graphics.Transform;
+import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.*;
 import org.joml.Matrix4f;
@@ -51,7 +48,8 @@ public class CampaignView implements
 
     @Override
     public void initialLoadCompleted() {
-        _widgetManager.show(_episodeIntro, WidgetManager.ShowAs.FIRST);
+        // Nothing to do?
+        //_widgetManager.show(_episodeIntro, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
@@ -162,37 +160,37 @@ public class CampaignView implements
     }
 
     @Override
-    public void widgetLoaded(WidgetCreateInfo wci) throws IOException {
+    public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException {
         if (wci == null) {
             System.out.print("CampaignView.widgetLoaded() was passed a null WidgetCreateInfo object");
             return;
         }
         if (wci._id.equals(MISSION_PAUSED) && wci._type.equals("MissionPausedWidget")) {
-            _missionPaused = new Widget(wci, new MissionPausedWidget(_widgetManager, this));
+            _missionPaused = new Widget(viewportConfig, wci, new MissionPausedWidget(_widgetManager, this));
         }
         else if (wci._id.equals(EPISODE_INTRO_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            _episodeIntro = new Widget(wci, new AnnouncementWidget(_widgetManager, this));
+            _episodeIntro = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
         }
         else if (wci._id.equals(EPISODE_OUTRO_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            _episodeOutro = new Widget(wci, new AnnouncementWidget(_widgetManager, this));
+            _episodeOutro = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
         }
         else if (wci._id.equals(GAME_OVER_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            _gameOver = new Widget(wci, new AnnouncementWidget(_widgetManager, this));
+            _gameOver = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
         }
         else if (wci._id.equals(GAME_WON_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            _gameWon = new Widget(wci, new AnnouncementWidget(_widgetManager, this));
+            _gameWon = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
         }
         else if (wci._id.equals(MISSION_INTRO_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            _missionIntro = new Widget(wci, new AnnouncementWidget(_widgetManager, this));
+            _missionIntro = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
         }
         else if (wci._id.equals(MISSION_COMPLETED) && wci._type.equals("ImageWidget")) {
-            _missionCompleted = new Widget(wci, new ImageWidget(_widgetManager));
+            _missionCompleted = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
         else if (wci._id.equals(GET_READY) && wci._type.equals("ImageWidget")) {
-            _getReady = new Widget(wci, new ImageWidget(_widgetManager));
+            _getReady = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
         else if (wci._id.equals(PLAYER_DIED) && wci._type.equals("ImageWidget")) {
-            _playerDied = new Widget(wci, new ImageWidget(_widgetManager));
+            _playerDied = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
     }
 

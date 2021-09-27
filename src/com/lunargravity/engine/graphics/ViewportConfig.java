@@ -1,6 +1,7 @@
 package com.lunargravity.engine.graphics;
 
 public class ViewportConfig {
+    public int _viewportIndex;
     public int _positionX;
     public int _positionY;
     public int _width;
