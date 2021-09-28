@@ -1,3 +1,17 @@
+//
+// Lunar Gravity
+//
+// This game is based upon the Amiga video game Gravity Force that was
+// released in 1989 by Stephan Wenzler
+//
+// https://www.mobygames.com/game/gravity-force
+// https://www.youtube.com/watch?v=m9mFtCvnko8
+//
+// This implementation is Copyright (c) 2021, Damian Coventry
+// All rights reserved
+// Written for Massey University course 159.261 Game Programming (Assignment 2)
+//
+
 package com.lunargravity.engine.core;
 
 import com.jme3.bullet.PhysicsSpace;
@@ -8,6 +22,7 @@ import com.lunargravity.engine.graphics.GlRenderer;
 import com.lunargravity.engine.graphics.GlViewport;
 import com.lunargravity.engine.graphics.ViewportConfig;
 import com.lunargravity.engine.timeouts.TimeoutManager;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.*;
@@ -319,7 +334,7 @@ public class Engine implements IEngine {
         }
     }
 
-    private ViewportConfig createDefaultViewportConfig() {
+    private @NotNull ViewportConfig createDefaultViewportConfig() {
         ViewportConfig config = new ViewportConfig();
         config._viewportIndex = 0;
         config._positionX = 0;

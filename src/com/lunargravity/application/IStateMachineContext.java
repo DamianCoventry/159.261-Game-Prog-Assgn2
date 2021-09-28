@@ -15,8 +15,9 @@
 package com.lunargravity.application;
 
 import com.lunargravity.engine.core.IEngine;
-import com.lunargravity.mvc.*;
-import com.lunargravity.race.view.RaceBuilderObserver;
+import com.lunargravity.mvc.IController;
+import com.lunargravity.mvc.IModel;
+import com.lunargravity.mvc.IView;
 
 public interface IStateMachineContext extends ICurrentFrame, IApplicationModes {
     void changeState(IState state);
@@ -24,9 +25,9 @@ public interface IStateMachineContext extends ICurrentFrame, IApplicationModes {
     IEngine getEngine(); // used by StateBase to provide convenient addition/removal of timeouts
 
     IModel getWorldModel(); // TODO: should these be here?
-    IView getWorldView(); 
-    IController getWorldController(); 
-    
+    IView getWorldView();
+    IController getWorldController();
+
     IModel getLogicModel(); // TODO: should these be here?
     IView getLogicView(); 
     IController getLogicController(); // used by RunningMenuState to add/remove a MenuController observer
