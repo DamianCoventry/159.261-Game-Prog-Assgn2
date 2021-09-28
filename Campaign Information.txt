@@ -42,5 +42,5 @@ Episodes:
             2) View of Nereid
             3) Pharos Crater
             4) Neptune's Shadow
-            5) Tidally locked
+            5) Tidally Locked
             6) Southern Hemisphere

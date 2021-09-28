@@ -13,7 +13,7 @@
                 "y": 960.0
             },
             "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
+                "backgroundImage": "images/MarsPhobosBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [
@@ -81,7 +81,7 @@
                 "y": 960.0
             },
             "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
+                "backgroundImage": "images/MarsPhobosBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [
@@ -149,7 +149,7 @@
                 "y": 960.0
             },
             "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
+                "backgroundImage": "images/MarsPhobosBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [
@@ -232,7 +232,7 @@
                 "y": 960.0
             },
             "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
+                "backgroundImage": "images/MarsPhobosBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [

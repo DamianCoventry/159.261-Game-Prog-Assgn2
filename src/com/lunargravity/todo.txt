@@ -1,9 +1,3 @@
-Make first cut of centered images:
-    Get ready 3-2-1
-    Player 1/2/both died
-    Mission completed
-    Race completed
-    Dogfight completed
 Make first cut of loading screens:
     Mission Loading
     Race Loading

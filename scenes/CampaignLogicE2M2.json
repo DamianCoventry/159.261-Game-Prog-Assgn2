@@ -13,7 +13,7 @@
                 "y": 960.0
             },
             "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
+                "backgroundImage": "images/JupiterGanymedeBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [
@@ -81,7 +81,7 @@
                 "y": 960.0
             },
             "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
+                "backgroundImage": "images/JupiterGanymedeBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [
@@ -130,7 +130,7 @@
                         "y": 50.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/GrildrigCrater.png",
+                        "backgroundImage": "images/LakhmuFossae.png",
                         "initialPosition": "centerInViewport"
                     },
                     "_children": []
@@ -149,7 +149,7 @@
                 "y": 960.0
             },
             "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
+                "backgroundImage": "images/JupiterGanymedeBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [
@@ -214,7 +214,7 @@
                         "y": 50.0
                     },
                     "_properties": {
-                        "backgroundImage": "images/GrildrigCrater.png"
+                        "backgroundImage": "images/LakhmuFossae.png"
                     },
                     "_children": []
                 }
@@ -232,7 +232,7 @@
                 "y": 960.0
             },
             "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
+                "backgroundImage": "images/JupiterGanymedeBackground.png",
                 "initialPosition": "fullViewport"
             },
             "_children": [
