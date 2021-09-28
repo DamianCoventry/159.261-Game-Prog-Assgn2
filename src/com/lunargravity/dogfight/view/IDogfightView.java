@@ -9,4 +9,5 @@ public interface IDogfightView extends IView {
     void showPausedWidget();
     void showGetReady(int i) throws IOException;
     void showCompletedWidget();
+    void showLevelStatusBar();
 }

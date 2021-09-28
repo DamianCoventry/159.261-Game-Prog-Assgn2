@@ -1,14 +1,14 @@
 package com.lunargravity.dogfight.view;
 
 import com.lunargravity.campaign.statemachine.GetReadyState;
-import com.lunargravity.dogfight.controller.IDogfightController;
-import com.lunargravity.dogfight.model.IDogfightModel;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.ImageWidget;
 import com.lunargravity.engine.widgetsystem.Widget;
 import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
 import com.lunargravity.engine.widgetsystem.WidgetManager;
+import com.lunargravity.dogfight.controller.IDogfightController;
+import com.lunargravity.dogfight.model.IDogfightModel;
 import org.joml.Matrix4f;
 
 import java.io.IOException;
@@ -19,10 +19,10 @@ public class DogfightView implements
         IDogfightPausedObserver,
         IDogfightResultsObserver
 {
-    private static final String RACE_RESULTS = "dogfightResults";
-    private static final String RACE_PAUSED = "dogfightPaused";
+    private static final String DOGFIGHT_RESULTS = "dogfightResults";
+    private static final String DOGFIGHT_PAUSED = "dogfightPaused";
     private static final String GET_READY = "getReady";
-    private static final String RACE_COMPLETED = "dogfightCompleted";
+    private static final String DOGFIGHT_COMPLETED = "dogfightCompleted";
 
     private final WidgetManager _widgetManager;
     private final IDogfightController _controller;
@@ -111,18 +111,24 @@ public class DogfightView implements
     }
 
     @Override
+    public void showLevelStatusBar() {
+        _widgetManager.hideAll();
+        // TODO: show the level status bar
+    }
+
+    @Override
     public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException {
         if (wci == null) {
             System.out.print("DogfightView.widgetLoaded() was passed a null WidgetCreateInfo object");
             return;
         }
-        if (wci._id.equals(RACE_RESULTS) && wci._type.equals("DogfightResultsWidget")) {
+        if (wci._id.equals(DOGFIGHT_RESULTS) && wci._type.equals("DogfightResultsWidget")) {
             _dogfightResults = new Widget(viewportConfig, wci, new DogfightResultsWidget(_widgetManager, this));
         }
-        else if (wci._id.equals(RACE_PAUSED) && wci._type.equals("DogfightPausedWidget")) {
+        else if (wci._id.equals(DOGFIGHT_PAUSED) && wci._type.equals("DogfightPausedWidget")) {
             _dogfightPaused = new Widget(viewportConfig, wci, new DogfightPausedWidget(_widgetManager, this));
         }
-        else if (wci._id.equals(RACE_COMPLETED) && wci._type.equals("ImageWidget")) {
+        else if (wci._id.equals(DOGFIGHT_COMPLETED) && wci._type.equals("ImageWidget")) {
             _dogfightCompleted = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
         else if (wci._id.equals(GET_READY) && wci._type.equals("ImageWidget")) {

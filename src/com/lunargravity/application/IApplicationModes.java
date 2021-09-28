@@ -1,5 +1,6 @@
 package com.lunargravity.application;
 
+import com.lunargravity.dogfight.view.DogfightBuilderObserver;
 import com.lunargravity.engine.scene.ISceneBuilderObserver;
 import com.lunargravity.race.view.RaceBuilderObserver;
 
@@ -14,4 +15,5 @@ public interface IApplicationModes {
     void startRaceGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException;
     void loadRaceLevel(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException;
     void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException;
+    void loadDogfightLevel(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException;
 }

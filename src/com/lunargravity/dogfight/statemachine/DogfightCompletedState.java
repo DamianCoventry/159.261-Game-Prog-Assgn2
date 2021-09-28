@@ -10,17 +10,17 @@ public class DogfightCompletedState extends StateBase {
         super(context);
     }
 
-    private IDogfightView getDogfightView() {
-        return (IDogfightView)getContext().getLogicView();
-    }
-
     @Override
     public void begin() {
         getDogfightView().showCompletedWidget();
 
-        addTimeout(3000, (callCount) -> {
+        addTimeout(3500, (callCount) -> {
             changeState(new DogfightResultsState(getContext()));
             return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;
         });
+    }
+
+    private IDogfightView getDogfightView() {
+        return (IDogfightView)getContext().getLogicView();
     }
 }

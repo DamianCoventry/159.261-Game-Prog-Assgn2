@@ -378,6 +378,11 @@ public class Application implements
         _logicController = new DogfightController((IDogfightModel)_logicModel);
         _logicView = new DogfightView(_widgetManager, (IDogfightController)_logicController, (IDogfightModel)_logicModel);
 
+        loadDogfightLevel(sceneBuilderObserver, numPlayers);
+    }
+
+    @Override
+    public void loadDogfightLevel(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException {
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 

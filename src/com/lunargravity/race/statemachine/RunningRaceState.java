@@ -3,11 +3,6 @@ package com.lunargravity.race.statemachine;
 import com.lunargravity.application.IStateMachineContext;
 import com.lunargravity.application.LargeNumberFont;
 import com.lunargravity.application.StateBase;
-import com.lunargravity.campaign.statemachine.GameOverState;
-import com.lunargravity.campaign.statemachine.GameWonState;
-import com.lunargravity.campaign.statemachine.MissionCompletedState;
-import com.lunargravity.campaign.statemachine.MissionPausedState;
-import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.race.controller.IRaceController;
 import com.lunargravity.race.model.IRaceModel;
 import com.lunargravity.race.view.IRaceView;
@@ -17,7 +12,6 @@ import org.joml.Vector4f;
 import java.io.IOException;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 
 public class RunningRaceState extends StateBase {
     private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);

@@ -51,6 +51,6 @@ public class RunningMenuState extends StateBase implements IMenuControllerObserv
 
     @Override
     public void startNewDogfightRequested(int numPlayers) {
-        changeState(new LoadingDogfightState(getContext(), numPlayers));
+        changeState(new LoadingDogfightState(getContext(), numPlayers, LoadingDogfightState.Mode.NEW_GAME));
     }
 }

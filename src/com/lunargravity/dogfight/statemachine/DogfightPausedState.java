@@ -32,8 +32,8 @@ public class DogfightPausedState extends StateBase implements IDogfightControlle
     }
 
     @Override
-    public void startNextDogfightRequested() {
-
+    public void startNextDogfightRequested(int numPlayers) {
+        // Nothing to do
     }
 
     @Override

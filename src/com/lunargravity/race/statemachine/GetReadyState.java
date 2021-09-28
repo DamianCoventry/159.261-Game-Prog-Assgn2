@@ -1,8 +1,9 @@
 package com.lunargravity.race.statemachine;
 
-import com.lunargravity.application.*;
-import com.lunargravity.race.view.IRaceView;
+import com.lunargravity.application.IStateMachineContext;
+import com.lunargravity.application.StateBase;
 import com.lunargravity.engine.timeouts.TimeoutManager;
+import com.lunargravity.race.view.IRaceView;
 
 import java.io.IOException;
 

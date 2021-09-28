@@ -32,15 +32,13 @@ public class DogfightResultsState extends StateBase implements IDogfightControll
     }
 
     @Override
-    public void startNextDogfightRequested() {
-        // TODO: will need the controller/model to bump the level number
-        //   perhaps add a startNextDogfightGame() method?
-        changeState(new LoadingDogfightState(getContext(), 1)); // TODO: get the numPlayers from the model
+    public void startNextDogfightRequested(int numPlayers) {
+        changeState(new LoadingDogfightState(getContext(), numPlayers, LoadingDogfightState.Mode.NEXT_LEVEL));
     }
 
     @Override
     public void resumeDogfightRequested() {
-
+        // Nothing to do
     }
 
     @Override

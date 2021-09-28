@@ -1,8 +1,9 @@
 package com.lunargravity.dogfight.controller;
 
-import com.lunargravity.dogfight.model.IDogfightModel;
 import com.lunargravity.engine.scene.ISceneLogicOwner;
+import com.lunargravity.dogfight.model.IDogfightModel;
 
+import java.time.LocalTime;
 import java.util.LinkedList;
 
 public class DogfightController implements IDogfightController, ISceneLogicOwner {
@@ -36,8 +37,9 @@ public class DogfightController implements IDogfightController, ISceneLogicOwner
 
     @Override
     public void startNextDogfight() {
+        _model.incrementLevel();
         for (var observer : _observers) {
-            observer.startNextDogfightRequested();
+            observer.startNextDogfightRequested(_model.getNumPlayers());
         }
     }
 
@@ -73,5 +75,10 @@ public class DogfightController implements IDogfightController, ISceneLogicOwner
     @Override
     public void loadDogfightScoreboard(String fileName) {
         _model.loadDogfightScoreboard(fileName);
+    }
+
+    @Override
+    public void killPlayer(int i) {
+        // TODO
     }
 }

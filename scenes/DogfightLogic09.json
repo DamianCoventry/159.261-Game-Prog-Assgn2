@@ -1,3 +1,177 @@
 {
-    "DoStuff": 1
+    "_name": "Dogfight Logic Level 9",
+    "_widgets": [
+        {
+            "_id": "dogfightResults",
+            "_type": "DogfightResultsWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 450.0,
+                "y": 250.0
+            },
+            "_properties": {
+                "backgroundImage": "images/DogfightResultsWidget_Normal.png",
+                "initialPosition": "centerInViewport"
+            },
+            "_children": [
+                {
+                    "_id": "dogfightHighScore0",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 100.0,
+                        "y": 130.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "dogfightHighScore1",
+                    "_type": "HighScoreWidget",
+                    "_position": {
+                        "x": 100.0,
+                        "y": 100.0
+                    },
+                    "_size": {
+                        "x": 250.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/HighScoreWidget_Normal.png",
+                        "hoverImage": "images/HighScoreWidget_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "startNextDogfight",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 120.0,
+                        "y": 15.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/StartNextDogfightButton_Normal.png",
+                        "hoverImage": "images/StartNextDogfightButton_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "mainMenuButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 285.0,
+                        "y": 15.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/MainMenuButton_Normal.png",
+                        "hoverImage": "images/MainMenuButton_Hover.png"
+                    },
+                    "_children": []
+                }
+            ]
+        },
+        {
+            "_id": "dogfightPaused",
+            "_type": "DogfightPausedWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 190.0,
+                "y": 126.0
+            },
+            "_properties": {
+                "backgroundImage": "images/GamePaused.png",
+                "initialPosition": "centerInViewport"
+            },
+            "_children": [
+                {
+                    "_id": "resumeDogfight",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 15.0,
+                        "y": 55.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/ResumeDogfightButton_Normal.png",
+                        "hoverImage": "images/ResumeDogfightButton_Hover.png"
+                    },
+                    "_children": []
+                },
+                {
+                    "_id": "mainMenuButton",
+                    "_type": "ButtonWidget",
+                    "_position": {
+                        "x": 15.0,
+                        "y": 15.0
+                    },
+                    "_size": {
+                        "x": 150.0,
+                        "y": 30.0
+                    },
+                    "_properties": {
+                        "backgroundImage": "images/MainMenuButton_Normal.png",
+                        "hoverImage": "images/MainMenuButton_Hover.png"
+                    },
+                    "_children": []
+                }
+            ]
+        },
+        {
+            "_id": "dogfightCompleted",
+            "_type": "ImageWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 450.0,
+                "y": 100.0
+            },
+            "_properties": {
+                "backgroundImage": "images/DogfightCompleted.png",
+                "initialPosition": "centerInViewport"
+            },
+            "_children": []
+        },
+        {
+            "_id": "getReady",
+            "_type": "ImageWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 250.0,
+                "y": 50.0
+            },
+            "_properties": {
+                "backgroundImage": "images/GetReady3.png",
+                "initialPosition": "centerInViewport"
+            },
+            "_children": []
+        }
+    ]
 }
