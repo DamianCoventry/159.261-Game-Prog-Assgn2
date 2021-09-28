@@ -1,6 +1,7 @@
 package com.lunargravity.race.statemachine;
 
-import com.lunargravity.application.*;
+import com.lunargravity.application.IStateMachineContext;
+import com.lunargravity.application.StateBase;
 import com.lunargravity.menu.statemachine.LoadingMenuState;
 import com.lunargravity.race.controller.IRaceController;
 import com.lunargravity.race.controller.IRaceControllerObserver;
@@ -31,15 +32,13 @@ public class RaceResultsState extends StateBase implements IRaceControllerObserv
     }
 
     @Override
-    public void startNextRaceRequested() {
-        // TODO: will need the controller/model to bump the level number
-        //   perhaps add a startNextRaceGame() method?
-        changeState(new LoadingRaceState(getContext(), 1)); // TODO: get the numPlayers from the model
+    public void startNextRaceRequested(int numPlayers) {
+        changeState(new LoadingRaceState(getContext(), numPlayers, LoadingRaceState.Mode.NEXT_LEVEL));
     }
 
     @Override
     public void resumeRaceRequested() {
-
+        // Nothing to do
     }
 
     @Override

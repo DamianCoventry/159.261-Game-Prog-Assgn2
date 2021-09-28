@@ -1,7 +1,3 @@
-Make first cut of loading screens:
-    Mission Loading
-    Race Loading
-    Dogfight Loading
 Check can go through all Race states
 Check can go through all Dogfight states
 

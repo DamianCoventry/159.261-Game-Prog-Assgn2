@@ -46,7 +46,7 @@ public class RunningMenuState extends StateBase implements IMenuControllerObserv
 
     @Override
     public void startNewRaceRequested(int numPlayers) {
-        changeState(new LoadingRaceState(getContext(), numPlayers));
+        changeState(new LoadingRaceState(getContext(), numPlayers, LoadingRaceState.Mode.NEW_GAME));
     }
 
     @Override

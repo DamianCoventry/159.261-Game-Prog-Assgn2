@@ -1,6 +1,7 @@
 package com.lunargravity.race.statemachine;
 
-import com.lunargravity.application.*;
+import com.lunargravity.application.IStateMachineContext;
+import com.lunargravity.application.StateBase;
 import com.lunargravity.menu.statemachine.LoadingMenuState;
 import com.lunargravity.race.controller.IRaceController;
 import com.lunargravity.race.controller.IRaceControllerObserver;
@@ -31,8 +32,8 @@ public class RacePausedState extends StateBase implements IRaceControllerObserve
     }
 
     @Override
-    public void startNextRaceRequested() {
-
+    public void startNextRaceRequested(int numPlayers) {
+        // Nothing to do
     }
 
     @Override

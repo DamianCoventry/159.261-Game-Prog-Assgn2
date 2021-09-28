@@ -19,8 +19,11 @@ public class LoadingDogfightState extends StateBase {
 
         getContext().startDogfightGame(dogfightBuilderObserver, _numPlayers);
 
-        changeState(new GetReadyState(getContext()));
-
         dogfightBuilderObserver.freeResources();
+    }
+
+    @Override
+    public void think() {
+        changeState(new GetReadyState(getContext()));
     }
 }

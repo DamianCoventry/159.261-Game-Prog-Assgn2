@@ -5,6 +5,7 @@ import com.lunargravity.application.StateBase;
 import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.view.ICampaignView;
+import com.lunargravity.campaign.view.MissionBuilderObserver;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
 import java.io.IOException;

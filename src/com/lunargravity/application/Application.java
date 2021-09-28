@@ -63,6 +63,7 @@ public class Application implements
 
     private static final int FIRST_EPISODE = 0;
     private static final int FIRST_MISSION = 0;
+    private static final int FIRST_LEVEL = 0;
 
     private final IEngine _engine;
     private PlayerInputBindings _playerInputBindings;
@@ -280,7 +281,7 @@ public class Application implements
     }
 
     @Override
-    public void createCampaignMvc(String savedGameFileName) throws IOException, InterruptedException {
+    public void createCampaignMvc(String savedGameFileName) throws IOException {
         SavedGameFile savedGameFile = new SavedGameFile(savedGameFileName); // throws
 
         _worldModel = new GameWorldModel();
@@ -342,21 +343,26 @@ public class Application implements
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
 
-        _logicModel = new RaceModel(numPlayers);
+        _logicModel = new RaceModel(FIRST_LEVEL, numPlayers);
         _logicController = new RaceController((IRaceModel)_logicModel);
         _logicView = new RaceView(_widgetManager, (IRaceController)_logicController, (IRaceModel)_logicModel);
 
+        loadRaceLevel(sceneBuilderObserver, numPlayers);
+    }
+
+    @Override
+    public void loadRaceLevel(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException {
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
+
+        IRaceModel model = (IRaceModel)_logicModel;
         ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
 
-        String worldSceneFileName = getFirstWorldRaceSceneFileName();
         SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
-        worldSceneBuilder.build(viewportConfig, worldSceneFileName);
+        worldSceneBuilder.build(viewportConfig, model.getWorldLevelScene());
 
-        String logicSceneFileName = getFirstLogicRaceSceneFileName();
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
-        logicSceneBuilder.build(viewportConfig, logicSceneFileName);
+        logicSceneBuilder.build(viewportConfig, model.getLogicLevelScene());
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
@@ -368,21 +374,21 @@ public class Application implements
         _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
         _worldView = new GameWorldView((IGameWorldModel)_worldModel);
 
-        _logicModel = new DogfightModel(numPlayers);
+        _logicModel = new DogfightModel(FIRST_LEVEL, numPlayers);
         _logicController = new DogfightController((IDogfightModel)_logicModel);
         _logicView = new DogfightView(_widgetManager, (IDogfightController)_logicController, (IDogfightModel)_logicModel);
 
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
+
+        IDogfightModel model = (IDogfightModel)_logicModel;
         ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
 
-        String worldSceneFileName = getFirstWorldDogfightSceneFileName();
         SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
-        worldSceneBuilder.build(viewportConfig, worldSceneFileName);
+        worldSceneBuilder.build(viewportConfig, model.getWorldLevelScene());
 
-        String logicSceneFileName = getFirstLogicDogfightSceneFileName();
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
-        logicSceneBuilder.build(viewportConfig, logicSceneFileName);
+        logicSceneBuilder.build(viewportConfig, model.getLogicLevelScene());
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
@@ -456,22 +462,6 @@ public class Application implements
                 // TODO: Is there something useful we can do with the exception?
             }
         }
-    }
-
-    static private String getFirstWorldRaceSceneFileName() {
-        return "scenes/RaceWorld00.json";
-    }
-
-    static private String getFirstLogicRaceSceneFileName() {
-        return "scenes/RaceLogic00.json";
-    }
-
-    static private String getFirstWorldDogfightSceneFileName() {
-        return "scenes/DogfightWorld00.json";
-    }
-
-    static private String getFirstLogicDogfightSceneFileName() {
-        return "scenes/DogfightLogic00.json";
     }
 
     public static void main(String[] args) {

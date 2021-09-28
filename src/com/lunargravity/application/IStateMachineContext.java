@@ -16,6 +16,7 @@ package com.lunargravity.application;
 
 import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.mvc.*;
+import com.lunargravity.race.view.RaceBuilderObserver;
 
 public interface IStateMachineContext extends ICurrentFrame, IApplicationModes {
     void changeState(IState state);

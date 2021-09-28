@@ -7,18 +7,42 @@ import java.time.LocalDate;
 public class DogfightModel implements IDogfightModel, ISceneStateOwner {
     public static final int NUM_HIGH_SCORES = 5;
 
+    private int _level;
     private final int _numPlayers;
     private DogfightHighScore[] _dogfightHighScores;
 
-    public DogfightModel(int numPlayers) {
+    public DogfightModel(int level, int numPlayers) {
+        _level = level;
         _numPlayers = numPlayers;
         allocateDogfightScoreboard();
         resetDogfightScoreboard();
     }
 
     @Override
+    public int getLevel() {
+        return _level;
+    }
+
+    @Override
     public int getNumPlayers() {
         return _numPlayers;
+    }
+
+    @Override
+    public void incrementLevel() {
+        if (++_level >= NUM_LEVELS) {
+            _level = 0;
+        }
+    }
+
+    @Override
+    public String getWorldLevelScene() {
+        return String.format("scenes/DogfightWorld%02d.json", _level);
+    }
+
+    @Override
+    public String getLogicLevelScene() {
+        return String.format("scenes/DogfightLogic%02d.json", _level);
     }
 
     @Override

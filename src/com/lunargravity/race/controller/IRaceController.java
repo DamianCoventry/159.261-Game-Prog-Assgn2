@@ -17,4 +17,6 @@ public interface IRaceController extends IController {
     boolean insertRaceHighScore(LocalTime elapsedTime);
     void saveRaceScoreboard(String fileName);
     void loadRaceScoreboard(String fileName);
+
+    void killPlayer(int i);
 }

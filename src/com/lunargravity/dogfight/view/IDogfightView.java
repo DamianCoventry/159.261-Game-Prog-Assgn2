@@ -7,6 +7,6 @@ import java.io.IOException;
 public interface IDogfightView extends IView {
     void showResultsWidget();
     void showPausedWidget();
-    void showGetReadyWidget(int countdown) throws IOException;
+    void showGetReady(int i) throws IOException;
     void showCompletedWidget();
 }

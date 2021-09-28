@@ -37,8 +37,9 @@ public class RaceController implements IRaceController, ISceneLogicOwner {
 
     @Override
     public void startNextRace() {
+        _model.incrementLevel();
         for (var observer : _observers) {
-            observer.startNextRaceRequested();
+            observer.startNextRaceRequested(_model.getNumPlayers());
         }
     }
 
@@ -74,5 +75,10 @@ public class RaceController implements IRaceController, ISceneLogicOwner {
     @Override
     public void loadRaceScoreboard(String fileName) {
         _model.loadRaceScoreboard(fileName);
+    }
+
+    @Override
+    public void killPlayer(int i) {
+        // TODO
     }
 }

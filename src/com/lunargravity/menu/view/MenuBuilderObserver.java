@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class MenuBuilderObserver implements ISceneBuilderObserver {
+    private static final float LABEL_X_OFFSET = 600.0f;
+    private static final float LABEL_Y_OFFSET = 435.0f;
+
     private final IManualFrameUpdater _manualFrameUpdater;
     private final WidgetManager _widgetManager;
     private final Widget _backgroundImage;
@@ -76,7 +79,7 @@ public class MenuBuilderObserver implements ISceneBuilderObserver {
 
         _widgetManager.draw(0, projectionMatrix);
 
-        _font.drawPercentage(projectionMatrix, currentItem * 100L / totalItems, 500, 500, 1.0f, WHITE);
+        _font.drawPercentage(projectionMatrix, currentItem * 100L / totalItems, LABEL_X_OFFSET, LABEL_Y_OFFSET, 1.0f, WHITE);
 
         _manualFrameUpdater.submitFrame();
     }

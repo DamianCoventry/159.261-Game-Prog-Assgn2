@@ -1,5 +1,6 @@
 package com.lunargravity.race.view;
 
+import com.lunargravity.campaign.statemachine.GetReadyState;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.ImageWidget;
@@ -91,17 +92,28 @@ public class RaceView implements
     }
 
     @Override
-    public void showGetReadyWidget(int countdown) throws IOException {
-        ImageWidget imageWidget = (ImageWidget)_getReady.getObserver();
-        imageWidget.setBackgroundImage(String.format("images/RaceGetReady%d.png", countdown));
-        _widgetManager.hideAll();
-        _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
+    public void showGetReady(int i) throws IOException {
+        if (_widgetManager.isVisible(_getReady)) {
+            int clamped = Math.min(GetReadyState.MAX_SECONDS, Math.max(GetReadyState.MIN_SECONDS, i));
+            _getReady.getObserver().setBackgroundImage(String.format("images/GetReady%d.png", clamped));
+        }
+        else {
+            _widgetManager.hideAll();
+            _getReady.getObserver().setBackgroundImage("images/GetReady3.png");
+            _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
+        }
     }
 
     @Override
     public void showCompletedWidget() {
         _widgetManager.hideAll();
         _widgetManager.show(_raceCompleted, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void showLevelStatusBar() {
+        _widgetManager.hideAll();
+        // TODO: show the level status bar
     }
 
     @Override

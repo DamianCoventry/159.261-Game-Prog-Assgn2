@@ -1,5 +1,6 @@
 package com.lunargravity.dogfight.view;
 
+import com.lunargravity.campaign.statemachine.GetReadyState;
 import com.lunargravity.dogfight.controller.IDogfightController;
 import com.lunargravity.dogfight.model.IDogfightModel;
 import com.lunargravity.engine.graphics.*;
@@ -91,11 +92,16 @@ public class DogfightView implements
     }
 
     @Override
-    public void showGetReadyWidget(int countdown) throws IOException {
-        ImageWidget imageWidget = (ImageWidget)_getReady.getObserver();
-        imageWidget.setBackgroundImage(String.format("images/DogfightGetReady%d.png", countdown));
-        _widgetManager.hideAll();
-        _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
+    public void showGetReady(int i) throws IOException {
+        if (_widgetManager.isVisible(_getReady)) {
+            int clamped = Math.min(GetReadyState.MAX_SECONDS, Math.max(GetReadyState.MIN_SECONDS, i));
+            _getReady.getObserver().setBackgroundImage(String.format("images/GetReady%d.png", clamped));
+        }
+        else {
+            _widgetManager.hideAll();
+            _getReady.getObserver().setBackgroundImage("images/GetReady3.png");
+            _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
+        }
     }
 
     @Override

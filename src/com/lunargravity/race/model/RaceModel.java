@@ -8,18 +8,42 @@ import java.time.LocalTime;
 public class RaceModel implements IRaceModel, ISceneStateOwner {
     public static final int NUM_HIGH_SCORES = 5;
 
+    private int _level;
     private final int _numPlayers;
     private RaceHighScore[] _raceHighScores;
 
-    public RaceModel(int numPlayers) {
+    public RaceModel(int level, int numPlayers) {
+        _level = level;
         _numPlayers = numPlayers;
         allocateRaceScoreboard();
         resetRaceScoreboard();
     }
 
     @Override
+    public int getLevel() {
+        return _level;
+    }
+
+    @Override
     public int getNumPlayers() {
         return _numPlayers;
+    }
+
+    @Override
+    public void incrementLevel() {
+        if (++_level >= NUM_LEVELS) {
+            _level = 0;
+        }
+    }
+
+    @Override
+    public String getWorldLevelScene() {
+        return String.format("scenes/RaceWorld%02d.json", _level);
+    }
+
+    @Override
+    public String getLogicLevelScene() {
+        return String.format("scenes/RaceLogic%02d.json", _level);
     }
 
     @Override
