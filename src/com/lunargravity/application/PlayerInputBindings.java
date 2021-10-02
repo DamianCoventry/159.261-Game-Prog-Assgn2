@@ -34,42 +34,42 @@ public class PlayerInputBindings {
         // TODO
     }
 
-    public void setPlayerRotateLeftKey(int player, int key) {
+    public void setPlayerRotateLeftKey(int i, int key) {
         // TODO
     }
-    public int getPlayerRotateLeftKey(int player) {
-        // TODO
-        return 0;
-    }
-
-    public void setPlayerRotateRightKey(int player, int key) {
-        // TODO
-    }
-    public int getPlayerRotateRightKey(int player) {
+    public int getPlayerRotateLeftKey(int i) {
         // TODO
         return 0;
     }
 
-    public void setPlayerThrustKey(int player, int key) {
+    public void setPlayerRotateRightKey(int i, int key) {
         // TODO
     }
-    public int getPlayerThrustKey(int player) {
-        // TODO
-        return 0;
-    }
-
-    public void setPlayerShootKey(int player, int key) {
-        // TODO
-    }
-    public int getPlayerShootKey(int player) {
+    public int getPlayerRotateRightKey(int i) {
         // TODO
         return 0;
     }
 
-    public void setPlayerKickKey(int player, int key) {
+    public void setPlayerThrustKey(int i, int key) {
         // TODO
     }
-    public int getPlayerKickKey(int player) {
+    public int getPlayerThrustKey(int i) {
+        // TODO
+        return 0;
+    }
+
+    public void setPlayerShootKey(int i, int key) {
+        // TODO
+    }
+    public int getPlayerShootKey(int i) {
+        // TODO
+        return 0;
+    }
+
+    public void setPlayerKickKey(int i, int key) {
+        // TODO
+    }
+    public int getPlayerKickKey(int i) {
         // TODO
         return 0;
     }

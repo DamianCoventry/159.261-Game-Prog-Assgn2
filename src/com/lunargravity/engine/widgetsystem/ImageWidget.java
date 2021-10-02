@@ -22,8 +22,8 @@ public class ImageWidget extends WidgetObserver {
     }
 
     @Override
-    public void widgetDraw(int viewport, Matrix4f projectionMatrix) {
-        super.widgetDraw(viewport, projectionMatrix);
+    public void widgetDraw(Matrix4f projectionMatrix) {
+        super.widgetDraw(projectionMatrix);
         // anything to do?
     }
 }

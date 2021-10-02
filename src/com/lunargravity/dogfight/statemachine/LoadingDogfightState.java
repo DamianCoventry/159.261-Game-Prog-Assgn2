@@ -32,7 +32,7 @@ public class LoadingDogfightState extends StateBase {
     }
 
     @Override
-    public void begin() throws IOException, InterruptedException {
+    public void begin() throws Exception {
         DogfightBuilderObserver dogfightBuilderObserver = new DogfightBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
 
         if (_mode == LoadingDogfightState.Mode.NEW_GAME) {

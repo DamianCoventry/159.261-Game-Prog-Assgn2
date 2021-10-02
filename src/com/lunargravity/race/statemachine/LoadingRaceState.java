@@ -18,7 +18,7 @@ public class LoadingRaceState extends StateBase {
     }
 
     @Override
-    public void begin() throws IOException, InterruptedException {
+    public void begin() throws Exception {
         RaceBuilderObserver raceBuilderObserver = new RaceBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
 
         if (_mode == Mode.NEW_GAME) {

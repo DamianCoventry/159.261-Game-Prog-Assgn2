@@ -1,11 +1,24 @@
+//
+// Lunar Gravity
+//
+// This game is based upon the Amiga video game Gravity Force that was
+// released in 1989 by Stephan Wenzler
+//
+// https://www.mobygames.com/game/gravity-force
+// https://www.youtube.com/watch?v=m9mFtCvnko8
+//
+// This implementation is Copyright (c) 2021, Damian Coventry
+// All rights reserved
+// Written for Massey University course 159.261 Game Programming (Assignment 2)
+//
+
 package com.lunargravity.engine.widgetsystem;
 
 import com.lunargravity.engine.core.IInputObserver;
-import com.lunargravity.engine.graphics.GlRenderer;
+import com.lunargravity.engine.graphics.Renderer;
 import com.lunargravity.engine.graphics.ViewportConfig;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector4f;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,12 +80,12 @@ public class Widget implements IInputObserver {
         return _parent;
     }
 
-    public void draw(int viewport, Matrix4f projectionMatrix) {
+    public void draw(Matrix4f projectionMatrix) {
         _projectionMatrix.set(projectionMatrix);
-        _observer.widgetDraw(viewport, _projectionMatrix);
+        _observer.widgetDraw(_projectionMatrix);
         if (_children != null) {
             for (var child : _children) {
-                child.draw(viewport, projectionMatrix);
+                child.draw(projectionMatrix);
             }
         }
     }
@@ -161,7 +174,7 @@ public class Widget implements IInputObserver {
     }
 
     @Override
-    public void mouseButtonEvent(int button, int action, int mods) throws IOException, InterruptedException {
+    public void mouseButtonEvent(int button, int action, int mods) throws Exception {
         if (_observer != null) {
             _observer.mouseButtonEvent(button, action, mods);
         }
@@ -181,16 +194,16 @@ public class Widget implements IInputObserver {
         }
     }
 
-    private Vector2f calculateInitialPosition(WidgetCreateInfo wci, GlRenderer renderer) {
+    private Vector2f calculateInitialPosition(WidgetCreateInfo wci, Renderer renderer) {
         String initialPosition = wci._properties.get(INITIAL_POSITION);
         if (initialPosition != null) {
-            if (initialPosition.equals(CENTER_IN_VIEWPORT) && renderer.getNumViewports() > 0) {
-                ViewportConfig viewportConfig = renderer.getViewport(0).getConfig();
+            if (initialPosition.equals(CENTER_IN_VIEWPORT) && renderer.getNumPerspectiveViewports() > 0) {
+                ViewportConfig viewportConfig = renderer.getOrthographicViewport().getConfig();
                 wci._position.x = (viewportConfig._width / 2.0f) - (wci._size.x / 2.0f);
                 wci._position.y = (viewportConfig._height / 2.0f) - (wci._size.y / 2.0f);
             }
-            else if (initialPosition.equals(FULL_VIEWPORT) && renderer.getNumViewports() > 0) {
-                ViewportConfig viewportConfig = renderer.getViewport(0).getConfig();
+            else if (initialPosition.equals(FULL_VIEWPORT) && renderer.getNumPerspectiveViewports() > 0) {
+                ViewportConfig viewportConfig = renderer.getOrthographicViewport().getConfig();
                 wci._position.x = wci._position.y = 0.0f;
                 wci._size.x = viewportConfig._width;
                 wci._size.y = viewportConfig._height;

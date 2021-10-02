@@ -1,8 +1,6 @@
 package com.lunargravity.campaign.model;
 
-import com.lunargravity.engine.scene.ISceneStateOwner;
-
-public class CampaignModel implements ICampaignModel, ISceneStateOwner {
+public class CampaignModel implements ICampaignModel {
     private static final int INITIAL_SHIP_COUNT = 3;
 
     private int _episode;
@@ -27,11 +25,6 @@ public class CampaignModel implements ICampaignModel, ISceneStateOwner {
 
     @Override
     public void modelFromJson(String json) {
-        // TODO
-    }
-
-    @Override
-    public void stateSettingLoaded(String name, String value) {
         // TODO
     }
 

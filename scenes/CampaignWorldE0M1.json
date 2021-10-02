@@ -1,3 +1,13 @@
 {
-    "DoStuff": 1
+    "_name": "Campaign World Episode 0, Mission 1",
+    "_displayMeshFileNames": [
+        "meshes/E0M1.Display.obj",
+        "meshes/LunarLander.Display.obj",
+        "meshes/Crate.Display.obj"
+    ],
+    "_collisionMeshFileNames": [
+        "meshes/E0M1.Collision.obj",
+        "meshes/LunarLander.Collision.obj",
+        "meshes/Crate.Collision.obj"
+    ]
 }

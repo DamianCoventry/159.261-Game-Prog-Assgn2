@@ -63,7 +63,7 @@ public class RunningRaceState extends StateBase {
     }
 
     @Override
-    public void draw2d(int viewport, Matrix4f projectionMatrix) { // temp
+    public void draw2d(Matrix4f projectionMatrix) { // temp
         // temp
         _font.drawNumber(projectionMatrix, getRaceModel().getNumPlayers(), 10.0f, 74.0f, 1.0f, WHITE);
         _font.drawNumber(projectionMatrix, getRaceModel().getLevel(), 10.0f, 10.0f, 1.0f, WHITE);

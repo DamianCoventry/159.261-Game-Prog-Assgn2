@@ -14,8 +14,7 @@
 
 package com.lunargravity.mvc;
 
-import com.lunargravity.engine.scene.ISceneLogicOwner;
-
-public interface IController extends ISceneLogicOwner {
-    void onControllerThink();
+public interface IController {
+    void controllerThink();
+    void levelCompleted();
 }

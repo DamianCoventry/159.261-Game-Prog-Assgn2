@@ -14,9 +14,7 @@
 
 package com.lunargravity.mvc;
 
-import com.lunargravity.engine.scene.ISceneStateOwner;
-
-public interface IModel extends ISceneStateOwner {
+public interface IModel {
     String modelToJson();
     void modelFromJson(String json);
 }

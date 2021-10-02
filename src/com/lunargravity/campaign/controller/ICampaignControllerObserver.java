@@ -1,6 +1,6 @@
 package com.lunargravity.campaign.controller;
 
-import java.io.IOException;
+import com.lunargravity.campaign.view.ICampaignView;
 
 public interface ICampaignControllerObserver {
     void gameOver();
@@ -8,15 +8,17 @@ public interface ICampaignControllerObserver {
     void gameCompleted();
     void gameCompletedAborted();
 
-    void startNextEpisode() throws IOException, InterruptedException;
-    void episodeIntroAborted();
+    void startNextEpisode() throws Exception;
+    void episodeIntroAborted() throws Exception;
     void missionIntroAborted();
-    void episodeOutroAborted() throws IOException, InterruptedException;
+    void episodeOutroAborted() throws Exception;
     void episodeCompleted();
 
-    void startNextMission();
+    void startNextMission() throws Exception;
     void resumeMission();
-    void playerShipSpawned();
+    void missionCompleted();
+    void playerDied(ICampaignView.WhichPlayer whichPlayer);
+    void playerShipSpawned(ICampaignView.WhichPlayer whichPlayer);
 
     void quitCampaign();
 }

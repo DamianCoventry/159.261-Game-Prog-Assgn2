@@ -1,5 +1,6 @@
 package com.lunargravity.campaign.view;
 
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.campaign.statemachine.GetReadyState;
@@ -29,6 +30,9 @@ public class CampaignView implements
     private final WidgetManager _widgetManager;
     private final ICampaignController _controller;
     private final ICampaignModel _model;
+    private final DisplayMeshCache _displayMeshCache;
+    private final MaterialCache _materialCache;
+    private final TextureCache _textureCache;
 
     private Widget _episodeIntro;
     private Widget _episodeOutro;
@@ -44,6 +48,9 @@ public class CampaignView implements
         _widgetManager = widgetManager;
         _controller = controller;
         _model = model;
+        _displayMeshCache = new DisplayMeshCache();
+        _materialCache = new MaterialCache();
+        _textureCache = new TextureCache();
     }
 
     @Override
@@ -63,7 +70,32 @@ public class CampaignView implements
     }
 
     @Override
-    public void drawView2d(int viewport, Matrix4f projectionMatrix) {
+    public void drawView2d(Matrix4f projectionMatrix) {
+        // TODO
+    }
+
+    @Override
+    public DisplayMeshCache getDisplayMeshCache() {
+        return _displayMeshCache;
+    }
+
+    @Override
+    public MaterialCache getMaterialCache() {
+        return _materialCache;
+    }
+
+    @Override
+    public TextureCache getTextureCache() {
+        return _textureCache;
+    }
+
+    @Override
+    public void onFrameEnd() {
+        // TODO
+    }
+
+    @Override
+    public void resetState() {
         // TODO
     }
 
@@ -145,12 +177,17 @@ public class CampaignView implements
     }
 
     @Override
-    public void staticMeshLoaded(GlStaticMesh staticMesh) {
+    public void displayMeshLoaded(DisplayMesh displayMesh) {
         // TODO
     }
 
     @Override
-    public void materialLoaded(GlMaterial material) {
+    public void collisionMeshLoaded(String name, CollisionShape collisionMesh) {
+        // TODO
+    }
+
+    @Override
+    public void materialLoaded(Material material) {
         // TODO
     }
 
@@ -205,7 +242,7 @@ public class CampaignView implements
     }
 
     @Override
-    public void announcementClicked(String widgetId) throws IOException, InterruptedException {
+    public void announcementClicked(String widgetId) throws Exception {
         switch (widgetId) {
             case EPISODE_INTRO_ANNOUNCEMENT -> _controller.episodeIntroAborted();
             case EPISODE_OUTRO_ANNOUNCEMENT -> _controller.episodeOutroAborted();

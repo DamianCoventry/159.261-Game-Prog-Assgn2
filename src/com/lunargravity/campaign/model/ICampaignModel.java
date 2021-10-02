@@ -11,7 +11,7 @@ public interface ICampaignModel extends IModel {
     int getNumPlayers();
 
     enum DecrementPlayerShipResult { SHIP_AVAILABLE, SHIPS_EXHAUSTED }
-    DecrementPlayerShipResult decrementPlayerShip(int player);
+    DecrementPlayerShipResult decrementPlayerShip(int i);
 
     enum IncrementEpisodeResult { START_NEXT_EPISODE, GAME_COMPLETED }
     IncrementEpisodeResult incrementEpisode();

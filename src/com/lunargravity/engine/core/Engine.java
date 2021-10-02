@@ -15,14 +15,14 @@
 package com.lunargravity.engine.core;
 
 import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.system.NativeLibraryLoader;
 import com.lunargravity.engine.desktopwindow.GlfwWindow;
 import com.lunargravity.engine.desktopwindow.GlfwWindowConfig;
-import com.lunargravity.engine.graphics.GlRenderer;
 import com.lunargravity.engine.graphics.GlViewport;
+import com.lunargravity.engine.graphics.Renderer;
 import com.lunargravity.engine.graphics.ViewportConfig;
 import com.lunargravity.engine.timeouts.TimeoutManager;
-import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.*;
@@ -37,9 +37,10 @@ public class Engine implements IEngine {
     private final IInputObserver _inputObserver;
     private final IViewportSizeObserver _viewportSizeObserver;
 
-    private final GlRenderer _renderer;
+    private final Renderer _renderer;
     private final TimeoutManager _timeoutManager;
     private final PhysicsSpace _physicsSpace;
+    private PhysicsCollisionListener _physicsCollisionListener;
     private GlfwWindow _window;
 
     private long _currentFrameNo;
@@ -60,13 +61,22 @@ public class Engine implements IEngine {
         _inputObserver = inputObserver;
         _viewportSizeObserver = viewportSizeObserver;
         _timeoutManager = new TimeoutManager();
+
         _physicsSpace = new PhysicsSpace(PhysicsSpace.BroadphaseType.DBVT);
+        _physicsSpace.addOngoingCollisionListener(event -> {
+            if (_physicsCollisionListener != null) {
+                _physicsCollisionListener.collision(event);
+            }
+        });
 
         resetFrameCounters();
         createDesktopWindow(windowConfig);
 
-        _renderer = new GlRenderer(new ViewportConfig[] {
-                createDefaultViewportConfig()
+        _renderer = new Renderer(
+                (int)_window.getWidth(),
+                (int)_window.getHeight(),
+                new ViewportConfig[] {
+                    ViewportConfig.createFullWindow((int)_window.getWidth(), (int)_window.getHeight())
         });
     }
 
@@ -76,7 +86,7 @@ public class Engine implements IEngine {
     }
 
     @Override
-    public void run() throws IOException, InterruptedException {
+    public void run() throws Exception {
         resetFrameCounters();
         while (!_window.shouldClose()) {
             _currentTimeMs = System.currentTimeMillis();
@@ -86,17 +96,20 @@ public class Engine implements IEngine {
             _frameObserver.onFrameBegin(_currentFrameNo, _currentTimeMs, _frameDelta);
 
             _physicsSpace.update(PHYSICS_TIME_STEP, 0);
+            _physicsSpace.distributeEvents();
             _frameObserver.onFrameThink();
 
             _renderer.clearBuffers();
-            for (int i = 0; i < _renderer.getNumViewports(); ++i) {
-                GlViewport viewport = _renderer.getViewport(i);
+            for (int i = 0; i < _renderer.getNumPerspectiveViewports(); ++i) {
+                GlViewport viewport = _renderer.getPerspectiveViewport(i);
                 if (viewport != null) {
                     viewport.activate();
                     _frameObserver.onFrameDraw3d(i, viewport.getPerspectiveMatrix());
-                    _frameObserver.onFrameDraw2d(i, viewport.getOrthographicMatrix());
                 }
             }
+
+            _renderer.getOrthographicViewport().activate();
+            _frameObserver.onFrameDraw2d(_renderer.getOrthographicViewport().getOrthographicMatrix());
 
             _window.flipPages();
             _frameObserver.onFrameEnd();
@@ -111,16 +124,17 @@ public class Engine implements IEngine {
 
     @Override
     public void setDefaultViewport() {
-        _renderer.setViewports(new ViewportConfig[] {
-                createDefaultViewportConfig()
-        });
+        _renderer.setPerspectiveViewports(
+                new ViewportConfig[]{
+                        ViewportConfig.createFullWindow((int) _window.getWidth(), (int) _window.getHeight())
+                });
     }
 
     @Override
-    public Vector2f[] getViewportSizes() {
-        Vector2f[] viewportSizes = new Vector2f[_renderer.getNumViewports()];
-        for (int i = 0; i < _renderer.getNumViewports(); ++i) {
-            ViewportConfig config = _renderer.getViewport(i).getConfig();
+    public Vector2f[] getPerspectiveViewportSizes() {
+        Vector2f[] viewportSizes = new Vector2f[_renderer.getNumPerspectiveViewports()];
+        for (int i = 0; i < _renderer.getNumPerspectiveViewports(); ++i) {
+            ViewportConfig config = _renderer.getPerspectiveViewport(i).getConfig();
             viewportSizes[i] = new Vector2f(config._width, config._height);
         }
         return viewportSizes;
@@ -128,6 +142,7 @@ public class Engine implements IEngine {
 
     @Override
     public void prepareNewFrame() {
+        _renderer.getOrthographicViewport().activate();
         _renderer.clearBuffers();
     }
 
@@ -137,19 +152,27 @@ public class Engine implements IEngine {
     }
 
     @Override
+    public Vector2f getOrthographicViewportSize() {
+        return new Vector2f(
+                _renderer.getOrthographicViewport().getConfig()._width,
+                _renderer.getOrthographicViewport().getConfig()._height
+        );
+    }
+
+    @Override
     public Matrix4f getPerspectiveProjectionMatrix() {
-        if (_renderer.getNumViewports() == 0) {
+        if (_renderer.getNumPerspectiveViewports() == 0) {
             throw new RuntimeException("There are no viewports");
         }
-        return _renderer.getViewport(0).getPerspectiveMatrix();
+        return _renderer.getPerspectiveViewport(0).getPerspectiveMatrix();
     }
 
     @Override
     public Matrix4f getOrthographicProjectionMatrix() {
-        if (_renderer.getNumViewports() == 0) {
+        if (_renderer.getNumPerspectiveViewports() == 0) {
             throw new RuntimeException("There are no viewports");
         }
-        return _renderer.getViewport(0).getOrthographicMatrix();
+        return _renderer.getPerspectiveViewport(0).getOrthographicMatrix();
     }
 
     @Override
@@ -163,6 +186,11 @@ public class Engine implements IEngine {
     }
 
     @Override
+    public long getNowMs() {
+        return _currentTimeMs;
+    }
+
+    @Override
     public TimeoutManager getTimeoutManager() {
         return _timeoutManager;
     }
@@ -173,7 +201,7 @@ public class Engine implements IEngine {
     }
 
     @Override
-    public GlRenderer getRenderer() {
+    public Renderer getRenderer() {
         return _renderer;
     }
 
@@ -190,6 +218,11 @@ public class Engine implements IEngine {
     @Override
     public float getDesktopWindowHeight() {
         return _window.getHeight();
+    }
+
+    @Override
+    public void setPhysicsCollisionListener(PhysicsCollisionListener listener) {
+        _physicsCollisionListener = listener;
     }
 
     @Override
@@ -268,12 +301,12 @@ public class Engine implements IEngine {
                 if (_renderer == null || _viewportSizeObserver == null) {
                     return;
                 }
-                for (int i = 0; i < _renderer.getNumViewports(); ++i) {
+                for (int i = 0; i < _renderer.getNumPerspectiveViewports(); ++i) {
                     ViewportConfig newConfig = _viewportSizeObserver.onViewportSizeChanged(
-                            i, _renderer.getViewport(i).getConfig(),
+                            i, _renderer.getPerspectiveViewport(i).getConfig(),
                             (int)_window.getWidth(), (int)_window.getHeight());
                     if (newConfig != null) {
-                        _renderer.getViewport(i).setConfig(newConfig);
+                        _renderer.getPerspectiveViewport(i).setConfig(newConfig);
                     }
                 }
             }
@@ -294,7 +327,7 @@ public class Engine implements IEngine {
                 if (_inputObserver != null) {
                     try {
                         _inputObserver.mouseButtonEvent(button, action, mods);
-                    } catch (IOException | InterruptedException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -332,18 +365,5 @@ public class Engine implements IEngine {
             _fps = _frameCount;
             _frameCount = 0;
         }
-    }
-
-    private @NotNull ViewportConfig createDefaultViewportConfig() {
-        ViewportConfig config = new ViewportConfig();
-        config._viewportIndex = 0;
-        config._positionX = 0;
-        config._positionY = 0;
-        config._width = (int)_window.getWidth();
-        config._height = (int)_window.getHeight();
-        config._verticalFovDegrees = 60.0;
-        config._perspectiveNcp = 1.0f;
-        config._perspectiveFcp = 10000.0f;
-        return config;
     }
 }

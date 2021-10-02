@@ -3,12 +3,10 @@ package com.lunargravity.campaign.controller;
 import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.engine.core.IEngine;
-import com.lunargravity.engine.scene.ISceneLogicOwner;
 
-import java.io.IOException;
 import java.util.LinkedList;
 
-public class CampaignController implements ICampaignController, ISceneLogicOwner {
+public class CampaignController implements ICampaignController {
     private final LinkedList<ICampaignControllerObserver> _observers;
     private final IEngine _engine;
     private final ICampaignModel _model;
@@ -30,31 +28,26 @@ public class CampaignController implements ICampaignController, ISceneLogicOwner
     }
 
     @Override
-    public void onControllerThink() {
+    public void controllerThink() {
         // TODO
     }
 
     @Override
-    public void logicSettingLoaded(String name, String value) {
-        // TODO
-    }
-
-    @Override
-    public void episodeIntroAborted() {
+    public void episodeIntroAborted() throws Exception {
         for (var observer : _observers) {
             observer.episodeIntroAborted();
         }
     }
 
     @Override
-    public void episodeOutroAborted() throws IOException, InterruptedException {
+    public void episodeOutroAborted() throws Exception {
         for (var observer : _observers) {
             observer.episodeOutroAborted();
         }
     }
 
     @Override
-    public void completeEpisode() throws IOException, InterruptedException {
+    public void completeEpisode() throws Exception {
         if (_model.incrementEpisode() == ICampaignModel.IncrementEpisodeResult.GAME_COMPLETED) {
             for (var observer : _observers) {
                 observer.gameCompleted();
@@ -96,7 +89,14 @@ public class CampaignController implements ICampaignController, ISceneLogicOwner
     }
 
     @Override
-    public void completeMission() {
+    public void levelCompleted() {
+        for (var observer : _observers) {
+            observer.missionCompleted();
+        }
+    }
+
+    @Override
+    public void completeMission() throws Exception {
         if (_model.incrementMission() == ICampaignModel.IncrementMissionResult.EPISODE_COMPLETED) {
             for (var observer : _observers) {
                 observer.episodeCompleted();
@@ -106,6 +106,13 @@ public class CampaignController implements ICampaignController, ISceneLogicOwner
             for (var observer : _observers) {
                 observer.startNextMission();
             }
+        }
+    }
+
+    @Override
+    public void playerDied(ICampaignView.WhichPlayer whichPlayer) {
+        for (var observer : _observers) {
+            observer.playerDied(whichPlayer);
         }
     }
 
@@ -122,7 +129,7 @@ public class CampaignController implements ICampaignController, ISceneLogicOwner
         }
         else {
             for (var observer : _observers) {
-                observer.playerShipSpawned();
+                observer.playerShipSpawned(whichPlayer);
             }
         }
     }

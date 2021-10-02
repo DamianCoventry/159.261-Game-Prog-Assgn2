@@ -26,7 +26,7 @@ public class LoadingMenuState extends StateBase {
     }
 
     @Override
-    public void begin() throws IOException, InterruptedException {
+    public void begin() throws Exception {
         MenuBuilderObserver menuBuilderObserver = new MenuBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
 
         getContext().startMenu(menuBuilderObserver);

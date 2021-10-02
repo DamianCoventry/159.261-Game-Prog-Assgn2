@@ -22,7 +22,7 @@ public class LoadingCampaignState extends StateBase {
     }
 
     @Override
-    public void begin() throws IOException, InterruptedException {
+    public void begin() throws Exception {
         if (_fileName != null) {
             getContext().createCampaignMvc(_fileName);
         } else {

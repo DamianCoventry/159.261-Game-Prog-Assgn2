@@ -1,23 +1,61 @@
-Change from interfaces to abstract classes
-Remove usage of InterruptedException
-Create menu world objects
-Allow the user to move the camera around the menu world
-Create Campaign world objects
-Create Race world objects
-Save player's progress during campaign
-Create a font for the menu?
+MUST DO
+Campaign gameplay:
+    add lunar lander ship debris
+    drop crates on death
+    allow lunar lander to shoot
+    hud
+Race gameplay:
+    add ghost bodies
+    allow player to collide with ghost bodies
+    trigger race end condition
+    hud
+Dogfight gameplay:
+    allow player to take damage
+    allow player to explode
+    trigger dogfight end condition
+    hud
+load and play sound effects
+Stream music
+use key bindings
 Complete the menu widgets:
     Saved Game list widget
     Sound + music check widgets
     Sound + music numeric widgets
     Player keys Key binding widgets
-create opengl vertex buffers from .obj files
-create materials from .mtl files
-create sounds from .wav files
-create music from .mp3 files
-create rigid bodies from .obj files
-create collisions shapes from .obj files
-create animations from FCurves
+Make 30 campaign levels
+make 10 race levels
+make 10 dogfight levels
+load and save high score tables
+
+SHOULD DO
+positional lighting
+bill boarding
+particle systems
+Save player's progress during campaign
+Make better loading screens (based on activity, not progress)
+key binding hints during the game
+create menu world meshes
+Allow the user to move the camera around the menu world
+create animations from FCurves:
+    widget open/close animation
+    lunar lander exhaust
+    lunar lander hit animation
+    crate collection animation
+    crate delivery animation
+add laser gates
+enemy ships:
+    add state for them
+    add state for movement tracks + loops
+    allow enemy ships to shoot
+    allow enemy ships to take damage
+    allow enemy ships to explode
+    add enemy ship debris
+better lunar lander explosion
+better menu GUI
+
+COULD DO
+Change from interfaces to abstract classes
+Remove usage of InterruptedException
 check all TODOs within the source
 
 Refactor a piece of the Widget system:

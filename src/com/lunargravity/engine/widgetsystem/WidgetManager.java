@@ -1,15 +1,28 @@
+//
+// Lunar Gravity
+//
+// This game is based upon the Amiga video game Gravity Force that was
+// released in 1989 by Stephan Wenzler
+//
+// https://www.mobygames.com/game/gravity-force
+// https://www.youtube.com/watch?v=m9mFtCvnko8
+//
+// This implementation is Copyright (c) 2021, Damian Coventry
+// All rights reserved
+// Written for Massey University course 159.261 Game Programming (Assignment 2)
+//
+
 package com.lunargravity.engine.widgetsystem;
 
 import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.engine.core.IInputObserver;
 import com.lunargravity.engine.desktopwindow.GlfwWindow;
-import com.lunargravity.engine.graphics.GlRenderer;
+import com.lunargravity.engine.graphics.Renderer;
 import com.lunargravity.engine.graphics.GlViewport;
 import com.lunargravity.engine.graphics.ViewportConfig;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
-import java.io.IOException;
 import java.util.LinkedList;
 
 import static org.lwjgl.opengl.GL11C.glDepthMask;
@@ -18,7 +31,7 @@ public class WidgetManager implements IInputObserver {
     private final LinkedList<Widget> _allWidgets;
     private final LinkedList<Widget> _visibleWidgets;
     private final IEngine _engine;
-    private final GlRenderer _renderer;
+    private final Renderer _renderer;
     private Widget _keyboardFocus;
     private Widget _mouseCapture;
     private Widget _hoveringOver;
@@ -33,7 +46,7 @@ public class WidgetManager implements IInputObserver {
         _hoveringOver = null;
     }
 
-    public GlRenderer getRenderer() {
+    public Renderer getRenderer() {
         return _renderer;
     }
 
@@ -58,10 +71,10 @@ public class WidgetManager implements IInputObserver {
         }
     }
 
-    public void draw(int viewport, Matrix4f projectionMatrix) {
+    public void draw(Matrix4f projectionMatrix) {
         glDepthMask(false);
         for (var widget : _visibleWidgets) {
-            widget.draw(viewport, projectionMatrix);
+            widget.draw(projectionMatrix);
         }
         glDepthMask(true);
     }
@@ -289,7 +302,7 @@ public class WidgetManager implements IInputObserver {
     }
 
     @Override
-    public void mouseButtonEvent(int button, int action, int mods) throws IOException, InterruptedException {
+    public void mouseButtonEvent(int button, int action, int mods) throws Exception {
         Widget greatestDescendant = null;
         Vector2f viewportCoordinates = toViewportCoordinates(_engine.getMouseCursorPosition());
         if (viewportCoordinates != null) {
@@ -356,12 +369,10 @@ public class WidgetManager implements IInputObserver {
         // of the window but the viewports are relative to the bottom left.
         final float yPosition = _engine.getDesktopWindowHeight() - cursorPosition.m_YPos;
 
-        for (int i = 0; i < _engine.getRenderer().getNumViewports(); ++i) {
-            GlViewport viewport = _engine.getRenderer().getViewport(i);
-            if (viewport.containsPoint(cursorPosition.m_XPos, yPosition)) {
-                return new Vector2f(cursorPosition.m_XPos - viewport.getConfig()._positionX,
-                                 yPosition - viewport.getConfig()._positionY);
-            }
+        GlViewport viewport = _engine.getRenderer().getOrthographicViewport();
+        if (viewport.containsPoint(cursorPosition.m_XPos, yPosition)) {
+            return new Vector2f(cursorPosition.m_XPos - viewport.getConfig()._positionX,
+                             yPosition - viewport.getConfig()._positionY);
         }
         return null;
     }

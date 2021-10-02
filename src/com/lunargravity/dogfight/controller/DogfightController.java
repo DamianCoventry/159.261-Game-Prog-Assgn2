@@ -15,11 +15,10 @@
 package com.lunargravity.dogfight.controller;
 
 import com.lunargravity.dogfight.model.IDogfightModel;
-import com.lunargravity.engine.scene.ISceneLogicOwner;
 
 import java.util.LinkedList;
 
-public class DogfightController implements IDogfightController, ISceneLogicOwner {
+public class DogfightController implements IDogfightController {
     private final LinkedList<IDogfightControllerObserver> _observers;
     private final IDogfightModel _model;
 
@@ -29,13 +28,13 @@ public class DogfightController implements IDogfightController, ISceneLogicOwner
     }
 
     @Override
-    public void onControllerThink() {
+    public void controllerThink() {
         // TODO
     }
 
     @Override
-    public void logicSettingLoaded(String name, String value) {
-        // TODO
+    public void levelCompleted() {
+        // Nothing to do
     }
 
     @Override

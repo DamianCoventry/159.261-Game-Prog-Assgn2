@@ -50,7 +50,7 @@ public class MenuBuilderObserver implements ISceneBuilderObserver {
     private Widget createBackgroundImageWidget() throws IOException {
         WidgetCreateInfo wci = new WidgetCreateInfo(ImageWidget.BACKGROUND_IMAGE, "ImageWidget");
         wci._position = new Vector2f(0, 0);
-        wci._size = _manualFrameUpdater.getViewportSizes()[0];
+        wci._size = _manualFrameUpdater.getOrthographicViewportSize();
         wci._properties = new HashMap<>();
         wci._properties.put(ImageWidget.BACKGROUND_IMAGE, "images/LoadingMenu.png");
         wci._properties.put(Widget.INITIAL_POSITION, Widget.FULL_VIEWPORT);
@@ -58,8 +58,8 @@ public class MenuBuilderObserver implements ISceneBuilderObserver {
         ViewportConfig viewportConfig = new ViewportConfig();
         viewportConfig._viewportIndex = 0; // TODO: this is temporary
         viewportConfig._positionX = viewportConfig._positionY = 0;
-        viewportConfig._width = (int)_manualFrameUpdater.getViewportSizes()[0].x;
-        viewportConfig._height = (int)_manualFrameUpdater.getViewportSizes()[0].y;
+        viewportConfig._width = (int)_manualFrameUpdater.getOrthographicViewportSize().x;
+        viewportConfig._height = (int)_manualFrameUpdater.getOrthographicViewportSize().y;
 
         return new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
     }
@@ -91,9 +91,11 @@ public class MenuBuilderObserver implements ISceneBuilderObserver {
 
         Matrix4f projectionMatrix = _manualFrameUpdater.getOrthographicProjectionMatrix();
 
-        _widgetManager.draw(0, projectionMatrix);
+        _widgetManager.draw(projectionMatrix);
 
-        _font.drawPercentage(projectionMatrix, currentItem * 100L / totalItems, LABEL_X_OFFSET, LABEL_Y_OFFSET, 1.0f, WHITE);
+        if (totalItems > 0) {
+            _font.drawPercentage(projectionMatrix, currentItem * 100L / totalItems, LABEL_X_OFFSET, LABEL_Y_OFFSET, 1.0f, WHITE);
+        }
 
         _manualFrameUpdater.submitFrame();
     }

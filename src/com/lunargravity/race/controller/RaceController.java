@@ -1,12 +1,11 @@
 package com.lunargravity.race.controller;
 
-import com.lunargravity.engine.scene.ISceneLogicOwner;
 import com.lunargravity.race.model.IRaceModel;
 
 import java.time.LocalTime;
 import java.util.LinkedList;
 
-public class RaceController implements IRaceController, ISceneLogicOwner {
+public class RaceController implements IRaceController {
     private final LinkedList<IRaceControllerObserver> _observers;
     private final IRaceModel _model;
 
@@ -16,13 +15,13 @@ public class RaceController implements IRaceController, ISceneLogicOwner {
     }
 
     @Override
-    public void onControllerThink() {
+    public void controllerThink() {
         // TODO
     }
 
     @Override
-    public void logicSettingLoaded(String name, String value) {
-        // TODO
+    public void levelCompleted() {
+        // Nothing to do
     }
 
     @Override

@@ -1,3 +1,17 @@
+//
+// Lunar Gravity
+//
+// This game is based upon the Amiga video game Gravity Force that was
+// released in 1989 by Stephan Wenzler
+//
+// https://www.mobygames.com/game/gravity-force
+// https://www.youtube.com/watch?v=m9mFtCvnko8
+//
+// This implementation is Copyright (c) 2021, Damian Coventry
+// All rights reserved
+// Written for Massey University course 159.261 Game Programming (Assignment 2)
+//
+
 package com.lunargravity.engine.graphics;
 
 import org.joml.Matrix4f;
@@ -12,7 +26,7 @@ import static org.lwjgl.opengl.GL11C.glDepthMask;
 public class NumberFont {
     private static final int NUM_CHARACTERS = 11;
 
-    private final GlRenderer _renderer;
+    private final Renderer _renderer;
     private final GlTexture _texture;
     private final GlDiffuseTextureProgram _program;
     private final float _frameWidth;
@@ -22,7 +36,7 @@ public class NumberFont {
     private final Matrix4f _modelMatrix;
     private PolyhedraVxTc[] _characterPolyhedra;
 
-    public NumberFont(GlRenderer renderer, float frameWidth, float frameHeight, String imageFileName) throws IOException {
+    public NumberFont(Renderer renderer, float frameWidth, float frameHeight, String imageFileName) throws IOException {
         _frameWidth = frameWidth;
         _halfFrameWidth = frameWidth / 2.0f;
         _halfFrameHeight = frameHeight / 2.0f;
@@ -41,12 +55,12 @@ public class NumberFont {
         }
     }
 
-    public void drawNumber(Matrix4f projectionMatrix, long number, float x, float y, float scale, Vector4f colour) {
+    public void drawNumber(Matrix4f projectionMatrix, long number, float x, float y, float scale, Vector4f Vector4f) {
         _renderer.activateTextureImageUnit(0);
         glBindTexture(GL_TEXTURE_2D, _texture.getId());
 
         _program.bind();
-        _program.setDiffuseColour(colour);
+        _program.setDiffuseColour(Vector4f);
 
         glDepthMask(false);
 
@@ -60,8 +74,8 @@ public class NumberFont {
         glDepthMask(true);
     }
 
-    public void drawPercentage(Matrix4f projectionMatrix, long number, float x, float y, float scale, Vector4f colour) {
-        drawNumber(projectionMatrix, number, x, y, scale, colour);
+    public void drawPercentage(Matrix4f projectionMatrix, long number, float x, float y, float scale, Vector4f Vector4f) {
+        drawNumber(projectionMatrix, number, x, y, scale, Vector4f);
         glDepthMask(false);
         drawSingleCharacter(projectionMatrix, NUM_CHARACTERS - 1, x + String.valueOf(number).length() * _frameWidth, y, scale);
         glDepthMask(true);

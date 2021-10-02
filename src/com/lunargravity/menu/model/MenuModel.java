@@ -14,10 +14,8 @@
 
 package com.lunargravity.menu.model;
 
-import com.lunargravity.engine.scene.ISceneStateOwner;
-
 // TODO: is this class needed?
-public class MenuModel implements IMenuModel, ISceneStateOwner {
+public class MenuModel implements IMenuModel {
     @Override
     public String modelToJson() {
         // TODO
@@ -36,11 +34,6 @@ public class MenuModel implements IMenuModel, ISceneStateOwner {
 
     @Override
     public void resetDogfightScoreboard() {
-        // TODO
-    }
-
-    @Override
-    public void stateSettingLoaded(String name, String value) {
         // TODO
     }
 }

@@ -20,5 +20,7 @@ import java.util.ArrayList;
 
 public class Scene {
     public String _name;
+    public ArrayList<String> _displayMeshFileNames;
+    public ArrayList<String> _collisionMeshFileNames;
     public ArrayList<WidgetCreateInfo> _widgets;
 }

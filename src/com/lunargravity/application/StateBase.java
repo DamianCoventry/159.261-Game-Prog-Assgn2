@@ -15,12 +15,11 @@
 package com.lunargravity.application;
 
 import com.lunargravity.engine.core.IManualFrameUpdater;
-import com.lunargravity.engine.graphics.GlRenderer;
+import com.lunargravity.engine.graphics.Renderer;
 import com.lunargravity.engine.graphics.ViewportConfig;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 import org.joml.Matrix4f;
 
-import java.io.IOException;
 import java.util.function.Function;
 
 public class StateBase implements IState {
@@ -47,7 +46,7 @@ public class StateBase implements IState {
     }
 
     @Override
-    public void begin() throws IOException, InterruptedException {
+    public void begin() throws Exception {
         // TODO
     }
 
@@ -67,7 +66,7 @@ public class StateBase implements IState {
     }
 
     @Override
-    public void draw2d(int viewport, Matrix4f projectionMatrix) {
+    public void draw2d(Matrix4f projectionMatrix) {
         // TODO
     }
 
@@ -77,7 +76,7 @@ public class StateBase implements IState {
     }
 
     @Override
-    public GlRenderer getRenderer() {
+    public Renderer getRenderer() {
         return _context.getEngine().getRenderer();
     }
 

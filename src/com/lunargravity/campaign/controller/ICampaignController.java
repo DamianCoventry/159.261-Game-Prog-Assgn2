@@ -12,13 +12,14 @@ public interface ICampaignController extends IController {
     void gameOverAborted();
     void gameWonAborted();
 
-    void episodeIntroAborted();
-    void episodeOutroAborted() throws IOException, InterruptedException;
-    void completeEpisode() throws IOException, InterruptedException;
+    void episodeIntroAborted() throws Exception;
+    void episodeOutroAborted() throws Exception;
+    void completeEpisode() throws Exception;
     
     void missionIntroAborted();
     void resumeMission();
-    void completeMission();
+    void completeMission() throws Exception;
+    void playerDied(ICampaignView.WhichPlayer whichPlayer);
     void spawnNextPlayerShip(ICampaignView.WhichPlayer whichPlayer);
 
     void quitCampaign();

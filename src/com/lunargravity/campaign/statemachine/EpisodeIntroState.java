@@ -24,7 +24,11 @@ public class EpisodeIntroState extends StateBase implements ICampaignControllerO
         getCampaignView().showEpisodeIntro();
 
         _timeoutId = addTimeout(3000, (callCount) -> {
-            loadCampaignMission();
+            try {
+                loadCampaignMission();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             _timeoutId = 0;
             return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;
         });
@@ -45,7 +49,7 @@ public class EpisodeIntroState extends StateBase implements ICampaignControllerO
     }
 
     @Override
-    public void episodeIntroAborted() {
+    public void episodeIntroAborted() throws Exception {
         loadCampaignMission();
     }
 
@@ -90,7 +94,17 @@ public class EpisodeIntroState extends StateBase implements ICampaignControllerO
     }
 
     @Override
-    public void playerShipSpawned() {
+    public void missionCompleted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerDied(ICampaignView.WhichPlayer whichPlayer) {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerShipSpawned(ICampaignView.WhichPlayer whichPlayer) {
         // Nothing to do
     }
 
@@ -112,22 +126,13 @@ public class EpisodeIntroState extends StateBase implements ICampaignControllerO
         return (ICampaignController)getContext().getLogicController();
     }
 
-    private void loadCampaignMission() {
-        MissionBuilderObserver missionBuilderObserver = null;
+    private void loadCampaignMission() throws Exception {
+        MissionBuilderObserver missionBuilderObserver = new MissionBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
 
-        try {
-            missionBuilderObserver = new MissionBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
+        getContext().loadCampaignMission(missionBuilderObserver);
 
-            getContext().loadCampaignMission(missionBuilderObserver);
+        changeState(new MissionIntroState(getContext()));
 
-            changeState(new MissionIntroState(getContext()));
-        }
-        catch (IOException | InterruptedException e) {
-            // TODO: Is there something useful we can do with the exception?
-        }
-
-        if (missionBuilderObserver != null) {
-            missionBuilderObserver.freeResources();
-        }
+        missionBuilderObserver.freeResources();
     }
 }

@@ -16,21 +16,19 @@ package com.lunargravity.application;
 
 import com.lunargravity.engine.core.IInputObserver;
 import com.lunargravity.engine.core.IManualFrameUpdater;
-import com.lunargravity.engine.graphics.GlRenderer;
+import com.lunargravity.engine.graphics.Renderer;
 import com.lunargravity.engine.graphics.ViewportConfig;
 import org.joml.Matrix4f;
 
-import java.io.IOException;
-
 public interface IState extends IInputObserver {
-    void begin() throws IOException, InterruptedException;
+    void begin() throws Exception;
     void end();
     void think();
     void draw3d(int viewport, Matrix4f projectionMatrix);
-    void draw2d(int viewport, Matrix4f projectionMatrix);
+    void draw2d(Matrix4f projectionMatrix);
 
     IManualFrameUpdater getManualFrameUpdater();
-    GlRenderer getRenderer();
+    Renderer getRenderer();
 
     ViewportConfig onViewportSizeChanged(int viewport, ViewportConfig viewportConfig, int windowWidth, int windowHeight);
 }

@@ -38,7 +38,11 @@ public class MissionCompletedState extends StateBase implements ICampaignControl
         getCampaignView().showMissionCompleted();
 
         _timeoutId = addTimeout(3000, (callCount) -> {
-            getCampaignController().completeMission();
+            try {
+                getCampaignController().completeMission();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             _timeoutId = 0;
             return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;
         });
@@ -97,23 +101,14 @@ public class MissionCompletedState extends StateBase implements ICampaignControl
     }
 
     @Override
-    public void startNextMission() {
-        MissionBuilderObserver missionBuilderObserver = null;
+    public void startNextMission() throws Exception {
+        MissionBuilderObserver missionBuilderObserver = new MissionBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
 
-        try {
-            missionBuilderObserver = new MissionBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
+        getContext().loadCampaignMission(missionBuilderObserver);
 
-            getContext().loadCampaignMission(missionBuilderObserver);
+        changeState(new MissionIntroState(getContext()));
 
-            changeState(new MissionIntroState(getContext()));
-        }
-        catch (IOException | InterruptedException e) {
-            // TODO: Is there something useful we can do with the exception?
-        }
-
-        if (missionBuilderObserver != null) {
-            missionBuilderObserver.freeResources();
-        }
+        missionBuilderObserver.freeResources();
     }
 
     @Override
@@ -132,7 +127,17 @@ public class MissionCompletedState extends StateBase implements ICampaignControl
     }
 
     @Override
-    public void playerShipSpawned() {
+    public void missionCompleted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerDied(ICampaignView.WhichPlayer whichPlayer) {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerShipSpawned(ICampaignView.WhichPlayer whichPlayer) {
         // Nothing to do
     }
 

@@ -14,6 +14,7 @@
 
 package com.lunargravity.world.view;
 
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
@@ -22,7 +23,6 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
@@ -38,10 +38,12 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     }
 
     private final IMenuWorldModel _model;
+    private final DisplayMeshCache _displayMeshCache;
+    private final MaterialCache _materialCache;
+    private final TextureCache _textureCache;
+
     private final ArrayList<PlanetarySystem> _planetarySystems;
-    private final ArrayList<GlStaticMesh> _staticMeshes;
-    private final ArrayList<GlMaterial> _materials;
-    private final ArrayList<GlTexture> _textures;
+    private final ArrayList<DisplayMesh> _displayMeshes;
     private final ArrayList<GlObject> _cameras;
     private GlObject _currentCamera;
     private GlObject _sun;
@@ -49,9 +51,10 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     public MenuWorldView(IMenuWorldModel model) {
         _model = model;
         _planetarySystems = new ArrayList<>();
-        _staticMeshes = new ArrayList<>();
-        _materials = new ArrayList<>();
-        _textures = new ArrayList<>();
+        _displayMeshes = new ArrayList<>();
+        _displayMeshCache = new DisplayMeshCache();
+        _materialCache = new MaterialCache();
+        _textureCache = new TextureCache();
         _cameras = new ArrayList<>();
     }
 
@@ -89,12 +92,37 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void drawView2d(int viewport, Matrix4f projectionMatrix) {
+    public void drawView2d(Matrix4f projectionMatrix) {
         // TODO
     }
 
     @Override
-    public void drawWorldViewStuff() {
+    public DisplayMeshCache getDisplayMeshCache() {
+        return _displayMeshCache;
+    }
+
+    @Override
+    public MaterialCache getMaterialCache() {
+        return _materialCache;
+    }
+
+    @Override
+    public TextureCache getTextureCache() {
+        return _textureCache;
+    }
+
+    @Override
+    public void onFrameEnd() {
+        // TODO
+    }
+
+    @Override
+    public void resetState() {
+        // TODO
+    }
+
+    @Override
+    public void freeResources() {
         // TODO
     }
 
@@ -110,10 +138,10 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
             _currentCamera = _cameras.get(0);
         }
         if (name.startsWith("Sun")) {
-            _sun = new GlObject(name, transform, findStaticMesh(type));
+            _sun = new GlObject(name, transform, findDisplayMesh(type));
         }
         else if (name.startsWith("Planet")) {
-            GlObject planet = new GlObject(name, transform, findStaticMesh(type));
+            GlObject planet = new GlObject(name, transform, findDisplayMesh(type));
             _planetarySystems.add(new PlanetarySystem(planet));
         }
         else if (name.startsWith("Moon")) {
@@ -124,29 +152,32 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
             String planetName = name.substring(i + PLANET_STRING_ID.length(), name.length() - 1);
             String moonName = name.substring(0, i - 1);
             PlanetarySystem planetarySystem = findPlanetarySystem(planetName);
-            planetarySystem._moons.add(new GlObject(moonName, transform, findStaticMesh(type)));
+            planetarySystem._moons.add(new GlObject(moonName, transform, findDisplayMesh(type)));
         }
     }
 
     @Override
-    public void staticMeshLoaded(GlStaticMesh staticMesh) {
-        staticMesh.bindMaterials(_materials);
-        _staticMeshes.add(staticMesh);
+    public void displayMeshLoaded(DisplayMesh displayMesh) {
+        _displayMeshes.add(displayMesh);
     }
 
     @Override
-    public void materialLoaded(GlMaterial material) {
-        material.bindTextures(_textures);
-        _materials.add(material);
+    public void collisionMeshLoaded(String name, CollisionShape collisionMesh) {
+        // TODO
+    }
+
+    @Override
+    public void materialLoaded(Material material) {
+        _materialCache.add(material);
     }
 
     @Override
     public void textureLoaded(GlTexture texture) {
-        _textures.add(texture);
+        _textureCache.add(texture);
     }
 
     @Override
-    public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException {
+    public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) {
         if (wci == null) {
             System.out.print("MenuWorldView.widgetLoaded() was passed a null WidgetCreateInfo object");
             return;
@@ -154,10 +185,10 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
         // TODO
     }
 
-    public GlStaticMesh findStaticMesh(String name) {
-        for (final var staticMesh : _staticMeshes) {
-            if (name.equals(staticMesh.getName())) {
-                return staticMesh;
+    public DisplayMesh findDisplayMesh(String name) {
+        for (final var displayMesh : _displayMeshes) {
+            if (name.equals(displayMesh.getName())) {
+                return displayMesh;
             }
         }
         throw new RuntimeException("There is no mesh named [" + name + "]");

@@ -25,7 +25,7 @@ public class ButtonWidget extends WidgetObserver {
     }
 
     @Override
-    public void mouseButtonEvent(int button, int action, int mods) throws IOException, InterruptedException {
+    public void mouseButtonEvent(int button, int action, int mods) throws Exception {
         boolean hadMouseCapture = _widget == _widgetManager.getMouseCapture();
         super.mouseButtonEvent(button, action, mods);
         if (action == GLFW_RELEASE && hadMouseCapture && _widget == _widgetManager.getHoveringOver()) {

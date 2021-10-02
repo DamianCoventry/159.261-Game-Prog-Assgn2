@@ -14,6 +14,7 @@
 
 package com.lunargravity.menu.view;
 
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.Widget;
@@ -44,6 +45,9 @@ public class MenuView implements
     private final WidgetManager _widgetManager;
     private final IMenuController _controller;
     private final IMenuModel _model;
+    private final DisplayMeshCache _displayMeshCache;
+    private final MaterialCache _materialCache;
+    private final TextureCache _textureCache;
 
     private Widget _main;
     private Widget _campaign;
@@ -55,6 +59,9 @@ public class MenuView implements
         _widgetManager = widgetManager;
         _controller = controller;
         _model = model;
+        _displayMeshCache = new DisplayMeshCache();
+        _materialCache = new MaterialCache();
+        _textureCache = new TextureCache();
     }
 
     @Override
@@ -73,7 +80,32 @@ public class MenuView implements
     }
 
     @Override
-    public void drawView2d(int viewport, Matrix4f projectionMatrix) {
+    public void drawView2d(Matrix4f projectionMatrix) {
+        // TODO
+    }
+
+    @Override
+    public DisplayMeshCache getDisplayMeshCache() {
+        return _displayMeshCache;
+    }
+
+    @Override
+    public MaterialCache getMaterialCache() {
+        return _materialCache;
+    }
+
+    @Override
+    public TextureCache getTextureCache() {
+        return _textureCache;
+    }
+
+    @Override
+    public void onFrameEnd() {
+        // TODO
+    }
+
+    @Override
+    public void resetState() {
         // TODO
     }
 
@@ -83,12 +115,17 @@ public class MenuView implements
     }
 
     @Override
-    public void staticMeshLoaded(GlStaticMesh staticMesh) {
+    public void displayMeshLoaded(DisplayMesh displayMesh) {
         // TODO
     }
 
     @Override
-    public void materialLoaded(GlMaterial material) {
+    public void collisionMeshLoaded(String name, CollisionShape collisionMesh) {
+        // TODO
+    }
+
+    @Override
+    public void materialLoaded(Material material) {
         // TODO
     }
 

@@ -102,7 +102,17 @@ public class GameWonState extends StateBase implements ICampaignControllerObserv
     }
 
     @Override
-    public void playerShipSpawned() {
+    public void missionCompleted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerDied(ICampaignView.WhichPlayer whichPlayer) {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerShipSpawned(ICampaignView.WhichPlayer whichPlayer) {
         // Nothing to do
     }
 

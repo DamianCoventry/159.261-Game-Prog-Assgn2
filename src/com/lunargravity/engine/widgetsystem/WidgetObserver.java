@@ -1,3 +1,17 @@
+//
+// Lunar Gravity
+//
+// This game is based upon the Amiga video game Gravity Force that was
+// released in 1989 by Stephan Wenzler
+//
+// https://www.mobygames.com/game/gravity-force
+// https://www.youtube.com/watch?v=m9mFtCvnko8
+//
+// This implementation is Copyright (c) 2021, Damian Coventry
+// All rights reserved
+// Written for Massey University course 159.261 Game Programming (Assignment 2)
+//
+
 package com.lunargravity.engine.widgetsystem;
 
 import com.lunargravity.engine.core.IInputObserver;
@@ -29,12 +43,12 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     protected GlTexture _hoverTexture;
     protected PolyhedraVxTc _polyhedra;
     protected Matrix4f _modelMatrix;
-    protected Vector4f _backGroundColour;
+    protected Vector4f _backGroundVector4f;
 
     protected WidgetObserver(WidgetManager widgetManager) {
         _widgetManager = widgetManager;
         _widget = null;
-        _backGroundColour = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+        _backGroundVector4f = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
         _program = _widgetManager.getRenderer().getDiffuseTextureProgram();
         _modelMatrix = new Matrix4f();
     }
@@ -61,7 +75,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
         if (stringValue != null) {
             alpha = Math.min(1.0f, Math.max(0.0f, Float.parseFloat(stringValue)));
         }
-        _backGroundColour.w = alpha;
+        _backGroundVector4f.w = alpha;
 
         stringValue = wci._properties.get(HOVER_IMAGE);
         if (stringValue != null) {
@@ -202,7 +216,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     }
 
     @Override
-    public void widgetDraw(int viewport, Matrix4f projectionMatrix) {
+    public void widgetDraw(Matrix4f projectionMatrix) {
         if (_backgroundTexture == null || _polyhedra == null) {
             return;
         }
@@ -220,7 +234,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
         }
         else {
             glBindTexture(GL_TEXTURE_2D, _backgroundTexture.getId());
-            _program.setDiffuseColour(_backGroundColour);
+            _program.setDiffuseColour(_backGroundVector4f);
         }
 
         _program.activate(mvpMatrix);
@@ -238,7 +252,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     }
 
     @Override
-    public void mouseButtonEvent(int button, int action, int mods) throws IOException, InterruptedException {
+    public void mouseButtonEvent(int button, int action, int mods) throws Exception {
         if (action == GLFW_PRESS) {
             _widgetManager.setMouseCapture(_widget);
         }

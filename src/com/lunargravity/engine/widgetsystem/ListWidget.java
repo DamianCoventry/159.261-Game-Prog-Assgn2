@@ -17,7 +17,7 @@ package com.lunargravity.engine.widgetsystem;
 import java.io.IOException;
 
 public class ListWidget extends WidgetObserver {
-    private IListObserver _observer;
+    private final IListObserver _observer;
     public ListWidget(WidgetManager widgetManager, IListObserver observer) {
         super(widgetManager);
         _observer = observer;

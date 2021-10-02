@@ -14,11 +14,9 @@
 
 package com.lunargravity.dogfight.model;
 
-import com.lunargravity.engine.scene.ISceneStateOwner;
-
 import java.time.LocalDate;
 
-public class DogfightModel implements IDogfightModel, ISceneStateOwner {
+public class DogfightModel implements IDogfightModel {
     public static final int NUM_HIGH_SCORES = 5;
 
     private int _level;
@@ -105,11 +103,6 @@ public class DogfightModel implements IDogfightModel, ISceneStateOwner {
 
     @Override
     public void modelFromJson(String json) {
-        // TODO
-    }
-
-    @Override
-    public void stateSettingLoaded(String name, String value) {
         // TODO
     }
 

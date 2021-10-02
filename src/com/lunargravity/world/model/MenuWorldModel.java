@@ -1,5 +1,7 @@
 package com.lunargravity.world.model;
 
+import com.lunargravity.engine.timeouts.TimeoutManager;
+
 public class MenuWorldModel implements IMenuWorldModel {
     @Override
     public String modelToJson() {
@@ -13,17 +15,12 @@ public class MenuWorldModel implements IMenuWorldModel {
     }
 
     @Override
-    public void doWorldModelStuff() {
+    public void removeTimeouts(TimeoutManager timeoutManager) {
         // TODO
     }
 
     @Override
     public void doMenuWorldModelStuff() {
-        // TODO
-    }
-
-    @Override
-    public void stateSettingLoaded(String name, String value) {
         // TODO
     }
 }

@@ -14,10 +14,9 @@
 
 package com.lunargravity.world.controller;
 
-import com.lunargravity.engine.scene.ISceneLogicOwner;
 import com.lunargravity.world.model.IMenuWorldModel;
 
-public class MenuWorldController implements IMenuWorldController, ISceneLogicOwner {
+public class MenuWorldController implements IMenuWorldController {
     private final IMenuWorldControllerObserver _observer;
     private final IMenuWorldModel _model;
 
@@ -27,22 +26,22 @@ public class MenuWorldController implements IMenuWorldController, ISceneLogicOwn
     }
 
     @Override
-    public void onControllerThink() {
+    public void controllerThink() {
         // TODO
     }
 
     @Override
-    public void doWorldControllerStuff() {
+    public void levelCompleted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void clearPhysicsCollisionListener() {
         // TODO
     }
 
     @Override
     public void doMenuWorldControllerStuff() {
-        // TODO
-    }
-
-    @Override
-    public void logicSettingLoaded(String name, String value) {
         // TODO
     }
 }

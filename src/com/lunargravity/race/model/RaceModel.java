@@ -1,11 +1,9 @@
 package com.lunargravity.race.model;
 
-import com.lunargravity.engine.scene.ISceneStateOwner;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class RaceModel implements IRaceModel, ISceneStateOwner {
+public class RaceModel implements IRaceModel {
     public static final int NUM_HIGH_SCORES = 5;
 
     private int _level;
@@ -91,11 +89,6 @@ public class RaceModel implements IRaceModel, ISceneStateOwner {
 
     @Override
     public void modelFromJson(String json) {
-        // TODO
-    }
-
-    @Override
-    public void stateSettingLoaded(String name, String value) {
         // TODO
     }
 

@@ -16,12 +16,11 @@ package com.lunargravity.menu.controller;
 
 import com.lunargravity.application.PlayerInputBindings;
 import com.lunargravity.engine.core.IEngine;
-import com.lunargravity.engine.scene.ISceneLogicOwner;
 import com.lunargravity.menu.model.IMenuModel;
 
 import java.util.LinkedList;
 
-public class MenuController implements IMenuController, ISceneLogicOwner {
+public class MenuController implements IMenuController {
     private final LinkedList<IMenuControllerObserver> _observers;
     private final IEngine _engine;
     private final PlayerInputBindings _playerInputBindings;
@@ -45,13 +44,13 @@ public class MenuController implements IMenuController, ISceneLogicOwner {
     }
 
     @Override
-    public void onControllerThink() {
+    public void controllerThink() {
         // TODO
     }
 
     @Override
-    public void logicSettingLoaded(String name, String value) {
-        // TODO
+    public void levelCompleted() {
+        // Nothing to do
     }
 
     @Override

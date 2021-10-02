@@ -7,8 +7,6 @@ import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
-import java.io.IOException;
-
 public class EpisodeOutroState extends StateBase implements ICampaignControllerObserver {
     private int _timeoutId;
 
@@ -25,7 +23,7 @@ public class EpisodeOutroState extends StateBase implements ICampaignControllerO
         _timeoutId = addTimeout(3000, (callCount) -> {
             try {
                 getCampaignController().completeEpisode();
-            } catch (IOException | InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             _timeoutId = 0;
@@ -43,7 +41,7 @@ public class EpisodeOutroState extends StateBase implements ICampaignControllerO
     }
 
     @Override
-    public void startNextEpisode() throws IOException, InterruptedException {
+    public void startNextEpisode() throws Exception {
         getContext().loadCampaignEpisode(new NullBuilderObserver());
         changeState(new EpisodeIntroState(getContext()));
     }
@@ -54,7 +52,7 @@ public class EpisodeOutroState extends StateBase implements ICampaignControllerO
     }
 
     @Override
-    public void episodeOutroAborted() throws IOException, InterruptedException {
+    public void episodeOutroAborted() throws Exception {
         getCampaignController().completeEpisode();
     }
 
@@ -94,7 +92,17 @@ public class EpisodeOutroState extends StateBase implements ICampaignControllerO
     }
 
     @Override
-    public void playerShipSpawned() {
+    public void missionCompleted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerDied(ICampaignView.WhichPlayer whichPlayer) {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerShipSpawned(ICampaignView.WhichPlayer whichPlayer) {
         // Nothing to do
     }
 

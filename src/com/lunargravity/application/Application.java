@@ -16,6 +16,7 @@ package com.lunargravity.application;
 
 import com.lunargravity.campaign.controller.CampaignController;
 import com.lunargravity.campaign.controller.ICampaignController;
+import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.model.CampaignModel;
 import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.campaign.model.SavedGameFile;
@@ -61,9 +62,8 @@ public class Application implements
         IInputObserver,
         IViewportSizeObserver,
         IStateMachineContext,
-        IMenuWorldControllerObserver,
-        IGameWorldControllerObserver {
-
+        IMenuWorldControllerObserver
+{
     static final private String WINDOW_TITLE = "Lunar Gravity v1.0";
     static final private String PLAYER_INPUT_BINDINGS_FILE_NAME = "playerInputBindings.json";
     static final private String MENU_SCENE_FILE_NAME = "scenes/menuScene.json";
@@ -99,7 +99,7 @@ public class Application implements
 
     private final WidgetManager _widgetManager;
 
-    public Application() throws IOException, InterruptedException {
+    public Application() throws Exception {
         _frameNo = _nowMs = 0;
         _frameDelta = 0.0;
 
@@ -131,7 +131,13 @@ public class Application implements
     }
 
     @Override
-    public void onFrameEnd() throws IOException, InterruptedException {
+    public void onFrameEnd() throws Exception {
+        if (_worldView != null) {
+            _worldView.onFrameEnd();
+        }
+        if (_logicView != null) {
+            _logicView.onFrameEnd();
+        }
         if (_pendingState != null) {
             changeStateNow(_pendingState);
             _pendingState = null;
@@ -141,10 +147,10 @@ public class Application implements
     @Override
     public void onFrameThink() {
         if (_worldController != null) {
-            _worldController.onControllerThink();
+            _worldController.controllerThink();
         }
         if (_logicController != null) {
-            _logicController.onControllerThink();
+            _logicController.controllerThink();
         }
         if (_worldView != null) {
             _worldView.viewThink();
@@ -155,7 +161,6 @@ public class Application implements
         _widgetManager.think();
         _currentState.think();
     }
-
 
     @Override
     public void onFrameDraw3d(int viewport, Matrix4f projectionMatrix) {
@@ -169,15 +174,15 @@ public class Application implements
     }
 
     @Override
-    public void onFrameDraw2d(int viewport, Matrix4f projectionMatrix) {
+    public void onFrameDraw2d(Matrix4f projectionMatrix) {
         if (_worldView != null) {
-            _worldView.drawView2d(viewport, projectionMatrix);
+            _worldView.drawView2d(projectionMatrix);
         }
         if (_logicView != null) {
-            _logicView.drawView2d(viewport, projectionMatrix);
+            _logicView.drawView2d(projectionMatrix);
         }
-        _widgetManager.draw(viewport, projectionMatrix);
-        _currentState.draw2d(viewport, projectionMatrix);
+        _widgetManager.draw(projectionMatrix);
+        _currentState.draw2d(projectionMatrix);
     }
 
     @Override
@@ -187,20 +192,23 @@ public class Application implements
     }
 
     @Override
-    public void mouseButtonEvent(int button, int action, int mods) throws IOException, InterruptedException {
+    public void mouseButtonEvent(int button, int action, int mods) throws Exception {
         _currentState.mouseButtonEvent(button, action, mods); // TODO: consider adding a 'consumed' return code
+        _engine.getRenderer().getOrthographicViewport().activate();
         _widgetManager.mouseButtonEvent(button, action, mods);
     }
 
     @Override
     public void mouseCursorMovedEvent(double xPos, double yPos) {
         _currentState.mouseCursorMovedEvent(xPos, yPos); // TODO: consider adding a 'consumed' return code
+        _engine.getRenderer().getOrthographicViewport().activate();
         _widgetManager.mouseCursorMovedEvent(xPos, yPos);
     }
 
     @Override
     public void mouseWheelScrolledEvent(double xOffset, double yOffset) {
         _currentState.mouseWheelScrolledEvent(xOffset, yOffset); // TODO: consider adding a 'consumed' return code
+        _engine.getRenderer().getOrthographicViewport().activate();
         _widgetManager.mouseWheelScrolledEvent(xOffset, yOffset);
     }
 
@@ -271,7 +279,9 @@ public class Application implements
     }
 
     @Override
-    public void startMenu(ISceneBuilderObserver sceneBuilderObserver) throws IOException, InterruptedException {
+    public void startMenu(ISceneBuilderObserver sceneBuilderObserver) throws Exception {
+        resetState();
+
         _worldModel = new MenuWorldModel();
         _worldController = new MenuWorldController(this, (IMenuWorldModel)_worldModel);
         _worldView = new MenuWorldView((IMenuWorldModel)_worldModel);
@@ -282,12 +292,12 @@ public class Application implements
 
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
-        ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
+        ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
 
-        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
+        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldView, _worldView);
         worldSceneBuilder.build(viewportConfig, MENU_WORLD_SCENE_FILE_NAME);
 
-        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
+        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicView, _logicView);
         logicSceneBuilder.build(viewportConfig, MENU_SCENE_FILE_NAME);
 
         _worldView.initialLoadCompleted();
@@ -296,37 +306,52 @@ public class Application implements
 
     @Override
     public void createCampaignMvc(String savedGameFileName) throws IOException {
-        SavedGameFile savedGameFile = new SavedGameFile(savedGameFileName); // throws
+        resetState();
 
-        _worldModel = new GameWorldModel();
-        _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
-        _worldView = new GameWorldView((IGameWorldModel)_worldModel);
+        SavedGameFile savedGameFile = new SavedGameFile(savedGameFileName); // throws
 
         _logicModel = new CampaignModel(savedGameFile.getEpisode(), savedGameFile.getMission(), savedGameFile.getNumPlayers());
         _logicController = new CampaignController(_engine, (ICampaignModel)_logicModel);
         _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
+
+        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), savedGameFile.getNumPlayers());
+        _worldView = new GameWorldView(_engine, (IGameWorldModel)_worldModel);
+        GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
+        gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
+        _worldController = gameWorldController;
+
+        ((ICampaignController) _logicController).addObserver(gameWorldController);
     }
 
     @Override
     public void createCampaignMvc(int numPlayers) {
-        _worldModel = new GameWorldModel();
-        _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
-        _worldView = new GameWorldView((IGameWorldModel)_worldModel);
+        resetState();
 
         _logicModel = new CampaignModel(FIRST_EPISODE, FIRST_MISSION, numPlayers);
         _logicController = new CampaignController(_engine, (ICampaignModel)_logicModel);
         _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
+
+        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers);
+        _worldView = new GameWorldView(_engine, (IGameWorldModel)_worldModel);
+        GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
+        gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
+        _worldController = gameWorldController;
+
+        ((ICampaignController) _logicController).addObserver(gameWorldController);
     }
 
     @Override
-    public void loadCampaignEpisode(ISceneBuilderObserver sceneBuilderObserver) throws IOException, InterruptedException {
+    public void loadCampaignEpisode(ISceneBuilderObserver sceneBuilderObserver) throws Exception {
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
         ICampaignModel model = (ICampaignModel)_logicModel;
-        ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
+        ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
 
-        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
+        _worldView.resetState();
+        _logicView.resetState();
+
+        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicView, _logicView);
         logicSceneBuilder.build(viewportConfig, model.getEpisodeIntroScene());
 
         _worldView.initialLoadCompleted();
@@ -334,17 +359,20 @@ public class Application implements
     }
 
     @Override
-    public void loadCampaignMission(ISceneBuilderObserver sceneBuilderObserver) throws IOException, InterruptedException {
+    public void loadCampaignMission(ISceneBuilderObserver sceneBuilderObserver) throws Exception {
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
-        ICampaignModel model = (ICampaignModel)_logicModel;
-        ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
+        _worldView.resetState();
+        _logicView.resetState();
 
-        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
+        ICampaignModel model = (ICampaignModel)_logicModel;
+        ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
+
+        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldView, _worldView);
         worldSceneBuilder.build(viewportConfig, model.getWorldMissionScene());
 
-        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
+        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicView, _logicView);
         logicSceneBuilder.build(viewportConfig, model.getLogicMissionScene());
 
         _worldView.initialLoadCompleted();
@@ -352,30 +380,37 @@ public class Application implements
     }
 
     @Override
-    public void startRaceGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException {
-        _worldModel = new GameWorldModel();
-        _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
-        _worldView = new GameWorldView((IGameWorldModel)_worldModel);
+    public void startRaceGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws Exception {
+        resetState();
 
         _logicModel = new RaceModel(FIRST_LEVEL, numPlayers);
         _logicController = new RaceController((IRaceModel)_logicModel);
         _logicView = new RaceView(_widgetManager, (IRaceController)_logicController, (IRaceModel)_logicModel);
 
+        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers);
+        _worldView = new GameWorldView(_engine, (IGameWorldModel)_worldModel);
+        GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
+        gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
+        _worldController = gameWorldController;
+
         loadRaceLevel(sceneBuilderObserver, numPlayers);
     }
 
     @Override
-    public void loadRaceLevel(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException {
+    public void loadRaceLevel(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws Exception {
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
-        IRaceModel model = (IRaceModel)_logicModel;
-        ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
+        _worldView.resetState();
+        _logicView.resetState();
 
-        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
+        IRaceModel model = (IRaceModel)_logicModel;
+        ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
+
+        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldView, _worldView);
         worldSceneBuilder.build(viewportConfig, model.getWorldLevelScene());
 
-        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
+        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicView, _logicView);
         logicSceneBuilder.build(viewportConfig, model.getLogicLevelScene());
 
         _worldView.initialLoadCompleted();
@@ -383,47 +418,59 @@ public class Application implements
     }
 
     @Override
-    public void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException {
-        _worldModel = new GameWorldModel();
-        _worldController = new GameWorldController(this, (IGameWorldModel)_worldModel);
-        _worldView = new GameWorldView((IGameWorldModel)_worldModel);
+    public void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws Exception {
+        resetState();
 
         _logicModel = new DogfightModel(FIRST_LEVEL, numPlayers);
         _logicController = new DogfightController((IDogfightModel)_logicModel);
         _logicView = new DogfightView(_widgetManager, (IDogfightController)_logicController, (IDogfightModel)_logicModel);
 
+        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers);
+        _worldView = new GameWorldView(_engine, (IGameWorldModel)_worldModel);
+        GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
+        gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
+        _worldController = gameWorldController;
+
         loadDogfightLevel(sceneBuilderObserver, numPlayers);
     }
 
     @Override
-    public void loadDogfightLevel(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws IOException, InterruptedException {
+    public void loadDogfightLevel(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws Exception {
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
-        IDogfightModel model = (IDogfightModel)_logicModel;
-        ViewportConfig viewportConfig = _engine.getRenderer().getViewport(0).getConfig();
+        _worldView.resetState();
+        _logicView.resetState();
 
-        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldModel, _worldView, _worldController);
+        IDogfightModel model = (IDogfightModel)_logicModel;
+        ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
+
+        SceneBuilder worldSceneBuilder = new SceneBuilder(sceneBuilderObserver, _worldView, _worldView);
         worldSceneBuilder.build(viewportConfig, model.getWorldLevelScene());
 
-        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicModel, _logicView, _logicController);
+        SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicView, _logicView);
         logicSceneBuilder.build(viewportConfig, model.getLogicLevelScene());
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
     }
 
-    @Override
-    public void temp() {
-        // TODO
+    public void resetState() {
+        if (_logicController instanceof CampaignController campaignController) {
+            campaignController.removeObserver((ICampaignControllerObserver)_worldController);
+        }
+        if (_worldController != null) {
+            _worldController.clearPhysicsCollisionListener();
+        }
+        if (_worldModel != null) {
+            _worldModel.removeTimeouts(_engine.getTimeoutManager());
+        }
+        if (_worldView != null) {
+            _worldView.freeResources();
+        }
     }
 
-    @Override
-    public void onMenuWorldControllerEvent() {
-        // TODO
-    }
-
-    public void run() throws IOException, InterruptedException {
+    public void run() throws Exception {
         _engine.run();
     }
 
@@ -432,7 +479,7 @@ public class Application implements
         _engine.freeResources();
     }
 
-    public void changeStateNow(IState state) throws IOException, InterruptedException {
+    public void changeStateNow(IState state) throws Exception {
         if (_currentState != null) {
             _currentState.end();
         }
@@ -497,5 +544,10 @@ public class Application implements
                 app.freeResources();
             }
         }
+    }
+
+    @Override
+    public void onMenuWorldControllerEvent() {
+        // TODO
     }
 }
