@@ -34,13 +34,13 @@ public class CollisionMeshBuilder {
 
         _meshCollisionShapes.clear();
         for (var object : loader.getObjects()) {
-            if (object.getName().endsWith(".MeshShape")) {
+            if (object.getName().contains(".MeshShape")) {
                 buildMeshShape(loader, vertices, object);
             }
-            else if (object.getName().endsWith(".BoxShape")) {
+            else if (object.getName().contains(".BoxShape")) {
                 buildBoxShape(loader, vertices, object);
             }
-            else if (object.getName().endsWith(".SphereShape")) {
+            else if (object.getName().contains(".SphereShape")) {
                 buildSphereShape(loader, vertices, object);
             }
             else if (object.getName().contains(".CompoundBox")) {

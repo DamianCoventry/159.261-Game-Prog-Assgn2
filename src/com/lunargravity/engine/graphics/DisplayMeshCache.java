@@ -1,7 +1,5 @@
 package com.lunargravity.engine.graphics;
 
-import com.jme3.bullet.PhysicsSpace;
-
 import java.util.ArrayList;
 
 public class DisplayMeshCache {
@@ -15,7 +13,7 @@ public class DisplayMeshCache {
         return _displayMeshes;
     }
 
-    public DisplayMesh get(String name) {
+    public DisplayMesh getByExactName(String name) {
         for (var displayMesh : _displayMeshes) {
             if (name.equals(displayMesh.getName())) {
                 return displayMesh;
@@ -24,8 +22,17 @@ public class DisplayMeshCache {
         return null;
     }
 
+    public DisplayMesh getByPartialName(String subString) {
+        for (var displayMesh : _displayMeshes) {
+            if (displayMesh.getName().contains(subString)) {
+                return displayMesh;
+            }
+        }
+        return null;
+    }
+
     public DisplayMesh add(DisplayMesh material) {
-        DisplayMesh cachedDisplayMesh = get(material.getName());
+        DisplayMesh cachedDisplayMesh = getByExactName(material.getName());
         if (cachedDisplayMesh != null) {
             return cachedDisplayMesh;
         }

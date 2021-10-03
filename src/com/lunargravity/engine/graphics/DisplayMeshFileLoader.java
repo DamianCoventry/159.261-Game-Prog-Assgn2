@@ -84,7 +84,7 @@ public class DisplayMeshFileLoader {
             while (line != null) {
                 line = line.trim();
                 if (!line.isEmpty() && !line.startsWith("#")) {
-                    parseLine(line);
+                    parseLine(line, fileName);
                 }
                 line = bufferedReader.readLine();
             }
@@ -112,7 +112,7 @@ public class DisplayMeshFileLoader {
         return _normals;
     }
 
-    private void parseLine(String line) throws Exception {
+    private void parseLine(String line, String fileName) throws Exception {
         String[] words = line.split(" ");
         switch (words[0]) {
             case "mtllib" -> parseMaterial(words);
@@ -122,7 +122,7 @@ public class DisplayMeshFileLoader {
             case "vn" -> parseNormal(words);
             case "usemtl" -> parseUseMaterial(words);
             case "s" -> parseSmoothingGroup(words);
-            case "f" -> parseFace(words);
+            case "f" -> parseFace(words, fileName);
         }
     }
 
@@ -179,9 +179,9 @@ public class DisplayMeshFileLoader {
         }
     }
 
-    private void parseFace(String[] words) throws Exception {
+    private void parseFace(String[] words, String fileName) throws Exception {
         if (words.length != 4 && !_objects.isEmpty()) {
-            throw new Exception("Only triangles supported");
+            throw new Exception("Only triangles supported. fileName = ["+fileName+"]");
         }
 
         int[] vertex0 = parseInteger3(words[1]);

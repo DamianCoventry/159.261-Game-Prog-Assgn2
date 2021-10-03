@@ -1,6 +1,5 @@
 MUST DO
 Campaign gameplay:
-    add lunar lander ship debris
     drop crates on death
     allow lunar lander to shoot
     hud
@@ -28,6 +27,7 @@ make 10 dogfight levels
 load and save high score tables
 
 SHOULD DO
+Debris should be exploded towards solid space
 positional lighting
 bill boarding
 particle systems

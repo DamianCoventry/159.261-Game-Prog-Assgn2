@@ -11,8 +11,17 @@ public class CollisionMeshCache {
         _collisionMeshes = new HashMap<>();
     }
 
-    public CollisionShape get(String name) {
+    public CollisionShape getByExactName(String name) {
         return _collisionMeshes.get(name);
+    }
+
+    public CollisionShape getByPartialName(String subString) {
+        for (var collisionMeshName : _collisionMeshes.keySet()) {
+            if (collisionMeshName.contains(subString)) {
+                return _collisionMeshes.get(collisionMeshName);
+            }
+        }
+        return null;
     }
 
     public CollisionShape add(String name, CollisionShape collisionShape) {

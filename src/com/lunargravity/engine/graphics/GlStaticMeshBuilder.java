@@ -30,7 +30,7 @@ public class GlStaticMeshBuilder {
 
             loadMaterials(loader.getMaterialFileNames());
 
-            if (_displayMeshCache.get(object.getName()) == null) {
+            if (_displayMeshCache.getByExactName(object.getName()) == null) {
                 buildStaticMesh(loader, object);
             }
         }

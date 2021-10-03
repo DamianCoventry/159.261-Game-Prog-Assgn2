@@ -161,6 +161,14 @@ public class Player {
         }
     }
 
+    public ArrayList<Crate> getCollectedCrates() {
+        return _collectedCrates;
+    }
+
+    public void clearCollectedCrates() {
+        _collectedCrates.clear();
+    }
+
     public void dropCrateForDelivery() {
         if (_collectedCrates.isEmpty() || _droppingForDeliveryTimeoutId != 0 || _state != State.IDLE) {
             return;
