@@ -17,32 +17,52 @@ package com.lunargravity.world.view;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsBody;
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.lunargravity.application.LargeNumberFont;
 import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.physics.CollisionMeshCache;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.timeouts.TimeoutManager;
+import com.lunargravity.engine.widgetsystem.ImageWidget;
+import com.lunargravity.engine.widgetsystem.Widget;
 import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
+import com.lunargravity.engine.widgetsystem.WidgetManager;
 import com.lunargravity.world.controller.GameWorldController;
 import com.lunargravity.world.controller.IGameWorldControllerObserver;
-import com.lunargravity.world.model.Crate;
-import com.lunargravity.world.model.IGameWorldModel;
-import com.lunargravity.world.model.Player;
+import com.lunargravity.world.model.*;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class GameWorldView implements IGameWorldView, IGameWorldControllerObserver, ISceneAssetOwner {
+public class GameWorldView implements
+        IGameWorldView,
+        IGameWorldControllerObserver,
+        ISceneAssetOwner,
+        IPlayerShotObserver
+{
     private static final float CAMERA_Z_DISTANCE = 15.0f;
     private static final int MIN_EXPLOSION_FORCE = 250;
     private static final int MAX_EXPLOSION_FORCE = 400;
+    private static final int NUM_PLAYER_SHOTS = 20;
+    private static final float PLAYER_SHOT_FORCE = 500.0f;
+    private static final float PLAYER_SHOT_OFFSET = 0.75f; // Measured using Blender
+
+    private static final com.jme3.math.Vector3f ZERO_VELOCITY = new com.jme3.math.Vector3f(0, 0, 0);
+    private static final com.jme3.math.Vector3f PREVENT_XY_AXES_ROTATION = new com.jme3.math.Vector3f(0.0f, 0.0f, 1.0f);
+    private static final com.jme3.math.Vector3f PREVENT_Z_AXIS_MOVEMENT = new com.jme3.math.Vector3f(1.0f, 1.0f, 0.0f);
+    private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    private static final String SINGLE_PLAYER_STATUS_BAR = "singlePlayerStatusBar";
 
     private final IEngine _engine;
     private final Renderer _renderer;
     private final IGameWorldModel _model;
-    
+    private final WidgetManager _widgetManager;
+    private LargeNumberFont _font;
+
     private final DisplayMeshCache _displayMeshCache;
     private DisplayMesh _worldDisplayMesh;
     private final CollisionMeshCache _collisionMeshCache;
@@ -51,8 +71,7 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
     private final Vector3f _jomlVector;
     private final com.jme3.math.Vector3f _jmeVector;
 
-    private static final com.jme3.math.Vector3f PREVENT_XY_AXES_ROTATION = new com.jme3.math.Vector3f(0.0f, 0.0f, 1.0f);
-    private static final com.jme3.math.Vector3f PREVENT_Z_AXIS_MOVEMENT = new com.jme3.math.Vector3f(1.0f, 1.0f, 0.0f);
+    private Widget _singlePlayerStatusBar;
 
     private static class RigidBodyObject {
         public boolean _active;
@@ -69,10 +88,11 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         }
     }
 
-    private final ArrayList<RigidBodyObject> _rigidBodyObjects;
-    private final ArrayList<RigidBodyObject> _deadRigidBodyObjects;
-    private final ArrayList<PhysicsRigidBody> _deliveryZoneRigidBodies;
-    private final ArrayList<RigidBodyObject> _debrisRigidBodies;
+    private final ArrayList<RigidBodyObject> _lunarLandersAndCrates;
+    //private final ArrayList<RigidBodyObject> _deadObjects;
+    private final ArrayList<PhysicsRigidBody> _deliveryZones;
+    private final ArrayList<RigidBodyObject> _debris;
+    private final ArrayList<RigidBodyObject> _playerShots;
     private PhysicsRigidBody _worldRigidBody;
     private com.jme3.math.Transform _physicsTransform;
     private com.jme3.math.Matrix4f _physicsMatrix;
@@ -83,22 +103,26 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
     private final Vector3f[] _lunarLanderStartPoints;
     private final Matrix4f _mvpMatrix;
 
-    public GameWorldView(IEngine engine, IGameWorldModel model) {
+    public GameWorldView(WidgetManager widgetManager, IEngine engine, IGameWorldModel model) throws IOException {
+        _widgetManager = widgetManager;
         _engine = engine;
         _renderer = engine.getRenderer();
         _model = model;
-        
+
         _displayMeshCache = new DisplayMeshCache();
 
         _collisionMeshCache = new CollisionMeshCache();
         _materialCache = new MaterialCache();
         _textureCache = new TextureCache();
+        _font = new LargeNumberFont(_renderer);
 
         _mvpMatrix = new Matrix4f();
-        _rigidBodyObjects = new ArrayList<>();
-        _deadRigidBodyObjects = new ArrayList<>();
-        _deliveryZoneRigidBodies = new ArrayList<>();
-        _debrisRigidBodies = new ArrayList<>();
+        _lunarLandersAndCrates = new ArrayList<>();
+        //_deadObjects = new ArrayList<>();
+        _deliveryZones = new ArrayList<>();
+        _debris = new ArrayList<>();
+        _playerShots = new ArrayList<>();
+
         _physicsTransform = new com.jme3.math.Transform();
         _physicsMatrix = new com.jme3.math.Matrix4f();
         _jomlVector = new Vector3f();
@@ -132,16 +156,18 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
             });
         }
 
-        _rigidBodyObjects.clear();
-        _deadRigidBodyObjects.clear();
-        _debrisRigidBodies.clear();
+        _lunarLandersAndCrates.clear();
+        //_deadObjects.clear();
+        _debris.clear();
+        _playerShots.clear();
         _model.clearCrates();
         _model.clearDeliveryZones();
 
-        createCrateRigidBodies();
-        createDeliveryZoneRigidBodies();
-        createLunarLanderRigidBodies();
-        createDebrisRigidBodies();
+        createCrates();
+        createDeliveryZones();
+        createLunarLanders();
+        createDebris();
+        createPlayerShots();
     }
 
     @Override
@@ -156,11 +182,17 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         }
 
         // Synchronise first so that we can attach a camera to each player's lunar lander
-        for (var rbo : _rigidBodyObjects) {
+        for (var rbo : _lunarLandersAndCrates) {
             synchroniseDisplayMeshWithCollisionMesh(rbo);
         }
 
-        for (var rbo : _debrisRigidBodies) {
+        for (var rbo : _debris) {
+            if (rbo._active) {
+                synchroniseDisplayMeshWithCollisionMesh(rbo);
+            }
+        }
+
+        for (var rbo : _playerShots) {
             if (rbo._active) {
                 synchroniseDisplayMeshWithCollisionMesh(rbo);
             }
@@ -173,12 +205,19 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
             _worldDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
         }
 
-        for (var rbo : _rigidBodyObjects) {
+        for (var rbo : _lunarLandersAndCrates) {
             _mvpMatrix.identity().mul(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
             rbo._displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
         }
 
-        for (var rbo : _debrisRigidBodies) {
+        for (var rbo : _debris) {
+            if (rbo._active) {
+                _mvpMatrix.identity().mul(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
+                rbo._displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
+            }
+        }
+
+        for (var rbo : _playerShots) {
             if (rbo._active) {
                 _mvpMatrix.identity().mul(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
                 rbo._displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
@@ -188,7 +227,21 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
 
     @Override
     public void drawView2d(Matrix4f projectionMatrix) {
-        // TODO
+        if (!_widgetManager.isVisible(_singlePlayerStatusBar)) {
+            return;
+        }
+        final float horizontalSpacing = 110.0f;
+        float x = 30.0f;
+        _font.drawNumber(projectionMatrix, 1, x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
+        _font.drawNumber(projectionMatrix, 2, x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
+        _font.drawNumber(projectionMatrix, _model.getPlayerState(0).getHitPoints(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
+        _font.drawNumber(projectionMatrix, _model.getPlayerState(0).getFuel(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
+        _font.drawNumber(projectionMatrix, 3, x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
+        _font.drawNumber(projectionMatrix, _model.getNumCratesRemaining(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
+        _font.drawNumber(projectionMatrix, _model.getNumCratesCollected(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
+        _font.drawNumber(projectionMatrix, _model.getNumCratesDelivered(), x, 892.0f, 1.0f, WHITE);
+
+        // TODO: what to do about player two?
     }
 
     @Override
@@ -208,37 +261,38 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
 
     @Override
     public void onFrameEnd() {
-        if (_deadRigidBodyObjects.isEmpty()) {
-            return;
-        }
+//        if (_deadObjects.isEmpty()) {
+//            return;
+//        }
+//
+//        for (var rbo : _deadObjects) {
+//            _engine.getPhysicsSpace().remove(rbo._rigidBody);
+//        }
+//        _deadObjects.clear();
 
-        for (var rbo : _deadRigidBodyObjects) {
-            _engine.getPhysicsSpace().remove(rbo._rigidBody);
-        }
-        _deadRigidBodyObjects.clear();
-
-        if (_model.getPlayerState(0).getRigidBody() != null) {
-            _model.getPlayerState(0).getRigidBody().activate();
-        }
-        if (_model.getNumPlayers() == 2 && _model.getPlayerState(1).getRigidBody() != null) {
-            _model.getPlayerState(1).getRigidBody().activate();
-        }
+//        if (_model.getPlayerState(0).getRigidBody() != null) {
+//            _model.getPlayerState(0).getRigidBody().activate();
+//        }
+//        if (_model.getNumPlayers() == 2 && _model.getPlayerState(1).getRigidBody() != null) {
+//            _model.getPlayerState(1).getRigidBody().activate();
+//        }
     }
 
     @Override
     public void resetState() {
-        resetRigidBodyObjects(_rigidBodyObjects); // <-- player ship rigid bodies, and crate rigid bodies, are in here
-        resetRigidBodyObjects(_deadRigidBodyObjects);
-        resetRigidBodyObjects(_debrisRigidBodies);
+        resetRigidBodyObjects(_lunarLandersAndCrates); // <-- player ship rigid bodies, and crate rigid bodies, are in here
+        //resetRigidBodyObjects(_deadObjects);
+        resetRigidBodyObjects(_debris);
+        resetRigidBodyObjects(_playerShots);
 
         for (int i = 0; i < _model.getNumPlayers(); ++i){
             _model.getPlayerState(i).setRigidBody(null);
         }
 
-        for (var rigidBody : _deliveryZoneRigidBodies) {
+        for (var rigidBody : _deliveryZones) {
             _engine.getPhysicsSpace().remove(rigidBody);
         }
-        _deliveryZoneRigidBodies.clear();
+        _deliveryZones.clear();
 
         _engine.getPhysicsSpace().remove(_worldRigidBody);
         _worldRigidBody = null;
@@ -256,16 +310,24 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         _model.resetPlayers();
         _model.clearCrates();
         _model.clearDeliveryZones();
+        _model.clearPlayerShots();
     }
 
     @Override
     public void freeResources() {
         _collisionMeshCache.clear();
+        _font.freeResources();
     }
 
     @Override
-    public void doGameWorldViewStuff() {
-        // TODO
+    public void showMissionStatusBar() {
+        _widgetManager.hideAll();
+        _widgetManager.show(_singlePlayerStatusBar, WidgetManager.ShowAs.FIRST);
+    }
+
+    @Override
+    public void hideMissionStatusBar() {
+        _widgetManager.hideAll();
     }
 
     @Override
@@ -333,7 +395,9 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
             System.out.print("GameWorldView.widgetLoaded() was passed a null WidgetCreateInfo object");
             return;
         }
-        // TODO
+        if (wci._id.equals(SINGLE_PLAYER_STATUS_BAR) && wci._type.equals("ImageWidget")) {
+            _singlePlayerStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
+        }
     }
 
     @Override
@@ -379,7 +443,21 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
 
         dropCollectedCrates(player);
         spawnPlayerShipDebris(player);
-        removePlayerShipRigidBody(player);
+        removePlayerShip(player);
+    }
+
+    @Override
+    public void playerShotExploded(PlayerShot playerShot) {
+        for (var a : _playerShots) {
+            if (a._rigidBody.getUserObject() == playerShot) {
+                a._active = false;
+                a._rigidBody.setUserObject(null);
+                if (_engine.getPhysicsSpace().contains(a._rigidBody)) {
+                    _engine.getPhysicsSpace().removeCollisionObject(a._rigidBody);
+                }
+                break;
+            }
+        }
     }
 
     private void dropCollectedCrates(Player player) {
@@ -396,20 +474,39 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         player.clearCollectedCrates();
     }
 
-    private void removePlayerShipRigidBody(Player player) {
-        for (var rbo : _rigidBodyObjects) {
+    private void removePlayerShip(Player player) {
+        for (var rbo : _lunarLandersAndCrates) {
             if (rbo._rigidBody == player.getRigidBody()) {
-                _deadRigidBodyObjects.add(rbo);
-                _rigidBodyObjects.remove(rbo);
+                _engine.getPhysicsSpace().removeCollisionObject(rbo._rigidBody);
                 rbo._rigidBody.setUserObject(null);
                 player.setRigidBody(null);
+                _lunarLandersAndCrates.remove(rbo);
+                break;
+            }
+        }
+    }
+
+    private void removeCrate(Crate crate) {
+        for (var rbo : _lunarLandersAndCrates) {
+            if (rbo._rigidBody.getUserObject() == crate) {
+                _engine.getPhysicsSpace().removeCollisionObject(rbo._rigidBody);
+                rbo._rigidBody.setUserObject(null);
+                crate.setRigidBody(null);
+                _lunarLandersAndCrates.remove(rbo);
+
+                if (_model.getPlayerState(0).getRigidBody() != null) {
+                    _model.getPlayerState(0).getRigidBody().activate();
+                }
+                if (_model.getNumPlayers() == 2 && _model.getPlayerState(1).getRigidBody() != null) {
+                    _model.getPlayerState(1).getRigidBody().activate();
+                }
                 break;
             }
         }
     }
 
     private void spawnPlayerShipDebris(Player player) {
-        for (var rbo : _debrisRigidBodies) {
+        for (var rbo : _debris) {
             rbo._active = true;
             rbo._rigidBody.setPhysicsLocation(_jmeVector);
             rbo._timeoutId = _engine.getTimeoutManager().addTimeout(randomInteger(2500, 4500), callCount -> {
@@ -447,6 +544,48 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         createLunarLanderRigidBody(player);
     }
 
+    @Override
+    public void playerFiredWeapon(int id) {
+        RigidBodyObject rbo = getUnusedPlayerShot();
+        if (rbo == null) {
+            return;
+        }
+
+        rbo._rigidBody.clearForces();
+        rbo._rigidBody.setLinearVelocity(ZERO_VELOCITY);
+        rbo._rigidBody.setAngularVelocity(ZERO_VELOCITY);
+
+        Player player = _model.getPlayerState(id);
+        var direction = player.calculateAndGetUpVector();
+        var position = player.getRigidBody().getPhysicsLocation(null);
+
+        _jmeVector.set(direction).multLocal(PLAYER_SHOT_OFFSET).addLocal(position);
+        rbo._rigidBody.setPhysicsLocation(_jmeVector);
+
+        _jmeVector.set(direction).multLocal(PLAYER_SHOT_FORCE);
+        rbo._rigidBody.applyCentralForce(_jmeVector);
+
+        rbo._active = true;
+        _model.addPlayerShot(player, rbo._rigidBody);
+
+        _engine.getPhysicsSpace().addCollisionObject(rbo._rigidBody);
+        rbo._rigidBody.setGravity(new com.jme3.math.Vector3f(0.0f, 0.0f, 0.0f)); // Overwrite the physics space gravity
+    }
+
+    private RigidBodyObject getUnusedPlayerShot() {
+        for (var a : _playerShots) {
+            if (!a._active) {
+                return a;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void playerWeaponCooledDown(int id) {
+        // TODO: what to draw?
+    }
+
     private void resetRigidBodyObjects(ArrayList<RigidBodyObject> rigidBodyObjects) {
         for (var rbo : rigidBodyObjects) {
             if (_engine.getPhysicsSpace().contains(rbo._rigidBody)) { // because debris always exists, but might not be in the physics space
@@ -460,7 +599,7 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         rigidBodyObjects.clear();
     }
 
-    private void createLunarLanderRigidBodies() {
+    private void createLunarLanders() {
         for (int i = 0; i < _model.getNumPlayers(); ++i) {
             createLunarLanderRigidBody(i);
         }
@@ -481,7 +620,7 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         rigidBody.setLinearFactor(PREVENT_Z_AXIS_MOVEMENT);
         rigidBody.setAngularFactor(PREVENT_XY_AXES_ROTATION);
 
-        _rigidBodyObjects.add(new RigidBodyObject(rigidBody, displayMesh, true));
+        _lunarLandersAndCrates.add(new RigidBodyObject(rigidBody, displayMesh, true));
         _engine.getPhysicsSpace().addCollisionObject(rigidBody);
 
         Player player = _model.getPlayerState(i);
@@ -490,7 +629,7 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         rigidBody.setUserObject(player);
     }
 
-    private void createCrateRigidBodies() {
+    private void createCrates() {
         for (var point : _crateStartPoints) {
             createCrateRigidBody(point, null);
         }
@@ -508,7 +647,7 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
 
         rigidBody.setLinearFactor(PREVENT_Z_AXIS_MOVEMENT);
 
-        _rigidBodyObjects.add(new RigidBodyObject(rigidBody, displayMesh, true));
+        _lunarLandersAndCrates.add(new RigidBodyObject(rigidBody, displayMesh, true));
         _engine.getPhysicsSpace().addCollisionObject(rigidBody);
 
         if (existingCrate == null) {
@@ -520,21 +659,21 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         }
     }
 
-    private void createDeliveryZoneRigidBodies() {
+    private void createDeliveryZones() {
         CollisionShape collisionMesh = _collisionMeshCache.getByExactName("DeliveryZone.BoxShape");
         if (collisionMesh != null) {
             for (var point : _deliveryZoneStartPoints) {
                 PhysicsRigidBody rigidBody = new PhysicsRigidBody(collisionMesh, PhysicsBody.massForStatic);
                 rigidBody.setPhysicsLocation(new com.jme3.math.Vector3f(point.x, point.y, point.z));
                 _engine.getPhysicsSpace().addCollisionObject(rigidBody);
-                _deliveryZoneRigidBodies.add(rigidBody);
+                _deliveryZones.add(rigidBody);
                 _model.addDeliveryZone(rigidBody);
             }
         }
     }
 
     // We'll allocate them now, but not insert them into the simulation
-    private void createDebrisRigidBodies() {
+    private void createDebris() {
         int i = 1;
         DisplayMesh displayMesh = _displayMeshCache.getByPartialName(String.format("Debris.Display.%03d", i));
         CollisionShape collisionMesh = _collisionMeshCache.getByPartialName(String.format("Debris.BoxShape.%03d", i));
@@ -542,11 +681,25 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         while (displayMesh != null && collisionMesh != null) {
             PhysicsRigidBody rigidBody = new PhysicsRigidBody(collisionMesh, 1.0f); // TODO: what about mass?
             RigidBodyObject rbo = new RigidBodyObject(rigidBody, displayMesh, false);
-            _debrisRigidBodies.add(rbo); // save for later insertion
+            _debris.add(rbo); // save for later insertion
 
             displayMesh = _displayMeshCache.getByPartialName(String.format("Debris.Display.%03d", i));
             collisionMesh = _collisionMeshCache.getByPartialName(String.format("Debris.BoxShape.%03d", i));
             ++i;
+        }
+    }
+
+    // We'll allocate them now, but not insert them into the simulation
+    private void createPlayerShots() {
+        DisplayMesh displayMesh = _displayMeshCache.getByExactName("Bullet.Display");
+        CollisionShape collisionMesh = _collisionMeshCache.getByExactName("Bullet.SphereShape");
+        if (displayMesh == null || collisionMesh == null) {
+            return;
+        }
+        for (int i = 0; i < NUM_PLAYER_SHOTS; ++i) {
+            PhysicsRigidBody rigidBody = new PhysicsRigidBody(collisionMesh, 1.0f); // TODO: what about mass?
+            RigidBodyObject rbo = new RigidBodyObject(rigidBody, displayMesh, false);
+            _playerShots.add(rbo); // save for later insertion
         }
     }
 
@@ -591,17 +744,5 @@ public class GameWorldView implements IGameWorldView, IGameWorldControllerObserv
         rbo._modelMatrix.m31(_physicsMatrix.m13);
         rbo._modelMatrix.m32(_physicsMatrix.m23);
         rbo._modelMatrix.m33(_physicsMatrix.m33);
-    }
-
-    private void removeCrate(Crate crate) {
-        for (var rbo : _rigidBodyObjects) {
-            if (rbo._rigidBody.getUserObject() == crate) {
-                crate.setRigidBody(null);
-                rbo._rigidBody.setUserObject(null);
-                _deadRigidBodyObjects.add(rbo);
-                _rigidBodyObjects.remove(rbo);
-                break;
-            }
-        }
     }
 }

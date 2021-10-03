@@ -12,8 +12,15 @@ public interface IGameWorldModel extends IWorldModel {
     void addCrate(PhysicsRigidBody rigidBody);
     void setCrateObserver(ICrateObserver observer);
     boolean areAllCratesDelivered();
+    int getNumCratesRemaining();
+    int getNumCratesCollected();
+    int getNumCratesDelivered();
 
     void clearDeliveryZones();
     void addDeliveryZone(PhysicsRigidBody rigidBody);
     void setDeliveryZoneObserver(IDeliveryZoneObserver observer);
+
+    void clearPlayerShots();
+    void addPlayerShot(Player player, PhysicsRigidBody rigidBody);
+    void setPlayerShotObserver(IPlayerShotObserver observer);
 }

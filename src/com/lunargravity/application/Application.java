@@ -175,13 +175,13 @@ public class Application implements
 
     @Override
     public void onFrameDraw2d(Matrix4f projectionMatrix) {
+        _widgetManager.draw(projectionMatrix);
         if (_worldView != null) {
             _worldView.drawView2d(projectionMatrix);
         }
         if (_logicView != null) {
             _logicView.drawView2d(projectionMatrix);
         }
-        _widgetManager.draw(projectionMatrix);
         _currentState.draw2d(projectionMatrix);
     }
 
@@ -315,7 +315,7 @@ public class Application implements
         _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
 
         _worldModel = new GameWorldModel(_engine.getTimeoutManager(), savedGameFile.getNumPlayers());
-        _worldView = new GameWorldView(_engine, (IGameWorldModel)_worldModel);
+        _worldView = new GameWorldView(_widgetManager, _engine, (IGameWorldModel)_worldModel);
         GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
         gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
         _worldController = gameWorldController;
@@ -324,7 +324,7 @@ public class Application implements
     }
 
     @Override
-    public void createCampaignMvc(int numPlayers) {
+    public void createCampaignMvc(int numPlayers) throws IOException {
         resetState();
 
         _logicModel = new CampaignModel(FIRST_EPISODE, FIRST_MISSION, numPlayers);
@@ -332,7 +332,7 @@ public class Application implements
         _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
 
         _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers);
-        _worldView = new GameWorldView(_engine, (IGameWorldModel)_worldModel);
+        _worldView = new GameWorldView(_widgetManager, _engine, (IGameWorldModel)_worldModel);
         GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
         gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
         _worldController = gameWorldController;
@@ -345,11 +345,11 @@ public class Application implements
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
-        ICampaignModel model = (ICampaignModel)_logicModel;
-        ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
-
         _worldView.resetState();
         _logicView.resetState();
+
+        ICampaignModel model = (ICampaignModel)_logicModel;
+        ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
 
         SceneBuilder logicSceneBuilder = new SceneBuilder(sceneBuilderObserver, _logicView, _logicView);
         logicSceneBuilder.build(viewportConfig, model.getEpisodeIntroScene());
@@ -388,7 +388,7 @@ public class Application implements
         _logicView = new RaceView(_widgetManager, (IRaceController)_logicController, (IRaceModel)_logicModel);
 
         _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers);
-        _worldView = new GameWorldView(_engine, (IGameWorldModel)_worldModel);
+        _worldView = new GameWorldView(_widgetManager, _engine, (IGameWorldModel)_worldModel);
         GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
         gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
         _worldController = gameWorldController;
@@ -426,7 +426,7 @@ public class Application implements
         _logicView = new DogfightView(_widgetManager, (IDogfightController)_logicController, (IDogfightModel)_logicModel);
 
         _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers);
-        _worldView = new GameWorldView(_engine, (IGameWorldModel)_worldModel);
+        _worldView = new GameWorldView(_widgetManager, _engine, (IGameWorldModel)_worldModel);
         GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
         gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
         _worldController = gameWorldController;

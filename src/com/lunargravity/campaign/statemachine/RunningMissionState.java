@@ -23,6 +23,7 @@ import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.world.controller.IGameWorldController;
 import com.lunargravity.world.model.IGameWorldModel;
+import com.lunargravity.world.view.IGameWorldView;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
@@ -31,8 +32,6 @@ import java.io.IOException;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class RunningMissionState extends StateBase implements ICampaignControllerObserver {
-    private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-    private LargeNumberFont _font;
 
     public RunningMissionState(IStateMachineContext context) {
         super(context);
@@ -41,25 +40,13 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
     @Override
     public void begin() throws IOException {
         getCampaignController().addObserver(this);
-        _font = new LargeNumberFont(getRenderer()); // temp
-        getCampaignView().showMissionStatusBar();
+        getGameWorldView().showMissionStatusBar();
     }
 
     @Override
     public void end() {
+        getGameWorldView().hideMissionStatusBar();
         getCampaignController().removeObserver(this);
-        _font.freeResources(); // temp
-    }
-
-    @Override
-    public void draw2d(Matrix4f projectionMatrix) { // temp
-        // temp
-        _font.drawNumber(projectionMatrix, getCampaignModel().getNumPlayers(), 10.0f, 138.0f, 1.0f, WHITE);
-        _font.drawNumber(projectionMatrix, getCampaignModel().getEpisode(), 10.0f, 74.0f, 1.0f, WHITE);
-        _font.drawNumber(projectionMatrix, getCampaignModel().getMission(), 10.0f, 10.0f, 1.0f, WHITE);
-
-        _font.drawNumber(projectionMatrix, getGameWorldModel().getPlayerState(0).getHitPoints(), 1150.0f, 74.0f, 1.0f, WHITE);
-        _font.drawNumber(projectionMatrix, getGameWorldModel().getPlayerState(1).getHitPoints(), 1150.0f, 10.0f, 1.0f, WHITE);
     }
 
     @Override
@@ -111,8 +98,8 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
         return (ICampaignModel)getContext().getLogicModel();
     }
 
-    private ICampaignView getCampaignView() {
-        return (ICampaignView)getContext().getLogicView();
+    private IGameWorldView getGameWorldView() {
+        return (IGameWorldView)getContext().getWorldView();
     }
 
     private ICampaignController getCampaignController() {

@@ -31,7 +31,8 @@ public class GameWorldController implements
         IPlayerObserver,
         ICrateObserver,
         IDeliveryZoneObserver,
-        ICampaignControllerObserver
+        ICampaignControllerObserver,
+        IPlayerShotObserver
 {
     public static final float LUNAR_LANDER_MASS = 2.0f;
     public static final float LUNAR_LANDER_DAMAGE_SCALE = 0.1f;
@@ -64,6 +65,7 @@ public class GameWorldController implements
         _model.setPlayerObserver(this);
         _model.setCrateObserver(this);
         _model.setDeliveryZoneObserver(this);
+        _model.setPlayerShotObserver(this);
     }
 
     public void addObserver(IGameWorldControllerObserver observer) {
@@ -210,6 +212,20 @@ public class GameWorldController implements
     }
 
     @Override
+    public void playerFiredWeapon(int id) {
+        for (var observer : _observers) {
+            observer.playerFiredWeapon(id);
+        }
+    }
+
+    @Override
+    public void playerWeaponCooledDown(int id) {
+        for (var observer : _observers) {
+            observer.playerWeaponCooledDown(id);
+        }
+    }
+
+    @Override
     public void crateStartedDelivering(Crate crate, com.jme3.math.Vector3f playerPosition) {
         for (var observer : _observers) {
             observer.crateStartedDelivering(crate, playerPosition);
@@ -233,11 +249,15 @@ public class GameWorldController implements
         if (event.getObjectA().getUserObject() instanceof Player player) {
             if (event.getObjectB().getUserObject() instanceof Crate crate) {
                 processPlayerToCrateCollision(player, crate);
-                damagePlayerShip(player, crate);
+                damagePlayerShip(player, crate.getRigidBody());
             }
             else if (event.getObjectB().getUserObject() instanceof DeliveryZone deliveryZone) {
                 processPlayerToDeliveryZoneCollision(player, deliveryZone);
                 damagePlayerShip(player); // delivery zone doesn't move, therefore has no kinetic energy
+            }
+            else if (event.getObjectB().getUserObject() instanceof PlayerShot playerShot) {
+                damagePlayerShip(player, playerShot.getRigidBody());
+                playerShot.explode();
             }
             else { // player collided with another object, possibly the world object
                 damagePlayerShip(player);
@@ -246,11 +266,15 @@ public class GameWorldController implements
         else if (event.getObjectB().getUserObject() instanceof Player player) {
             if (event.getObjectA().getUserObject() instanceof Crate crate) {
                 processPlayerToCrateCollision(player, crate);
-                damagePlayerShip(player, crate);
+                damagePlayerShip(player, crate.getRigidBody());
             }
             else if (event.getObjectA().getUserObject() instanceof DeliveryZone deliveryZone) {
                 processPlayerToDeliveryZoneCollision(player, deliveryZone);
                 damagePlayerShip(player); // delivery zone doesn't move, therefore has no kinetic energy
+            }
+            else if (event.getObjectA().getUserObject() instanceof PlayerShot playerShot) {
+                damagePlayerShip(player, playerShot.getRigidBody());
+                playerShot.explode();
             }
             else { // player collided with another object, possibly the world object
                 damagePlayerShip(player);
@@ -266,19 +290,25 @@ public class GameWorldController implements
                 processCrateToDeliveryZoneCollision(crate, deliveryZone);
             }
         }
+        else if (event.getObjectA().getUserObject() instanceof PlayerShot playerShot) {
+            playerShot.explode();
+        }
+        else if (event.getObjectB().getUserObject() instanceof PlayerShot playerShot) {
+            playerShot.explode();
+        }
     }
 
-    private void damagePlayerShip(Player player, Crate crate) {
-        if (haveReachDamageBatchSizeLimit(player)) {
+    private void damagePlayerShip(Player player, PhysicsRigidBody rigidBody) {
+        if (player.isExplodingOrDead() || haveReachDamageBatchSizeLimit(player) || rigidBody == null) {
             return;
         }
         float playerVelocity = getVelocityAsScalar(player.getRigidBody());
-        float crateVelocity = getVelocityAsScalar(crate.getRigidBody());
+        float crateVelocity = getVelocityAsScalar(rigidBody);
         if (playerVelocity < MIN_VELOCITY_FOR_DAMAGE && crateVelocity < MIN_VELOCITY_FOR_DAMAGE) {
             return;
         }
         float playerKineticEnergy = calculateKineticEnergy(player.getRigidBody().getMass(), playerVelocity);
-        float crateKineticEnergy = calculateKineticEnergy(crate.getRigidBody().getMass(), crateVelocity);
+        float crateKineticEnergy = calculateKineticEnergy(rigidBody.getMass(), crateVelocity);
         float kineticEnergy = playerKineticEnergy + crateKineticEnergy;
         if (kineticEnergy >= MIN_KINETIC_ENERGY_FOR_DAMAGE) {
             collateKineticEnergy(player, kineticEnergy);
@@ -286,7 +316,7 @@ public class GameWorldController implements
     }
 
     private void damagePlayerShip(Player player) {
-        if (haveReachDamageBatchSizeLimit(player)) {
+        if (player.isExplodingOrDead() || haveReachDamageBatchSizeLimit(player)) {
             return;
         }
         float playerVelocity = getVelocityAsScalar(player.getRigidBody());
@@ -432,5 +462,12 @@ public class GameWorldController implements
     @Override
     public void quitCampaign() {
         // Nothing to do
+    }
+
+    @Override
+    public void playerShotExploded(PlayerShot playerShot) {
+        for (var observer : _observers) {
+            observer.playerShotExploded(playerShot);
+        }
     }
 }

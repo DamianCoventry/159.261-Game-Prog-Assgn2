@@ -142,12 +142,6 @@ public class CampaignView implements
     }
 
     @Override
-    public void showMissionStatusBar() {
-        _widgetManager.hideAll();
-        // TODO: show mission status bar
-    }
-
-    @Override
     public void showGetReady(int i) throws IOException {
         if (_widgetManager.isVisible(_getReady)) {
             int clamped = Math.min(GetReadyState.MAX_SECONDS, Math.max(GetReadyState.MIN_SECONDS, i));

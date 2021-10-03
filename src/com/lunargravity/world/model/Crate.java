@@ -25,6 +25,14 @@ public class Crate {
         _state = state;
     }
 
+    public boolean isIdle() {
+        return _state == State.IDLE;
+    }
+
+    public boolean isCollected() {
+        return _state == State.COLLECTED;
+    }
+
     public boolean isDelivered() {
         return _state == State.DELIVERED;
     }

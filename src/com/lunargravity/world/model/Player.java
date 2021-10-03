@@ -11,8 +11,10 @@ public class Player {
     private static final int CRATE_COLLECTION_TIME = 1000;
     private static final int CRATE_DELIVERY_SPEED = 1000; // 1 second must pass between crate deliveries
     private static final int EXPLODING_TIME = 2000;
+    private static final int WEAPON_COOL_DOWN_TIME = 500;
     private static final float LUNAR_LANDER_THRUST = 45.0f;
     private static final int MAX_HIT_POINTS = 100;
+    private static final int MAX_FUEL = 100;
     private static final float VELOCITY_EPSILON = 0.1f;
 
     private static final Vector3f LUNAR_LANDER_KICK = new Vector3f(0.0f, 1000.0f, 0.0f);
@@ -31,6 +33,7 @@ public class Player {
     private int _collectionTimeoutId;
     private int _droppingForDeliveryTimeoutId;
     private int _explodingTimeoutId;
+    private int _weaponCoolDownTimeoutId;
 
     private PhysicsRigidBody _rigidBody;
     private IPlayerObserver _observer;
@@ -41,9 +44,14 @@ public class Player {
     private boolean _shootActive;
 
     private State _state;
+    private WeaponState _weaponState;
     private int _hitPoints;
+    private int _fuel;
 
     private final ArrayList<Crate> _collectedCrates;
+
+    public enum State { IDLE, COLLECTING, DROPPING_FOR_DELIVERY, EXPLODING, DEAD }
+    private enum WeaponState { IDLE, COOLING_DOWN }
 
     public Player(int id, TimeoutManager timeoutManager) {
         _id = id;
@@ -58,12 +66,15 @@ public class Player {
         _collectedCrates = new ArrayList<>();
 
         _state = State.IDLE;
+        _weaponState = WeaponState.IDLE;
         _thrustActive = _rotateCcwActive = _rotateCwActive = _shootActive = false;
         _hitPoints = MAX_HIT_POINTS;
+        _fuel = MAX_FUEL;
 
         _collectionTimeoutId = 0;
         _droppingForDeliveryTimeoutId = 0;
         _explodingTimeoutId = 0;
+        _weaponCoolDownTimeoutId = 0;
     }
 
     public int getId() {
@@ -74,6 +85,14 @@ public class Player {
         return _hitPoints;
     }
 
+    public int getFuel() {
+        return _fuel;
+    }
+
+    public boolean isExplodingOrDead() {
+        return _state == State.EXPLODING || _state == State.DEAD;
+    }
+
     public boolean isIdle() {
         return _state == State.IDLE;
     }
@@ -82,9 +101,8 @@ public class Player {
         _thrustActive = _rotateCcwActive = _rotateCwActive = _shootActive = false;
         _hitPoints = MAX_HIT_POINTS;
         _state = State.IDLE;
+        _weaponState = WeaponState.IDLE;
     }
-
-    public enum State { IDLE, COLLECTING, DROPPING_FOR_DELIVERY, EXPLODING, DEAD }
 
     public void setObserver(IPlayerObserver observer) {
         _observer = observer;
@@ -201,7 +219,12 @@ public class Player {
             timeoutManager.removeTimeout(_explodingTimeoutId);
             _explodingTimeoutId = 0;
         }
+        if (_weaponCoolDownTimeoutId != 0) {
+            timeoutManager.removeTimeout(_weaponCoolDownTimeoutId);
+            _weaponCoolDownTimeoutId = 0;
+        }
         _state = State.IDLE;
+        _weaponState = WeaponState.IDLE;
     }
 
     public void applyInputCommands() {
@@ -235,8 +258,7 @@ public class Player {
     }
 
     public void kick() {
-        // TODO: player needs to be at rest, and touching something else
-        if (!isMoving()) {
+        if (!isMoving() && _rigidBody != null) {
             _rigidBody.applyCentralForce(LUNAR_LANDER_KICK);
         }
     }
@@ -251,6 +273,7 @@ public class Player {
         _hitPoints = 0;
         _state = State.EXPLODING;
         _observer.playerShipExploding(_id);
+        _collectedCrates.clear();
 
         _explodingTimeoutId = _timeoutManager.addTimeout(EXPLODING_TIME, callCount -> {
             _state = State.DEAD;
@@ -260,17 +283,35 @@ public class Player {
         });
     }
 
-    private void thrust() {
+    public Vector3f calculateAndGetUpVector() {
+        calculateUpVector();
+        return _upVector;
+    }
+
+    private void calculateUpVector() {
         _rigidBody.getPhysicsRotationMatrix(_rotationMatrix);
         _upVector.x = _rotationMatrix.get(0, 1);
         _upVector.y = _rotationMatrix.get(1, 1);
         _upVector.z = _rotationMatrix.get(2, 1);
+    }
 
+    private void thrust() {
+        calculateUpVector();
         _thrustForce.set(_upVector).multLocal(LUNAR_LANDER_THRUST);
         _rigidBody.applyCentralForce(_thrustForce);
     }
 
     private void shoot() {
-        // TODO
+        if (_weaponState != WeaponState.IDLE) {
+            return;
+        }
+        _observer.playerFiredWeapon(_id);
+        _weaponState = WeaponState.COOLING_DOWN;
+        _weaponCoolDownTimeoutId = _timeoutManager.addTimeout(WEAPON_COOL_DOWN_TIME, callCount -> {
+            _weaponState = WeaponState.IDLE;
+            _observer.playerWeaponCooledDown(_id);
+            _weaponCoolDownTimeoutId = 0;
+            return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;
+        });
     }
 }

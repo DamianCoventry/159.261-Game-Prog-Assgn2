@@ -1,15 +1,35 @@
 {
     "_name": "Campaign World Episode 0, Mission 1",
     "_displayMeshFileNames": [
-        "meshes/E0M1.Display.obj",
+        "meshes/E0M0.Display.obj",
         "meshes/LunarLander.Display.obj",
         "meshes/Crate.Display.obj",
-        "meshes/LunarLanderDebris.Display.obj"
+        "meshes/LunarLanderDebris.Display.obj",
+        "meshes/Bullet.Display.obj"
     ],
     "_collisionMeshFileNames": [
-        "meshes/E0M1.Collision.obj",
+        "meshes/E0M0.Collision.obj",
         "meshes/LunarLander.Collision.obj",
         "meshes/Crate.Collision.obj",
-        "meshes/LunarLanderDebris.Collision.obj"
+        "meshes/LunarLanderDebris.Collision.obj",
+        "meshes/Bullet.Collision.obj"
+    ],
+    "_widgets": [
+        {
+            "_id": "singlePlayerStatusBar",
+            "_type": "ImageWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 860.0
+            },
+            "_size": {
+                "x": 1280.0,
+                "y": 100.0
+            },
+            "_properties": {
+                "backgroundImage": "images/SinglePlayerStatusBar.png"
+            },
+            "_children": []
+        }
     ]
 }

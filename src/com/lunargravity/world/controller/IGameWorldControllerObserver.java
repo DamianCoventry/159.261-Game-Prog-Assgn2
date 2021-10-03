@@ -15,6 +15,7 @@
 package com.lunargravity.world.controller;
 
 import com.lunargravity.world.model.Crate;
+import com.lunargravity.world.model.PlayerShot;
 
 public interface IGameWorldControllerObserver {
     void crateCollectionCompleted(Crate crate);
@@ -26,4 +27,7 @@ public interface IGameWorldControllerObserver {
     void playerShipExploding(int player);
     void playerShipDead(int player);
     void playerShipSpawned(int player);
+    void playerFiredWeapon(int id);
+    void playerWeaponCooledDown(int id);
+    void playerShotExploded(PlayerShot playerShot);
 }

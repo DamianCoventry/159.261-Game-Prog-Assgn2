@@ -1,8 +1,10 @@
 MUST DO
 Campaign gameplay:
-    drop crates on death
-    allow lunar lander to shoot
     hud
+load and play sound effect's
+player ship runs out of fuel
+player ship can be repaired
+player ship can refuel
 Race gameplay:
     add ghost bodies
     allow player to collide with ghost bodies
@@ -13,7 +15,6 @@ Dogfight gameplay:
     allow player to explode
     trigger dogfight end condition
     hud
-load and play sound effects
 Stream music
 use key bindings
 Complete the menu widgets:
@@ -21,12 +22,14 @@ Complete the menu widgets:
     Sound + music check widgets
     Sound + music numeric widgets
     Player keys Key binding widgets
-Make 30 campaign levels
-make 10 race levels
-make 10 dogfight levels
+Make 12 campaign levels
+make 2 race levels
+make 2 dogfight levels
 load and save high score tables
+make sure 2 player modes work
 
 SHOULD DO
+update the above-ground terrain in E0M0
 Debris should be exploded towards solid space
 positional lighting
 bill boarding
@@ -51,6 +54,8 @@ enemy ships:
     allow enemy ships to explode
     add enemy ship debris
 better lunar lander explosion
+player shot explosion
+enemy shot explosion
 better menu GUI
 
 COULD DO

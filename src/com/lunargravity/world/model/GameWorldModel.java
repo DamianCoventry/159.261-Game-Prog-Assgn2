@@ -24,10 +24,12 @@ public class GameWorldModel implements IGameWorldModel {
     private final Player[] _players;
     private final ArrayList<Crate> _crates;
     private final ArrayList<DeliveryZone> _deliveryZones;
+    private final ArrayList<PlayerShot> _playerShots;
     private final TimeoutManager _timeoutManager;
     
     private ICrateObserver _crateObserver;
     private IDeliveryZoneObserver _deliveryZoneObserver;
+    private IPlayerShotObserver _playerShotObserver;
 
     public GameWorldModel(TimeoutManager timeoutManager, int numPlayers) {
         _timeoutManager = timeoutManager;
@@ -37,6 +39,7 @@ public class GameWorldModel implements IGameWorldModel {
         _players[1] = new Player(1, _timeoutManager);
         _crates = new ArrayList<>();
         _deliveryZones = new ArrayList<>();
+        _playerShots = new ArrayList<>();
     }
 
     @Override
@@ -59,6 +62,9 @@ public class GameWorldModel implements IGameWorldModel {
             a.removeTimeouts(timeoutManager);
         }
         for (var a : _crates) {
+            a.removeTimeouts(timeoutManager);
+        }
+        for (var a : _playerShots) {
             a.removeTimeouts(timeoutManager);
         }
     }
@@ -98,6 +104,39 @@ public class GameWorldModel implements IGameWorldModel {
     }
 
     @Override
+    public int getNumCratesRemaining() {
+        int count = 0;
+        for (var crate : _crates) {
+            if (crate.isIdle()) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public int getNumCratesCollected() {
+        int count = 0;
+        for (var crate : _crates) {
+            if (crate.isCollected()) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public int getNumCratesDelivered() {
+        int count = 0;
+        for (var crate : _crates) {
+            if (crate.isDelivered()) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
+    @Override
     public void clearCrates() {
         _crates.clear();
     }
@@ -132,6 +171,26 @@ public class GameWorldModel implements IGameWorldModel {
     @Override
     public void setDeliveryZoneObserver(IDeliveryZoneObserver observer) {
         _deliveryZoneObserver = observer;
+    }
+
+    @Override
+    public void clearPlayerShots() {
+        _playerShots.clear();
+    }
+
+    @Override
+    public void addPlayerShot(Player player, PhysicsRigidBody rigidBody) {
+        if (_playerShotObserver == null) {
+            throw new RuntimeException("No player shot observer set");
+        }
+        PlayerShot playerShot = new PlayerShot(player, rigidBody, _playerShotObserver, _timeoutManager);
+        _playerShots.add(playerShot);
+        rigidBody.setUserObject(playerShot);
+    }
+
+    @Override
+    public void setPlayerShotObserver(IPlayerShotObserver observer) {
+        _playerShotObserver = observer;
     }
 
     @Override

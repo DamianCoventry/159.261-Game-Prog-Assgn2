@@ -122,18 +122,18 @@ public class CollisionMeshBuilder {
 
     private void buildSphereShape(DisplayMeshFileLoader loader, Vector3f[] vertices, DisplayMeshFileLoader.Object object) {
         int totalVertices = 0;
-        float averageLength = 0.0f;
+        float totalLength = 0.0f;
         for (var piece : object.getPieces()) {
             totalVertices += piece.getFaces().size() * 3;
             for (var face : piece.getFaces()) {
-                averageLength += vertices[face._vertices[0]].length();
-                averageLength += vertices[face._vertices[1]].length();
-                averageLength += vertices[face._vertices[2]].length();
+                totalLength += vertices[face._vertices[0]].length();
+                totalLength += vertices[face._vertices[1]].length();
+                totalLength += vertices[face._vertices[2]].length();
             }
         }
 
         if (totalVertices > 0) {
-            SphereCollisionShape scs = new SphereCollisionShape(averageLength / totalVertices);
+            SphereCollisionShape scs = new SphereCollisionShape(totalLength / totalVertices);
             _meshCollisionShapes.put(object.getName(), scs);
         }
     }

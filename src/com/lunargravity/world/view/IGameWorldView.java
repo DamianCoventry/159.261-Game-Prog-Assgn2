@@ -15,5 +15,6 @@
 package com.lunargravity.world.view;
 
 public interface IGameWorldView extends IWorldView {
-    void doGameWorldViewStuff();
+    void showMissionStatusBar();
+    void hideMissionStatusBar();
 }
