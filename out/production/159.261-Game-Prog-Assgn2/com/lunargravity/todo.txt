@@ -1,9 +1,7 @@
 MUST DO
-Campaign gameplay:
-    hud
 load and play sound effect's
-player ship runs out of fuel
 player ship can be repaired
+player ship runs out of fuel
 player ship can refuel
 Race gameplay:
     add ghost bodies

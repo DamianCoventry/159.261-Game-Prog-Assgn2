@@ -9,6 +9,7 @@ public interface ICampaignModel extends IModel {
     int getEpisode();
     int getMission();
     int getNumPlayers();
+    int getShipsRemaining(int playerId);
 
     enum DecrementPlayerShipResult { SHIP_AVAILABLE, SHIPS_EXHAUSTED }
     DecrementPlayerShipResult decrementPlayerShip(int i);

@@ -89,7 +89,6 @@ public class GameWorldView implements
     }
 
     private final ArrayList<RigidBodyObject> _lunarLandersAndCrates;
-    //private final ArrayList<RigidBodyObject> _deadObjects;
     private final ArrayList<PhysicsRigidBody> _deliveryZones;
     private final ArrayList<RigidBodyObject> _debris;
     private final ArrayList<RigidBodyObject> _playerShots;
@@ -118,7 +117,6 @@ public class GameWorldView implements
 
         _mvpMatrix = new Matrix4f();
         _lunarLandersAndCrates = new ArrayList<>();
-        //_deadObjects = new ArrayList<>();
         _deliveryZones = new ArrayList<>();
         _debris = new ArrayList<>();
         _playerShots = new ArrayList<>();
@@ -157,7 +155,6 @@ public class GameWorldView implements
         }
 
         _lunarLandersAndCrates.clear();
-        //_deadObjects.clear();
         _debris.clear();
         _playerShots.clear();
         _model.clearCrates();
@@ -230,13 +227,14 @@ public class GameWorldView implements
         if (!_widgetManager.isVisible(_singlePlayerStatusBar)) {
             return;
         }
+
         final float horizontalSpacing = 110.0f;
         float x = 30.0f;
-        _font.drawNumber(projectionMatrix, 1, x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
-        _font.drawNumber(projectionMatrix, 2, x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
+        _font.drawNumber(projectionMatrix, _model.getEpisode()+1, x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
+        _font.drawNumber(projectionMatrix, _model.getMission()+1, x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
         _font.drawNumber(projectionMatrix, _model.getPlayerState(0).getHitPoints(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
         _font.drawNumber(projectionMatrix, _model.getPlayerState(0).getFuel(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
-        _font.drawNumber(projectionMatrix, 3, x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
+        _font.drawNumber(projectionMatrix, _model.getShipsRemaining(0), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
         _font.drawNumber(projectionMatrix, _model.getNumCratesRemaining(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
         _font.drawNumber(projectionMatrix, _model.getNumCratesCollected(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
         _font.drawNumber(projectionMatrix, _model.getNumCratesDelivered(), x, 892.0f, 1.0f, WHITE);
@@ -261,27 +259,12 @@ public class GameWorldView implements
 
     @Override
     public void onFrameEnd() {
-//        if (_deadObjects.isEmpty()) {
-//            return;
-//        }
-//
-//        for (var rbo : _deadObjects) {
-//            _engine.getPhysicsSpace().remove(rbo._rigidBody);
-//        }
-//        _deadObjects.clear();
-
-//        if (_model.getPlayerState(0).getRigidBody() != null) {
-//            _model.getPlayerState(0).getRigidBody().activate();
-//        }
-//        if (_model.getNumPlayers() == 2 && _model.getPlayerState(1).getRigidBody() != null) {
-//            _model.getPlayerState(1).getRigidBody().activate();
-//        }
+        // Nothing to do
     }
 
     @Override
     public void resetState() {
         resetRigidBodyObjects(_lunarLandersAndCrates); // <-- player ship rigid bodies, and crate rigid bodies, are in here
-        //resetRigidBodyObjects(_deadObjects);
         resetRigidBodyObjects(_debris);
         resetRigidBodyObjects(_playerShots);
 

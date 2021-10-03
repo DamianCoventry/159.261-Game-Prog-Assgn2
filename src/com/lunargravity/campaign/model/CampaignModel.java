@@ -44,6 +44,11 @@ public class CampaignModel implements ICampaignModel {
     }
 
     @Override
+    public int getShipsRemaining(int playerId) {
+        return _playerShipCounts[playerId];
+    }
+
+    @Override
     public DecrementPlayerShipResult decrementPlayerShip(int player) {
         if (player < 0 || player > 1) {
             throw new IllegalArgumentException("player index is invalid");

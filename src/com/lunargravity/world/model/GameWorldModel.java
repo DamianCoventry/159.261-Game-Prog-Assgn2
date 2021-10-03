@@ -15,6 +15,7 @@
 package com.lunargravity.world.model;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
 import java.util.ArrayList;
@@ -26,13 +27,15 @@ public class GameWorldModel implements IGameWorldModel {
     private final ArrayList<DeliveryZone> _deliveryZones;
     private final ArrayList<PlayerShot> _playerShots;
     private final TimeoutManager _timeoutManager;
-    
+    private final ICampaignModel _campaignModel;
+
     private ICrateObserver _crateObserver;
     private IDeliveryZoneObserver _deliveryZoneObserver;
     private IPlayerShotObserver _playerShotObserver;
 
-    public GameWorldModel(TimeoutManager timeoutManager, int numPlayers) {
+    public GameWorldModel(TimeoutManager timeoutManager, int numPlayers, ICampaignModel campaignModel) {
         _timeoutManager = timeoutManager;
+        _campaignModel = campaignModel;
         _numPlayers = numPlayers;
         _players = new Player[2];
         _players[0] = new Player(0, _timeoutManager);
@@ -191,6 +194,21 @@ public class GameWorldModel implements IGameWorldModel {
     @Override
     public void setPlayerShotObserver(IPlayerShotObserver observer) {
         _playerShotObserver = observer;
+    }
+
+    @Override
+    public long getEpisode() {
+        return _campaignModel.getEpisode();
+    }
+
+    @Override
+    public long getMission() {
+        return _campaignModel.getMission();
+    }
+
+    @Override
+    public long getShipsRemaining(int playerId) {
+        return _campaignModel.getShipsRemaining(playerId);
     }
 
     @Override

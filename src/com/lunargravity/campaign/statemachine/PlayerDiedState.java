@@ -20,6 +20,7 @@ import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.engine.timeouts.TimeoutManager;
+import com.lunargravity.world.view.IGameWorldView;
 
 import java.io.IOException;
 
@@ -56,7 +57,12 @@ public class PlayerDiedState extends StateBase implements ICampaignControllerObs
 
     @Override
     public void gameOver() {
+        getGameWorldView().resetState();
         changeState(new GameOverState(getContext()));
+    }
+
+    private IGameWorldView getGameWorldView() {
+        return (IGameWorldView)getContext().getWorldView();
     }
 
     @Override

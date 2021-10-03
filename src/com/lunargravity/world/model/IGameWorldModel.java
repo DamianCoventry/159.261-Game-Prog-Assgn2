@@ -23,4 +23,8 @@ public interface IGameWorldModel extends IWorldModel {
     void clearPlayerShots();
     void addPlayerShot(Player player, PhysicsRigidBody rigidBody);
     void setPlayerShotObserver(IPlayerShotObserver observer);
+
+    long getEpisode();
+    long getMission();
+    long getShipsRemaining(int playerId);
 }
