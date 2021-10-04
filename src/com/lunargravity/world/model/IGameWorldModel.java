@@ -1,6 +1,7 @@
 package com.lunargravity.world.model;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.math.Vector3f;
 
 public interface IGameWorldModel extends IWorldModel {
     int getNumPlayers();
@@ -9,9 +10,10 @@ public interface IGameWorldModel extends IWorldModel {
     void resetPlayers();
 
     void clearCrates();
-    void addCrate(PhysicsRigidBody rigidBody);
+    void addCrate(PhysicsRigidBody rigidBody, Vector3f startPosition);
     void setCrateObserver(ICrateObserver observer);
     boolean areAllCratesDelivered();
+    void updateCrateMovingStates(long nowMs);
     int getNumCratesRemaining();
     int getNumCratesCollected();
     int getNumCratesDelivered();

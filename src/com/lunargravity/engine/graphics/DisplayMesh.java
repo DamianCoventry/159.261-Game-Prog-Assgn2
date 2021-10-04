@@ -30,6 +30,12 @@ public class DisplayMesh {
         _midPoint = new Vector3f();
     }
 
+    public void freeResources() {
+        for (var p : _pieces) {
+            p.freeResources();
+        }
+    }
+
     public String getName() {
         return _name;
     }

@@ -28,13 +28,9 @@ public class TextureCache {
     }
 
     public void freeResources() {
-        for (var texture : _textures) {
-            texture.freeResources();
+        for (var t : _textures) {
+            t.freeResources();
         }
-        _textures.clear();
-    }
-
-    public void clear() {
         _textures.clear();
     }
 }

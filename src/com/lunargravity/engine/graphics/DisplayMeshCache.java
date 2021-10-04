@@ -40,7 +40,10 @@ public class DisplayMeshCache {
         return material;
     }
 
-    public void clear() {
+    public void freeResources() {
+        for (var mesh : _displayMeshes) {
+            mesh.freeResources();
+        }
         _displayMeshes.clear();
     }
 }

@@ -1,75 +1,43 @@
-MUST DO
-load and play sound effect's
-player ship can be repaired
-player ship runs out of fuel
-player ship can refuel
-Race gameplay:
-    add ghost bodies
-    allow player to collide with ghost bodies
-    trigger race end condition
-    hud
-Dogfight gameplay:
-    allow player to take damage
-    allow player to explode
-    trigger dogfight end condition
-    hud
-Stream music
-use key bindings
-Complete the menu widgets:
-    Saved Game list widget
-    Sound + music check widgets
-    Sound + music numeric widgets
-    Player keys Key binding widgets
-Make 12 campaign levels
-make 2 race levels
-make 2 dogfight levels
-load and save high score tables
-make sure 2 player modes work
+remove the saved game feature
+stream music
+add an explosion sprite
+add an explosion ring
+add more explosion flare?
+Implement positional lighting
+use the key bindings
+Make a simple menu background
+Put a spinning lunar lander in the menu
+make menu widgets that don't suck
+make loading screens that don't suck
+make a hud that doesn't suck
+Remove the ability to shoot
+Remove the race button
+Remove the dogfight button
+Move the above ground geometry forward for level e0m1
+For subterranean geometry, draw a front-facing set of polygons
+Draw the tunnels with three quarters of their geometry
+Sort out the odd damage system
+Remove the shooting ability of the lunar lander
+Finish as many levels as possible
+Better looking levels:
+    mix of textures
+    more detail geometry
+
+2 players:
+    does it work?
+    2 player hud
+    debris is not being removed correctly
+    draw the 'other' player another colour
+    what happens when one player dies?
+    border down the middle of the screen
+    alpha blend the 'other' ship
 
 What happens if the player explodes during the paused state?
 What happens if a crate is delivered during the paused state?
 What happens if a crate is collected during the paused state?
 
-SHOULD DO
-update the above-ground terrain in E0M0
-Debris should be exploded towards solid space
-positional lighting
-bill boarding
-particle systems
-Save player's progress during campaign
-Make better loading screens (based on activity, not progress)
-key binding hints during the game
-create menu world meshes
-Allow the user to move the camera around the menu world
-create animations from FCurves:
-    widget open/close animation
-    lunar lander exhaust
-    lunar lander hit animation
-    crate collection animation
-    crate delivery animation
-add laser gates
-enemy ships:
-    add state for them
-    add state for movement tracks + loops
-    allow enemy ships to shoot
-    allow enemy ships to take damage
-    allow enemy ships to explode
-    add enemy ship debris
-better lunar lander explosion
-player shot explosion
-enemy shot explosion
-better menu GUI
+mark the items in the diagrams as 'possible future feature'
 
-COULD DO
 Change from interfaces to abstract classes
 Remove usage of InterruptedException
 check all TODOs within the source
-
-Refactor a piece of the Widget system:
-    Remove the background image from the widget class
-    Replace it with view layers, where each layer has a diffuse texture and a blending parameter
-    Make the view layer order explicit
-    Make the order of the child widgets explicit
-    Make an explicit hit box size in the widget instead of using the old diffuse texture as the size
-    Use the centre of the hit box as the origin for drawing
-    Each view layer must calculate its own center and put that center on the origin

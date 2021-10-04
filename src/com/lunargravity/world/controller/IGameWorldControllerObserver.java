@@ -22,6 +22,7 @@ public interface IGameWorldControllerObserver {
     void crateCollectionAborted();
     void crateStartedDelivering(Crate crate, com.jme3.math.Vector3f playerPosition);
     void crateDeliveryCompleted(Crate crate);
+    void respawnCrateAtStartPosition(Crate crate);
     void allCratesDelivered();
     void playerShipTookDamage(int player, int hitPointsDamage, int hitPointsRemaining);
     void playerShipExploding(int player);

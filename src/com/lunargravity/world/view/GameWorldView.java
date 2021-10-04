@@ -18,6 +18,9 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsBody;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.lunargravity.application.LargeNumberFont;
+import com.lunargravity.engine.audio.SoundBuffer;
+import com.lunargravity.engine.audio.SoundBufferCache;
+import com.lunargravity.engine.audio.SoundSource;
 import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.physics.CollisionMeshCache;
@@ -34,6 +37,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -49,6 +53,7 @@ public class GameWorldView implements
     private static final int NUM_PLAYER_SHOTS = 20;
     private static final float PLAYER_SHOT_FORCE = 500.0f;
     private static final float PLAYER_SHOT_OFFSET = 0.75f; // Measured using Blender
+    private static final int NUM_PLAYER_SHIP_HIT_SOUNDS = 4;
 
     private static final com.jme3.math.Vector3f ZERO_VELOCITY = new com.jme3.math.Vector3f(0, 0, 0);
     private static final com.jme3.math.Vector3f PREVENT_XY_AXES_ROTATION = new com.jme3.math.Vector3f(0.0f, 0.0f, 1.0f);
@@ -61,10 +66,10 @@ public class GameWorldView implements
     private final Renderer _renderer;
     private final IGameWorldModel _model;
     private final WidgetManager _widgetManager;
-    private LargeNumberFont _font;
+    private final LargeNumberFont _font;
 
+    private final SoundBufferCache _soundBufferCache;
     private final DisplayMeshCache _displayMeshCache;
-    private DisplayMesh _worldDisplayMesh;
     private final CollisionMeshCache _collisionMeshCache;
     private final MaterialCache _materialCache;
     private final TextureCache _textureCache;
@@ -72,6 +77,7 @@ public class GameWorldView implements
     private final com.jme3.math.Vector3f _jmeVector;
 
     private Widget _singlePlayerStatusBar;
+    private DisplayMesh _worldDisplayMesh;
 
     private static class RigidBodyObject {
         public boolean _active;
@@ -102,6 +108,11 @@ public class GameWorldView implements
     private final Vector3f[] _lunarLanderStartPoints;
     private final Matrix4f _mvpMatrix;
 
+    private SoundSource _playerShipShoot;
+    private SoundSource _playerShipExplode;
+    private SoundSource[] _playerShipHits;
+    private SoundSource _collectCrate;
+
     public GameWorldView(WidgetManager widgetManager, IEngine engine, IGameWorldModel model) throws IOException {
         _widgetManager = widgetManager;
         _engine = engine;
@@ -109,6 +120,7 @@ public class GameWorldView implements
         _model = model;
 
         _displayMeshCache = new DisplayMeshCache();
+        _soundBufferCache = new SoundBufferCache();
 
         _collisionMeshCache = new CollisionMeshCache();
         _materialCache = new MaterialCache();
@@ -139,18 +151,17 @@ public class GameWorldView implements
     }
 
     @Override
-    public void initialLoadCompleted() {
-        int width = (int)_engine.getDesktopWindowWidth();
-        int height = (int)_engine.getDesktopWindowHeight();
+    public void initialLoadCompleted() throws UnsupportedAudioFileException, IOException {
+        int width = (int) _engine.getDesktopWindowWidth();
+        int height = (int) _engine.getDesktopWindowHeight();
         if (_model.getNumPlayers() == 1) {
-            _renderer.setPerspectiveViewports(new ViewportConfig[] {
+            _renderer.setPerspectiveViewports(new ViewportConfig[]{
                     ViewportConfig.createFullWindow(width, height)
             });
-        }
-        else {
-            _renderer.setPerspectiveViewports(new ViewportConfig[] {
-                    ViewportConfig.createDefault(0, 0, width/2, height),
-                    ViewportConfig.createDefault(width/2, 0, width/2, height)
+        } else {
+            _renderer.setPerspectiveViewports(new ViewportConfig[]{
+                    ViewportConfig.createDefault(0, 0, width / 2, height),
+                    ViewportConfig.createDefault(width / 2, 0, width / 2, height)
             });
         }
 
@@ -165,6 +176,51 @@ public class GameWorldView implements
         createLunarLanders();
         createDebris();
         createPlayerShots();
+
+        loadSounds();
+    }
+
+    private void loadSounds() throws UnsupportedAudioFileException, IOException {
+        SoundBuffer soundBuffer = SoundBuffer.fromFile("sounds/PlayerShipShoot.wav");
+        _soundBufferCache.add(soundBuffer);
+        _playerShipShoot = new SoundSource(false, false);
+        _playerShipShoot.setBuffer(soundBuffer);
+
+        soundBuffer = SoundBuffer.fromFile("sounds/PlayerShipExploding.wav");
+        _soundBufferCache.add(soundBuffer);
+        _playerShipExplode = new SoundSource(false, false);
+        _playerShipExplode.setBuffer(soundBuffer);
+
+        _playerShipHits = new SoundSource[NUM_PLAYER_SHIP_HIT_SOUNDS];
+        for (int i = 0; i < NUM_PLAYER_SHIP_HIT_SOUNDS; ++i) {
+            soundBuffer = SoundBuffer.fromFile(String.format("sounds/Hit%d.wav", i));
+            _soundBufferCache.add(soundBuffer);
+            _playerShipHits[i] = new SoundSource(false, false);
+            _playerShipHits[i].setBuffer(soundBuffer);
+        }
+
+        soundBuffer = SoundBuffer.fromFile("sounds/CollectCrate.wav");
+        _soundBufferCache.add(soundBuffer);
+        _collectCrate = new SoundSource(false, false);
+        _collectCrate.setBuffer(soundBuffer);
+    }
+
+    private void unloadSounds() {
+        if (_playerShipShoot != null) {
+            _playerShipShoot.freeResources();
+        }
+        if (_playerShipExplode != null) {
+            _playerShipExplode.freeResources();
+        }
+        if (_playerShipHits != null) {
+            for (var a : _playerShipHits) {
+                a.freeResources();
+            }
+        }
+        if (_collectCrate != null) {
+            _collectCrate.freeResources();
+        }
+        _soundBufferCache.freeResources();
     }
 
     @Override
@@ -281,12 +337,13 @@ public class GameWorldView implements
         _worldRigidBody = null;
 
         _worldDisplayMesh = null;
-        _displayMeshCache.clear();
+        _displayMeshCache.freeResources();
         _collisionMeshCache.clear();
         _materialCache.clear();
-        _textureCache.clear();
+        _textureCache.freeResources();
         _crateStartPoints.clear();
         _deliveryZoneStartPoints.clear();
+        _soundBufferCache.freeResources();
         _physicsTransform = new com.jme3.math.Transform();
         _physicsMatrix = new com.jme3.math.Matrix4f();
 
@@ -294,6 +351,8 @@ public class GameWorldView implements
         _model.clearCrates();
         _model.clearDeliveryZones();
         _model.clearPlayerShots();
+
+        unloadSounds();
     }
 
     @Override
@@ -386,6 +445,7 @@ public class GameWorldView implements
     @Override
     public void crateCollectionCompleted(Crate crate) {
         removeCrate(crate);
+        _collectCrate.play();
     }
 
     @Override
@@ -407,6 +467,12 @@ public class GameWorldView implements
     }
 
     @Override
+    public void respawnCrateAtStartPosition(Crate crate) {
+        // TODO: play an animation?
+        crate.respawnAtStartPosition();
+    }
+
+    @Override
     public void allCratesDelivered() {
         // TODO
     }
@@ -414,6 +480,7 @@ public class GameWorldView implements
     @Override
     public void playerShipTookDamage(int player, int hitPointsDamage, int hitPointsRemaining) {
         // TODO: draw sparks?
+        _playerShipHits[randomInteger(0, 3)].play();
     }
 
     @Override
@@ -427,6 +494,8 @@ public class GameWorldView implements
         dropCollectedCrates(player);
         spawnPlayerShipDebris(player);
         removePlayerShip(player);
+
+        _playerShipExplode.play();
     }
 
     @Override
@@ -474,7 +543,7 @@ public class GameWorldView implements
             if (rbo._rigidBody.getUserObject() == crate) {
                 _engine.getPhysicsSpace().removeCollisionObject(rbo._rigidBody);
                 rbo._rigidBody.setUserObject(null);
-                crate.setRigidBody(null);
+                crate.setRigidBody(null, null);
                 _lunarLandersAndCrates.remove(rbo);
 
                 if (_model.getPlayerState(0).getRigidBody() != null) {
@@ -553,6 +622,8 @@ public class GameWorldView implements
 
         _engine.getPhysicsSpace().addCollisionObject(rbo._rigidBody);
         rbo._rigidBody.setGravity(new com.jme3.math.Vector3f(0.0f, 0.0f, 0.0f)); // Overwrite the physics space gravity
+
+        _playerShipShoot.play();
     }
 
     private RigidBodyObject getUnusedPlayerShot() {
@@ -626,7 +697,8 @@ public class GameWorldView implements
         }
 
         PhysicsRigidBody rigidBody = new PhysicsRigidBody(collisionMesh, 1.0f); // TODO: what about mass?
-        rigidBody.setPhysicsLocation(new com.jme3.math.Vector3f(point.x, point.y, point.z));
+        com.jme3.math.Vector3f startPosition = new com.jme3.math.Vector3f(point.x, point.y, point.z);
+        rigidBody.setPhysicsLocation(startPosition);
 
         rigidBody.setLinearFactor(PREVENT_Z_AXIS_MOVEMENT);
 
@@ -634,10 +706,10 @@ public class GameWorldView implements
         _engine.getPhysicsSpace().addCollisionObject(rigidBody);
 
         if (existingCrate == null) {
-            _model.addCrate(rigidBody);
+            _model.addCrate(rigidBody, startPosition);
         }
         else {
-            existingCrate.setRigidBody(rigidBody);
+            existingCrate.setRigidBody(rigidBody, startPosition);
             rigidBody.setUserObject(existingCrate);
         }
     }

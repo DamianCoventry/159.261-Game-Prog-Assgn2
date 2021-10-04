@@ -15,6 +15,7 @@
 package com.lunargravity.world.model;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.math.Vector3f;
 import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
@@ -107,6 +108,13 @@ public class GameWorldModel implements IGameWorldModel {
     }
 
     @Override
+    public void updateCrateMovingStates(long nowMs) {
+        for (var crate : _crates) {
+            crate.updateMovingState(nowMs);
+        }
+    }
+
+    @Override
     public int getNumCratesRemaining() {
         int count = 0;
         for (var crate : _crates) {
@@ -145,12 +153,12 @@ public class GameWorldModel implements IGameWorldModel {
     }
 
     @Override
-    public void addCrate(PhysicsRigidBody rigidBody) {
+    public void addCrate(PhysicsRigidBody rigidBody, Vector3f startPosition) {
         if (_crateObserver == null) {
             throw new RuntimeException("No crate observer set");
         }
         Crate crate = new Crate(_timeoutManager, _crateObserver);
-        crate.setRigidBody(rigidBody);
+        crate.setRigidBody(rigidBody, startPosition);
         _crates.add(crate);
         rigidBody.setUserObject(crate);
     }

@@ -39,6 +39,7 @@ public interface IEngine extends IManualFrameUpdater {
 
     void setPhysicsCollisionListener(PhysicsCollisionListener listener);
 
+    boolean isSoundAvailable();
     boolean isSoundEnabled();
     void enableSound();
     void disableSound();

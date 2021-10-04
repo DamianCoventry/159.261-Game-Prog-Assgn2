@@ -17,6 +17,8 @@ package com.lunargravity.engine.core;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.system.NativeLibraryLoader;
+import com.lunargravity.engine.audio.AudioDevice;
+import com.lunargravity.engine.audio.SoundListener;
 import com.lunargravity.engine.desktopwindow.GlfwWindow;
 import com.lunargravity.engine.desktopwindow.GlfwWindowConfig;
 import com.lunargravity.engine.graphics.GlViewport;
@@ -42,6 +44,9 @@ public class Engine implements IEngine {
     private final PhysicsSpace _physicsSpace;
     private PhysicsCollisionListener _physicsCollisionListener;
     private GlfwWindow _window;
+
+    private AudioDevice _audioDevice;
+    private SoundListener _soundListener;
 
     private long _currentFrameNo;
     private long _frameCount;
@@ -78,10 +83,24 @@ public class Engine implements IEngine {
                 new ViewportConfig[] {
                     ViewportConfig.createFullWindow((int)_window.getWidth(), (int)_window.getHeight())
         });
+
+        try {
+            _audioDevice = new AudioDevice();
+            _soundListener = new SoundListener();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            // We'll keep going without audio
+            _audioDevice = null;
+        }
     }
 
     @Override
     public void freeResources() {
+        if (_audioDevice != null) {
+            _audioDevice.freeResources();
+        }
+        _renderer.freeResources();
         _window.freeResources();
     }
 
@@ -223,6 +242,11 @@ public class Engine implements IEngine {
     @Override
     public void setPhysicsCollisionListener(PhysicsCollisionListener listener) {
         _physicsCollisionListener = listener;
+    }
+
+    @Override
+    public boolean isSoundAvailable() {
+        return _audioDevice != null;
     }
 
     @Override
