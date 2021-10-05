@@ -54,6 +54,8 @@ public class GameWorldView implements
     private static final float PLAYER_SHOT_FORCE = 500.0f;
     private static final float PLAYER_SHOT_OFFSET = 0.75f; // Measured using Blender
     private static final int NUM_PLAYER_SHIP_HIT_SOUNDS = 4;
+    private static final int COLLISION_SOUND_GAP = 250;
+    private static final float MIN_IMPULSE_TO_PLAY_SOUND = 2.0f;
 
     private static final com.jme3.math.Vector3f ZERO_VELOCITY = new com.jme3.math.Vector3f(0, 0, 0);
     private static final com.jme3.math.Vector3f PREVENT_XY_AXES_ROTATION = new com.jme3.math.Vector3f(0.0f, 0.0f, 1.0f);
@@ -107,10 +109,13 @@ public class GameWorldView implements
     private final ArrayList<Vector3f> _deliveryZoneStartPoints;
     private final Vector3f[] _lunarLanderStartPoints;
     private final Matrix4f _mvpMatrix;
+    private final Matrix4f _mvMatrix;
+    private long _lastCollisionTime;
 
     private SoundSource _playerShipShoot;
     private SoundSource _playerShipExplode;
     private SoundSource[] _playerShipHits;
+    private int _playerShipHitSoundIndex;
     private SoundSource _collectCrate;
 
     public GameWorldView(WidgetManager widgetManager, IEngine engine, IGameWorldModel model) throws IOException {
@@ -128,6 +133,7 @@ public class GameWorldView implements
         _font = new LargeNumberFont(_renderer);
 
         _mvpMatrix = new Matrix4f();
+        _mvMatrix = new Matrix4f();
         _lunarLandersAndCrates = new ArrayList<>();
         _deliveryZones = new ArrayList<>();
         _debris = new ArrayList<>();
@@ -137,6 +143,7 @@ public class GameWorldView implements
         _physicsMatrix = new com.jme3.math.Matrix4f();
         _jomlVector = new Vector3f();
         _jmeVector = new com.jme3.math.Vector3f();
+        _lastCollisionTime = 0;
 
         _cameras = new Transform[2];
         _cameras[0] = new Transform();
@@ -146,6 +153,7 @@ public class GameWorldView implements
         _lunarLanderStartPoints[0] = new Vector3f(0.0f, 0.0f, 0.0f);
         _lunarLanderStartPoints[1] = new Vector3f(0.0f, 0.0f, 0.0f);
 
+        _playerShipHitSoundIndex = 0;
         _crateStartPoints = new ArrayList<>();
         _deliveryZoneStartPoints = new ArrayList<>();
     }
@@ -254,26 +262,26 @@ public class GameWorldView implements
         attachCamerasToLunarLanders();
 
         if (_worldDisplayMesh != null) {
-            _mvpMatrix.identity().mul(projectionMatrix).mul(_cameras[viewport].getViewMatrix());
-            _worldDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
+            _mvMatrix.set(_cameras[viewport].getViewMatrix());
+            _worldDisplayMesh.draw(_renderer, _renderer.getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
         }
 
         for (var rbo : _lunarLandersAndCrates) {
-            _mvpMatrix.identity().mul(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
-            rbo._displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
+            _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
+            rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
         }
 
         for (var rbo : _debris) {
             if (rbo._active) {
-                _mvpMatrix.identity().mul(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
-                rbo._displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
+                _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
             }
         }
 
         for (var rbo : _playerShots) {
             if (rbo._active) {
-                _mvpMatrix.identity().mul(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
-                rbo._displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
+                _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
             }
         }
     }
@@ -478,9 +486,20 @@ public class GameWorldView implements
     }
 
     @Override
+    public void playerShipCollided(Player player, float appliedImpulse) {
+        //System.out.printf("appliedImpulse = %.2f\n", appliedImpulse);
+        if (appliedImpulse >= MIN_IMPULSE_TO_PLAY_SOUND && _engine.getNowMs() - _lastCollisionTime >= COLLISION_SOUND_GAP) {
+            _lastCollisionTime = _engine.getNowMs();
+            _playerShipHits[_playerShipHitSoundIndex].play();
+            if (++_playerShipHitSoundIndex > 3) {
+                _playerShipHitSoundIndex = 0;
+            }
+        }
+    }
+
+    @Override
     public void playerShipTookDamage(int player, int hitPointsDamage, int hitPointsRemaining) {
         // TODO: draw sparks?
-        _playerShipHits[randomInteger(0, 3)].play();
     }
 
     @Override

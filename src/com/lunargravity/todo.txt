@@ -10,13 +10,11 @@ Put a spinning lunar lander in the menu
 make menu widgets that don't suck
 make loading screens that don't suck
 make a hud that doesn't suck
-Remove the ability to shoot
 Remove the race button
 Remove the dogfight button
 Move the above ground geometry forward for level e0m1
 For subterranean geometry, draw a front-facing set of polygons
 Draw the tunnels with three quarters of their geometry
-Sort out the odd damage system
 Remove the shooting ability of the lunar lander
 Finish as many levels as possible
 Better looking levels:

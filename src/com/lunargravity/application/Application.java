@@ -314,7 +314,7 @@ public class Application implements
         _logicController = new CampaignController(_engine, (ICampaignModel)_logicModel);
         _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
 
-        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), savedGameFile.getNumPlayers(), (ICampaignModel)_logicModel);
+        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), savedGameFile.getNumPlayers(), (ICampaignModel)_logicModel, _playerInputBindings);
         _worldView = new GameWorldView(_widgetManager, _engine, (IGameWorldModel)_worldModel);
         GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
         gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
@@ -331,7 +331,7 @@ public class Application implements
         _logicController = new CampaignController(_engine, (ICampaignModel)_logicModel);
         _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
 
-        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers, (ICampaignModel)_logicModel);
+        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers, (ICampaignModel)_logicModel, _playerInputBindings);
         _worldView = new GameWorldView(_widgetManager, _engine, (IGameWorldModel)_worldModel);
         GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
         gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
@@ -387,7 +387,7 @@ public class Application implements
         _logicController = new RaceController((IRaceModel)_logicModel);
         _logicView = new RaceView(_widgetManager, (IRaceController)_logicController, (IRaceModel)_logicModel);
 
-        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers, (ICampaignModel)_logicModel);
+        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers, (ICampaignModel)_logicModel, _playerInputBindings);
         _worldView = new GameWorldView(_widgetManager, _engine, (IGameWorldModel)_worldModel);
         GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
         gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);
@@ -425,7 +425,7 @@ public class Application implements
         _logicController = new DogfightController((IDogfightModel)_logicModel);
         _logicView = new DogfightView(_widgetManager, (IDogfightController)_logicController, (IDogfightModel)_logicModel);
 
-        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers, (ICampaignModel)_logicModel);
+        _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers, (ICampaignModel)_logicModel, _playerInputBindings);
         _worldView = new GameWorldView(_widgetManager, _engine, (IGameWorldModel)_worldModel);
         GameWorldController gameWorldController = new GameWorldController(_engine, _logicController, (IGameWorldModel)_worldModel);
         gameWorldController.addObserver((IGameWorldControllerObserver)_worldView);

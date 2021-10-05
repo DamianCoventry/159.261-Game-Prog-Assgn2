@@ -15,7 +15,7 @@
 package com.lunargravity.campaign.statemachine;
 
 import com.lunargravity.application.IStateMachineContext;
-import com.lunargravity.application.LargeNumberFont;
+import com.lunargravity.application.PlayerInputBindings;
 import com.lunargravity.application.StateBase;
 import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.controller.ICampaignControllerObserver;
@@ -24,8 +24,6 @@ import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.world.controller.IGameWorldController;
 import com.lunargravity.world.model.IGameWorldModel;
 import com.lunargravity.world.view.IGameWorldView;
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
 
 import java.io.IOException;
 
@@ -46,49 +44,88 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
     @Override
     public void end() {
         getGameWorldView().hideMissionStatusBar();
+        for (int i = 0; i < getGameWorldModel().getNumPlayers(); ++i) {
+            getGameWorldModel().getPlayerState(i).resetInputStates();
+        }
         getCampaignController().removeObserver(this);
     }
 
     @Override
     public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
+        PlayerInputBindings inputBindings = getGameWorldModel().getPlayerInputBindings();
+
         if (action == GLFW_PRESS) {
-            switch (key) {
-                // Detecting this key press is temporary
-                case GLFW_KEY_1 -> changeState(new PlayerDiedState(getContext(), ICampaignView.WhichPlayer.PLAYER_1));
-                // Detecting this key press is temporary
-                case GLFW_KEY_2 -> changeState(new MissionCompletedState(getContext()));
-                // Detecting this key press is temporary
-                case GLFW_KEY_3 -> changeState(new GameWonState(getContext()));
-                // Detecting this key press is temporary
-                case GLFW_KEY_4 -> changeState(new GameOverState(getContext()));
-                case GLFW_KEY_ESCAPE -> changeState(new MissionPausedState(getContext()));
-
-                // TODO: Use key bindings
-                case GLFW_KEY_UP -> getGameWorldController().playerStartThrust(0);
-                case GLFW_KEY_LEFT -> getGameWorldController().playerStartRotateCcw(0);
-                case GLFW_KEY_RIGHT -> getGameWorldController().playerStartRotateCw(0);
-                case GLFW_KEY_RIGHT_CONTROL -> getGameWorldController().playerStartShoot(0);
-                case GLFW_KEY_RIGHT_SHIFT -> getGameWorldController().playerKick(0);
-
-                case GLFW_KEY_W -> getGameWorldController().playerStartThrust(1);
-                case GLFW_KEY_A -> getGameWorldController().playerStartRotateCcw(1);
-                case GLFW_KEY_D -> getGameWorldController().playerStartRotateCw(1);
-                case GLFW_KEY_SPACE -> getGameWorldController().playerStartShoot(1);
-                case GLFW_KEY_K -> getGameWorldController().playerKick(1);
+            if (key == GLFW_KEY_ESCAPE) {
+                changeState(new MissionPausedState(getContext()));
+            }
+            
+            if (inputBindings.getPlayerThrustKey(0) == key) {
+                getGameWorldController().playerStartThrust(0);
+            }
+            if (inputBindings.getPlayerRotateRightKey(0) == key) {
+                getGameWorldController().playerStartRotateCcw(0);
+            }
+            if (inputBindings.getPlayerRotateLeftKey(0) == key) {
+                getGameWorldController().playerStartRotateCw(0);
+            }
+            if (inputBindings.getPlayerShootKey(0) == key) {
+                getGameWorldController().playerStartShoot(0);
+            }
+            if (inputBindings.getPlayerKickKey(0) == key) {
+                getGameWorldController().playerKick(0);
+            }
+            
+            if (getGameWorldModel().getNumPlayers() == 2) {
+                if (inputBindings.getPlayerThrustKey(1) == key) {
+                    getGameWorldController().playerStartThrust(1);
+                }
+                if (inputBindings.getPlayerRotateRightKey(1) == key) {
+                    getGameWorldController().playerStartRotateCcw(1);
+                }
+                if (inputBindings.getPlayerRotateLeftKey(1) == key) {
+                    getGameWorldController().playerStartRotateCw(1);
+                }
+                if ( inputBindings.getPlayerShootKey(1) ==key){
+                    getGameWorldController().playerStartShoot(1);
+                }
+                if (inputBindings.getPlayerKickKey(1) == key) {
+                    getGameWorldController().playerKick(1);
+                }
             }
         }
         else if (action == GLFW_RELEASE) {
-            switch (key) {
-                // TODO: Use key bindings
-                case GLFW_KEY_UP -> getGameWorldController().playerStopThrust(0);
-                case GLFW_KEY_LEFT -> getGameWorldController().playerStopRotateCcw(0);
-                case GLFW_KEY_RIGHT -> getGameWorldController().playerStopRotateCw(0);
-                case GLFW_KEY_RIGHT_CONTROL -> getGameWorldController().playerStopShoot(0);
+            if (inputBindings.getPlayerThrustKey(0) == key) {
+                getGameWorldController().playerStopThrust(0);
+            }
+            if (inputBindings.getPlayerRotateRightKey(0) == key) {
+                getGameWorldController().playerStopRotateCcw(0);
+            }
+            if (inputBindings.getPlayerRotateLeftKey(0) == key) {
+                getGameWorldController().playerStopRotateCw(0);
+            }
+            if (inputBindings.getPlayerShootKey(0) == key) {
+                getGameWorldController().playerStopShoot(0);
+            }
+            if (inputBindings.getPlayerKickKey(0) == key) {
+                getGameWorldController().playerKick(0);
+            }
 
-                case GLFW_KEY_W -> getGameWorldController().playerStopThrust(1);
-                case GLFW_KEY_A -> getGameWorldController().playerStopRotateCcw(1);
-                case GLFW_KEY_D -> getGameWorldController().playerStopRotateCw(1);
-                case GLFW_KEY_SPACE -> getGameWorldController().playerStopShoot(1);
+            if (getGameWorldModel().getNumPlayers() == 2) {
+                if (inputBindings.getPlayerThrustKey(1) == key) {
+                    getGameWorldController().playerStopThrust(1);
+                }
+                if (inputBindings.getPlayerRotateRightKey(1) == key) {
+                    getGameWorldController().playerStopRotateCcw(1);
+                }
+                if (inputBindings.getPlayerRotateLeftKey(1) == key) {
+                    getGameWorldController().playerStopRotateCw(1);
+                }
+                if ( inputBindings.getPlayerShootKey(1) ==key){
+                    getGameWorldController().playerStopShoot(1);
+                }
+                if (inputBindings.getPlayerKickKey(1) == key) {
+                    getGameWorldController().playerKick(1);
+                }
             }
         }
     }

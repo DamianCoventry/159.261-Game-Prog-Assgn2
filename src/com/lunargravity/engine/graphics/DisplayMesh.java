@@ -64,4 +64,16 @@ public class DisplayMesh {
             piece.draw(renderer, program, mvpMatrix);
         }
     }
+
+    public void draw(Renderer renderer, GLDirectionalLightProgram program, Matrix4f mvMatrix, Matrix4f projectionMatrix) {
+        for (var piece : _pieces) {
+            piece.draw(renderer, program, mvMatrix, projectionMatrix);
+        }
+    }
+
+    public void draw(Renderer renderer, GLSpecularDirectionalLightProgram program, Matrix4f mvMatrix, Matrix4f projectionMatrix) {
+        for (var piece : _pieces) {
+            piece.draw(renderer, program, mvMatrix, projectionMatrix);
+        }
+    }
 }

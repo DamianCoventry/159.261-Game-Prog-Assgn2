@@ -2,6 +2,7 @@ package com.lunargravity.world.model;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
+import com.lunargravity.application.PlayerInputBindings;
 
 public interface IGameWorldModel extends IWorldModel {
     int getNumPlayers();
@@ -29,4 +30,6 @@ public interface IGameWorldModel extends IWorldModel {
     long getEpisode();
     long getMission();
     long getShipsRemaining(int playerId);
+
+    PlayerInputBindings getPlayerInputBindings();
 }

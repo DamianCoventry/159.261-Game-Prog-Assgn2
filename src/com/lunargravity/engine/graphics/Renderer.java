@@ -14,6 +14,8 @@
 
 package com.lunargravity.engine.graphics;
 
+import org.joml.Vector3f;
+
 import java.io.IOException;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -22,6 +24,8 @@ import static org.lwjgl.opengl.GL13C.glActiveTexture;
 
 public class Renderer {
     private final GlDiffuseTextureProgram _diffuseTextureProgram;
+    private final GLDirectionalLightProgram _directionalLightProgram;
+    private final GLSpecularDirectionalLightProgram _specularDirectionalLightProgram;
     private final GlViewport _orthographicViewport;
     private GlViewport[] _perspectiveViewports;
 
@@ -31,6 +35,10 @@ public class Renderer {
         setPerspectiveViewports(perspectiveConfigs);
 
         _diffuseTextureProgram = new GlDiffuseTextureProgram();
+        _directionalLightProgram = new GLDirectionalLightProgram();
+        _directionalLightProgram.setLightDirection(new Vector3f(-7.0f, 2.5f, 4.0f).normalize());
+        _specularDirectionalLightProgram = new GLSpecularDirectionalLightProgram();
+        _specularDirectionalLightProgram.setLightDirection(new Vector3f(-7.0f, 2.5f, 4.0f).normalize());
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glEnable(GL_CULL_FACE);
@@ -41,6 +49,14 @@ public class Renderer {
 
     public GlDiffuseTextureProgram getDiffuseTextureProgram() {
         return _diffuseTextureProgram;
+    }
+
+    public GLDirectionalLightProgram getDirectionalLightProgram() {
+        return _directionalLightProgram;
+    }
+
+    public GLSpecularDirectionalLightProgram getSpecularDirectionalLightProgram() {
+        return _specularDirectionalLightProgram;
     }
 
     public void freeResources() {

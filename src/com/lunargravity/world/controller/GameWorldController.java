@@ -15,8 +15,6 @@
 package com.lunargravity.world.controller;
 
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
-import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.math.Vector3f;
 import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.view.ICampaignView;
@@ -35,31 +33,19 @@ public class GameWorldController implements
         IPlayerShotObserver
 {
     public static final float LUNAR_LANDER_MASS = 2.0f;
-    public static final float LUNAR_LANDER_DAMAGE_SCALE = 0.1f;
-    public static final float MIN_VELOCITY_FOR_DAMAGE = 3.5f;
-    public static final float MIN_KINETIC_ENERGY_FOR_DAMAGE = 5.0f;
-    public static final long DAMAGE_TIME_WINDOW = 250;
-    public static final int KINETIC_ENERGY_BATCH_SIZE = 100;
+    public static final float MIN_IMPULSE_TO_CAUSE_DAMAGE = 5.0f;
+    public static final float PLAYER_SHIP_DAMAGE_SCALE = 0.75f;
 
     private final ArrayList<IGameWorldControllerObserver> _observers;
     private final ICampaignController _logicController;
     private final IGameWorldModel _model;
     private final IEngine _engine;
-    private final Vector3f _velocity;
-    private final float[][] _kineticEnergyBatches;
-    private final int[] _kineticEnergyCounts;
-    private final long[] _hitPointDamageTimestamps;
 
     public GameWorldController(IEngine engine, IController controller, IGameWorldModel model) {
         _engine = engine;
         _engine.setPhysicsCollisionListener(this::processPhysicsCollisionEvent);
         _logicController = (ICampaignController)controller;
         _observers = new ArrayList<>();
-        _velocity = new Vector3f();
-
-        _hitPointDamageTimestamps = new long[2];
-        _kineticEnergyCounts = new int[2];
-        _kineticEnergyBatches = new float[2][KINETIC_ENERGY_BATCH_SIZE];
 
         _model = model;
         _model.setPlayerObserver(this);
@@ -87,10 +73,6 @@ public class GameWorldController implements
             }
             player.applyInputCommands();
             player.stopCollectingCrateIfMoving();
-            if (nowMs - _hitPointDamageTimestamps[i] >= DAMAGE_TIME_WINDOW) {
-                applyPlayerDamage(player);
-                _hitPointDamageTimestamps[i] = nowMs;
-            }
         }
 
         _model.updateCrateMovingStates(nowMs);
@@ -256,50 +238,30 @@ public class GameWorldController implements
         }
     }
 
-    private void printVelocity(Player player) {
-        player.getRigidBody().getLinearVelocity(_velocity);
-        float length = _velocity.length();
-        System.out.printf("(%02f,%02f,%02f) [%02f]\n", _velocity.x, _velocity.y, _velocity.z, length);
-    }
-
     private void processPhysicsCollisionEvent(PhysicsCollisionEvent event) {
         if (event.getObjectA().getUserObject() instanceof Player player) {
-            printVelocity(player);
-
             if (event.getObjectB().getUserObject() instanceof Crate crate) {
                 processPlayerToCrateCollision(player, crate);
-                savePlayerKineticEnergy(player, crate.getRigidBody());
             }
             else if (event.getObjectB().getUserObject() instanceof DeliveryZone deliveryZone) {
                 processPlayerToDeliveryZoneCollision(player, deliveryZone);
-                savePlayerKineticEnergy(player); // delivery zone doesn't move, therefore has no kinetic energy
             }
             else if (event.getObjectB().getUserObject() instanceof PlayerShot playerShot) {
-                savePlayerKineticEnergy(player, playerShot.getRigidBody());
                 playerShot.explode();
             }
-            else { // player collided with another object, possibly the world object
-                savePlayerKineticEnergy(player);
-            }
+            damagePlayerShip(player, event.getAppliedImpulse());
         }
         else if (event.getObjectB().getUserObject() instanceof Player player) {
-            printVelocity(player);
-
             if (event.getObjectA().getUserObject() instanceof Crate crate) {
                 processPlayerToCrateCollision(player, crate);
-                savePlayerKineticEnergy(player, crate.getRigidBody());
             }
             else if (event.getObjectA().getUserObject() instanceof DeliveryZone deliveryZone) {
                 processPlayerToDeliveryZoneCollision(player, deliveryZone);
-                savePlayerKineticEnergy(player); // delivery zone doesn't move, therefore has no kinetic energy
             }
             else if (event.getObjectA().getUserObject() instanceof PlayerShot playerShot) {
-                savePlayerKineticEnergy(player, playerShot.getRigidBody());
                 playerShot.explode();
             }
-            else { // player collided with another object, possibly the world object
-                savePlayerKineticEnergy(player);
-            }
+            damagePlayerShip(player, event.getAppliedImpulse());
         }
         else if (event.getObjectA().getUserObject() instanceof DeliveryZone deliveryZone) {
             if (event.getObjectB().getUserObject() instanceof Crate crate) {
@@ -319,46 +281,13 @@ public class GameWorldController implements
         }
     }
 
-    private void savePlayerKineticEnergy(Player player, PhysicsRigidBody rigidBody) {
-        if (player.isExplodingOrDead() || haveReachDamageBatchSizeLimit(player) || rigidBody == null) {
-            return;
+    private void damagePlayerShip(Player player, float appliedImpulse) {
+        if (appliedImpulse >= MIN_IMPULSE_TO_CAUSE_DAMAGE) {
+            player.takeDamage((int)(appliedImpulse * PLAYER_SHIP_DAMAGE_SCALE));
         }
-        float playerVelocity = getVelocityAsScalar(player.getRigidBody());
-        float crateVelocity = getVelocityAsScalar(rigidBody);
-        if (playerVelocity < MIN_VELOCITY_FOR_DAMAGE && crateVelocity < MIN_VELOCITY_FOR_DAMAGE) {
-            return;
+        for (var observer : _observers) {
+            observer.playerShipCollided(player, appliedImpulse);
         }
-        float playerKineticEnergy = calculateKineticEnergy(player.getRigidBody().getMass(), playerVelocity);
-        float crateKineticEnergy = calculateKineticEnergy(rigidBody.getMass(), crateVelocity);
-        float kineticEnergy = playerKineticEnergy + crateKineticEnergy;
-        if (kineticEnergy >= MIN_KINETIC_ENERGY_FOR_DAMAGE) {
-            collateKineticEnergy(player, kineticEnergy);
-        }
-    }
-
-    private void savePlayerKineticEnergy(Player player) {
-        if (player.isExplodingOrDead() || haveReachDamageBatchSizeLimit(player)) {
-            return;
-        }
-        float playerVelocity = getVelocityAsScalar(player.getRigidBody());
-        if (playerVelocity < MIN_VELOCITY_FOR_DAMAGE) {
-            return;
-        }
-        float kineticEnergy = calculateKineticEnergy(player.getRigidBody().getMass(), playerVelocity);
-        if (kineticEnergy >= MIN_KINETIC_ENERGY_FOR_DAMAGE) {
-            collateKineticEnergy(player, kineticEnergy);
-        }
-    }
-
-    private static float calculateKineticEnergy(float mass, float velocity) {
-        return 0.5f * mass * (velocity * velocity);
-    }
-
-    private float getVelocityAsScalar(PhysicsRigidBody rigidBody) {
-        rigidBody.getAngularVelocity(_velocity);
-        float angularVelocity = _velocity.length();
-        rigidBody.getLinearVelocity(_velocity);
-        return angularVelocity + _velocity.length();
     }
 
     private void processPlayerToCrateCollision(Player player, Crate crate) {
@@ -377,34 +306,6 @@ public class GameWorldController implements
         if (deliveryZone.isIdle() && crate.isDroppedForDelivery()) {
             deliveryZone.startDeliveringCrate(crate);
         }
-    }
-
-    private boolean haveReachDamageBatchSizeLimit(Player player) {
-        return _kineticEnergyCounts[player.getId()] >= KINETIC_ENERGY_BATCH_SIZE;
-    }
-
-    private void collateKineticEnergy(Player player, float kineticEnergy) {
-        int index = _kineticEnergyCounts[player.getId()];
-        _kineticEnergyBatches[player.getId()][index] = kineticEnergy;
-        ++_kineticEnergyCounts[player.getId()];
-    }
-
-    private void applyPlayerDamage(Player player) {
-        if (_kineticEnergyCounts[player.getId()] == 0) {
-            return;
-        }
-
-        float kineticEnergy = 0;
-        for (int i = 0; i < _kineticEnergyCounts[player.getId()]; ++i) {
-            kineticEnergy += _kineticEnergyBatches[player.getId()][i];
-        }
-        kineticEnergy /= _kineticEnergyCounts[player.getId()];
-
-        int damage = (int)(LUNAR_LANDER_DAMAGE_SCALE * kineticEnergy);
-        //System.out.println("damage = " + damage);
-        player.takeDamage(damage);
-
-        _kineticEnergyCounts[player.getId()] = 0; // reset for next time
     }
 
     @Override

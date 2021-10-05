@@ -97,8 +97,12 @@ public class Player {
         return _state == State.IDLE;
     }
 
-    public void reset() {
+    public void resetInputStates() {
         _thrustActive = _rotateCcwActive = _rotateCwActive = _shootActive = false;
+    }
+
+    public void reset() {
+        resetInputStates();
         _hitPoints = MAX_HIT_POINTS;
         _state = State.IDLE;
         _weaponState = WeaponState.IDLE;

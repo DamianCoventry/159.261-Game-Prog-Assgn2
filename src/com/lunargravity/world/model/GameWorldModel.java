@@ -16,6 +16,7 @@ package com.lunargravity.world.model;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
+import com.lunargravity.application.PlayerInputBindings;
 import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
@@ -29,12 +30,14 @@ public class GameWorldModel implements IGameWorldModel {
     private final ArrayList<PlayerShot> _playerShots;
     private final TimeoutManager _timeoutManager;
     private final ICampaignModel _campaignModel;
+    private final PlayerInputBindings _playerInputBindings;
 
     private ICrateObserver _crateObserver;
     private IDeliveryZoneObserver _deliveryZoneObserver;
     private IPlayerShotObserver _playerShotObserver;
 
-    public GameWorldModel(TimeoutManager timeoutManager, int numPlayers, ICampaignModel campaignModel) {
+    public GameWorldModel(TimeoutManager timeoutManager, int numPlayers, ICampaignModel campaignModel, PlayerInputBindings playerInputBindings) {
+        _playerInputBindings = playerInputBindings;
         _timeoutManager = timeoutManager;
         _campaignModel = campaignModel;
         _numPlayers = numPlayers;
@@ -217,6 +220,11 @@ public class GameWorldModel implements IGameWorldModel {
     @Override
     public long getShipsRemaining(int playerId) {
         return _campaignModel.getShipsRemaining(playerId);
+    }
+
+    @Override
+    public PlayerInputBindings getPlayerInputBindings() {
+        return _playerInputBindings;
     }
 
     @Override
