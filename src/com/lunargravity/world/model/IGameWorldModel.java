@@ -15,6 +15,7 @@ public interface IGameWorldModel extends IWorldModel {
     void setCrateObserver(ICrateObserver observer);
     boolean areAllCratesDelivered();
     void updateCrateMovingStates(long nowMs);
+    void setCrateLimit(int size);
     int getNumCratesRemaining();
     int getNumCratesCollected();
     int getNumCratesDelivered();

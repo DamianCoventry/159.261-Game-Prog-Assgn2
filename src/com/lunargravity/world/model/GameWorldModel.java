@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 public class GameWorldModel implements IGameWorldModel {
     private final int _numPlayers;
+    private int _crateLimit;
     private final Player[] _players;
     private final ArrayList<Crate> _crates;
     private final ArrayList<DeliveryZone> _deliveryZones;
@@ -47,6 +48,7 @@ public class GameWorldModel implements IGameWorldModel {
         _crates = new ArrayList<>();
         _deliveryZones = new ArrayList<>();
         _playerShots = new ArrayList<>();
+        _crateLimit = 0;
     }
 
     @Override
@@ -118,6 +120,11 @@ public class GameWorldModel implements IGameWorldModel {
     }
 
     @Override
+    public void setCrateLimit(int size) {
+        _crateLimit = size;
+    }
+
+    @Override
     public int getNumCratesRemaining() {
         int count = 0;
         for (var crate : _crates) {
@@ -160,10 +167,12 @@ public class GameWorldModel implements IGameWorldModel {
         if (_crateObserver == null) {
             throw new RuntimeException("No crate observer set");
         }
-        Crate crate = new Crate(_timeoutManager, _crateObserver);
-        crate.setRigidBody(rigidBody, startPosition);
-        _crates.add(crate);
-        rigidBody.setUserObject(crate);
+        if (_crates.size() < _crateLimit) {
+            Crate crate = new Crate(_timeoutManager, _crateObserver);
+            crate.setRigidBody(rigidBody, startPosition);
+            _crates.add(crate);
+            rigidBody.setUserObject(crate);
+        }
     }
 
     @Override

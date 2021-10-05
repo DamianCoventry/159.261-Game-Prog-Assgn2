@@ -16,6 +16,7 @@ package com.lunargravity.engine.graphics;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
@@ -57,6 +58,14 @@ public class GlStaticMeshPiece {
         renderer.activateTextureImageUnit(0);
         glBindTexture(GL_TEXTURE_2D, _material.getDiffuseTexture().getId());
         program.setDiffuseColour(_material.getDiffuseColour());
+        program.activate(mvpMatrix);
+        _polyhedra.draw();
+    }
+
+    public void draw(Renderer renderer, GlDiffuseTextureProgram program, Matrix4f mvpMatrix, Vector4f diffuseColour) {
+        renderer.activateTextureImageUnit(0);
+        glBindTexture(GL_TEXTURE_2D, _material.getDiffuseTexture().getId());
+        program.setDiffuseColour(diffuseColour);
         program.activate(mvpMatrix);
         _polyhedra.draw();
     }

@@ -63,10 +63,10 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
                 getGameWorldController().playerStartThrust(0);
             }
             if (inputBindings.getPlayerRotateRightKey(0) == key) {
-                getGameWorldController().playerStartRotateCcw(0);
+                getGameWorldController().playerStartRotateCw(0);
             }
             if (inputBindings.getPlayerRotateLeftKey(0) == key) {
-                getGameWorldController().playerStartRotateCw(0);
+                getGameWorldController().playerStartRotateCcw(0);
             }
             if (inputBindings.getPlayerShootKey(0) == key) {
                 getGameWorldController().playerStartShoot(0);
@@ -80,10 +80,10 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
                     getGameWorldController().playerStartThrust(1);
                 }
                 if (inputBindings.getPlayerRotateRightKey(1) == key) {
-                    getGameWorldController().playerStartRotateCcw(1);
+                    getGameWorldController().playerStartRotateCw(1);
                 }
                 if (inputBindings.getPlayerRotateLeftKey(1) == key) {
-                    getGameWorldController().playerStartRotateCw(1);
+                    getGameWorldController().playerStartRotateCcw(1);
                 }
                 if ( inputBindings.getPlayerShootKey(1) ==key){
                     getGameWorldController().playerStartShoot(1);
@@ -98,10 +98,10 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
                 getGameWorldController().playerStopThrust(0);
             }
             if (inputBindings.getPlayerRotateRightKey(0) == key) {
-                getGameWorldController().playerStopRotateCcw(0);
+                getGameWorldController().playerStopRotateCw(0);
             }
             if (inputBindings.getPlayerRotateLeftKey(0) == key) {
-                getGameWorldController().playerStopRotateCw(0);
+                getGameWorldController().playerStopRotateCcw(0);
             }
             if (inputBindings.getPlayerShootKey(0) == key) {
                 getGameWorldController().playerStopShoot(0);
@@ -115,10 +115,10 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
                     getGameWorldController().playerStopThrust(1);
                 }
                 if (inputBindings.getPlayerRotateRightKey(1) == key) {
-                    getGameWorldController().playerStopRotateCcw(1);
+                    getGameWorldController().playerStopRotateCw(1);
                 }
                 if (inputBindings.getPlayerRotateLeftKey(1) == key) {
-                    getGameWorldController().playerStopRotateCw(1);
+                    getGameWorldController().playerStopRotateCcw(1);
                 }
                 if ( inputBindings.getPlayerShootKey(1) ==key){
                     getGameWorldController().playerStopShoot(1);

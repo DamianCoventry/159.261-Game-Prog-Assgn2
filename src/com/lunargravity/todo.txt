@@ -1,10 +1,8 @@
+add more explosion flare?
 remove the saved game feature
 stream music
 add an explosion sprite
 add an explosion ring
-add more explosion flare?
-Implement positional lighting
-use the key bindings
 Make a simple menu background
 Put a spinning lunar lander in the menu
 make menu widgets that don't suck
@@ -12,9 +10,6 @@ make loading screens that don't suck
 make a hud that doesn't suck
 Remove the race button
 Remove the dogfight button
-Move the above ground geometry forward for level e0m1
-For subterranean geometry, draw a front-facing set of polygons
-Draw the tunnels with three quarters of their geometry
 Remove the shooting ability of the lunar lander
 Finish as many levels as possible
 Better looking levels:

@@ -16,6 +16,7 @@ package com.lunargravity.engine.graphics;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.ArrayList;
 
@@ -62,6 +63,12 @@ public class DisplayMesh {
     public void draw(Renderer renderer, GlDiffuseTextureProgram program, Matrix4f mvpMatrix) {
         for (var piece : _pieces) {
             piece.draw(renderer, program, mvpMatrix);
+        }
+    }
+
+    public void draw(Renderer renderer, GlDiffuseTextureProgram program, Matrix4f mvpMatrix, Vector4f diffuseColour) {
+        for (var piece : _pieces) {
+            piece.draw(renderer, program, mvpMatrix, diffuseColour);
         }
     }
 

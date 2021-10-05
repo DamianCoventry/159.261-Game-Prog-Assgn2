@@ -56,6 +56,7 @@ public class GameWorldView implements
     private static final int NUM_PLAYER_SHIP_HIT_SOUNDS = 4;
     private static final int COLLISION_SOUND_GAP = 250;
     private static final float MIN_IMPULSE_TO_PLAY_SOUND = 2.0f;
+    private static final float PLAYER_EXPLOSION_SIZE = 3.0f;
 
     private static final com.jme3.math.Vector3f ZERO_VELOCITY = new com.jme3.math.Vector3f(0, 0, 0);
     private static final com.jme3.math.Vector3f PREVENT_XY_AXES_ROTATION = new com.jme3.math.Vector3f(0.0f, 0.0f, 1.0f);
@@ -80,6 +81,10 @@ public class GameWorldView implements
 
     private Widget _singlePlayerStatusBar;
     private DisplayMesh _worldDisplayMesh;
+
+    private Vector4f _playerExplosionColour;
+    private DisplayMesh _explosionFlash;
+    private boolean _playerExploding;
 
     private static class RigidBodyObject {
         public boolean _active;
@@ -110,6 +115,7 @@ public class GameWorldView implements
     private final Vector3f[] _lunarLanderStartPoints;
     private final Matrix4f _mvpMatrix;
     private final Matrix4f _mvMatrix;
+    private final Matrix4f _explosionMatrix;
     private long _lastCollisionTime;
 
     private SoundSource _playerShipShoot;
@@ -143,6 +149,7 @@ public class GameWorldView implements
         _physicsMatrix = new com.jme3.math.Matrix4f();
         _jomlVector = new Vector3f();
         _jmeVector = new com.jme3.math.Vector3f();
+        _explosionMatrix = new Matrix4f();
         _lastCollisionTime = 0;
 
         _cameras = new Transform[2];
@@ -152,6 +159,7 @@ public class GameWorldView implements
         _lunarLanderStartPoints = new Vector3f[2];
         _lunarLanderStartPoints[0] = new Vector3f(0.0f, 0.0f, 0.0f);
         _lunarLanderStartPoints[1] = new Vector3f(0.0f, 0.0f, 0.0f);
+        _playerExplosionColour = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
         _playerShipHitSoundIndex = 0;
         _crateStartPoints = new ArrayList<>();
@@ -184,6 +192,7 @@ public class GameWorldView implements
         createLunarLanders();
         createDebris();
         createPlayerShots();
+        createExplosionFlash();
 
         loadSounds();
     }
@@ -233,7 +242,13 @@ public class GameWorldView implements
 
     @Override
     public void viewThink() {
-        // TODO
+        if (_playerExploding) {
+            _playerExplosionColour.w -= 0.016f;
+            if (_playerExplosionColour.w < 0.0f) {
+                _playerExplosionColour.w = 0.0f;
+                _playerExploding = false;
+            }
+        }
     }
 
     @Override
@@ -283,6 +298,11 @@ public class GameWorldView implements
                 _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
                 rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
             }
+        }
+
+        if (_playerExploding) {
+            _mvpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(_explosionMatrix);
+            _explosionFlash.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
         }
     }
 
@@ -354,6 +374,11 @@ public class GameWorldView implements
         _soundBufferCache.freeResources();
         _physicsTransform = new com.jme3.math.Transform();
         _physicsMatrix = new com.jme3.math.Matrix4f();
+
+        if (_explosionFlash != null) {
+            _explosionFlash.freeResources();
+            _explosionFlash = null;
+        }
 
         _model.resetPlayers();
         _model.clearCrates();
@@ -514,7 +539,15 @@ public class GameWorldView implements
         spawnPlayerShipDebris(player);
         removePlayerShip(player);
 
+        _explosionMatrix.identity().translate(_jomlVector);
+        _playerExplosionColour.w = 1.0f;
+        _playerExploding = true;
         _playerShipExplode.play();
+    }
+
+    @Override
+    public void playerShipDead(int player) {
+        //_playerExploding = false;
     }
 
     @Override
@@ -536,10 +569,14 @@ public class GameWorldView implements
             return;
         }
 
+        int numDropped = 0;
         for (var crate : player.getCollectedCrates()) {
             crate.removeTimeouts(_engine.getTimeoutManager());
             crate.setState(Crate.State.IDLE);
             createCrateRigidBody(_jomlVector, crate);
+            if (++numDropped >= _model.getNumCratesRemaining()) {
+                break;
+            }
         }
 
         player.clearCollectedCrates();
@@ -603,11 +640,6 @@ public class GameWorldView implements
 
     private int randomInteger(int min, int max) {
         return min + (int)(Math.random() * ((max - min) + 1));
-    }
-
-    @Override
-    public void playerShipDead(int player) {
-        // TODO: what to draw?
     }
 
     @Override
@@ -703,6 +735,7 @@ public class GameWorldView implements
     }
 
     private void createCrates() {
+        _model.setCrateLimit(_crateStartPoints.size());
         for (var point : _crateStartPoints) {
             createCrateRigidBody(point, null);
         }
@@ -818,5 +851,53 @@ public class GameWorldView implements
         rbo._modelMatrix.m31(_physicsMatrix.m13);
         rbo._modelMatrix.m32(_physicsMatrix.m23);
         rbo._modelMatrix.m33(_physicsMatrix.m33);
+    }
+
+    private void createExplosionFlash() throws IOException {
+        GlTexture texture = new GlTexture(BitmapImage.fromFile("images/ExplosionFlash.png"));
+        _textureCache.add(texture);
+
+        Material material = new Material("ExplosionFlash");
+        material.setDiffuseColour(WHITE);
+        material.setDiffuseTextureFileName("images/ExplosionFlash.png");
+        _materialCache.add(material);
+
+        float halfW = PLAYER_EXPLOSION_SIZE / 2.0f;
+        float halfH = PLAYER_EXPLOSION_SIZE / 2.0f;
+        
+        final float[] vertices = new float[] {
+                // Triangle 0
+                -halfW,  halfH, 0.0f,
+                -halfW, -halfH, 0.0f,
+                 halfW, -halfH, 0.0f,
+                // Triangle 1
+                -halfW,  halfH, 0.0f,
+                 halfW, -halfH, 0.0f,
+                 halfW,  halfH, 0.0f,
+        };
+
+        final float[] texCoordinates = new float[] {
+                // Triangle 0
+                0.0f, 1.0f,
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+                // Triangle 1
+                0.0f, 1.0f,
+                1.0f, 0.0f,
+                1.0f, 1.0f,
+        };
+        final float[] normals = new float[] {
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+        };
+
+        _explosionFlash = new DisplayMesh("ExplosionFlash");
+        _explosionFlash.addPiece(new GlStaticMeshPiece("ExplosionFlash", new PolyhedraVxTcNm(vertices, texCoordinates, normals)));
+        _explosionFlash.bindMaterials(_materialCache, _textureCache);
     }
 }
