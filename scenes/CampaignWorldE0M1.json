@@ -5,14 +5,16 @@
         "meshes/LunarLander.Display.obj",
         "meshes/Crate.Display.obj",
         "meshes/LunarLanderDebris.Display.obj",
-        "meshes/Bullet.Display.obj"
+        "meshes/Bullet.Display.obj",
+        "meshes/LunarLanderCube.Display.obj"
     ],
     "_collisionMeshFileNames": [
         "meshes/E0M1.Collision.obj",
         "meshes/LunarLander.Collision.obj",
         "meshes/Crate.Collision.obj",
         "meshes/LunarLanderDebris.Collision.obj",
-        "meshes/Bullet.Collision.obj"
+        "meshes/Bullet.Collision.obj",
+		"meshes/LunarLanderCube.Collision.obj"
     ],
     "_widgets": [
         {

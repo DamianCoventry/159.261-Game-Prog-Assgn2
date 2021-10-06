@@ -41,6 +41,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static org.lwjgl.opengl.GL11C.glDepthMask;
+
 public class GameWorldView implements
         IGameWorldView,
         IGameWorldControllerObserver,
@@ -48,15 +50,27 @@ public class GameWorldView implements
         IPlayerShotObserver
 {
     private static final float CAMERA_Z_DISTANCE = 15.0f;
+    private static final float PLAYER_SHOT_FORCE = 500.0f;
+    private static final float PLAYER_SHOT_OFFSET = 0.75f; // Measured using Blender
+    private static final float MIN_IMPULSE_TO_PLAY_SOUND = 2.0f;
+    private static final float EXPLOSION_FLASH_SIZE = 3.0f;
+    private static final float EXPLOSION_FLASH_FADE_INCREMENT = 0.008f;
+    private static final float EXPLOSION_WAKE_SIZE = 7.0f;
+    private static final float EXPLOSION_WAKE_SCALE_INCREMENT = 0.035f;
+
     private static final int MIN_EXPLOSION_FORCE = 250;
     private static final int MAX_EXPLOSION_FORCE = 400;
     private static final int NUM_PLAYER_SHOTS = 20;
-    private static final float PLAYER_SHOT_FORCE = 500.0f;
-    private static final float PLAYER_SHOT_OFFSET = 0.75f; // Measured using Blender
     private static final int NUM_PLAYER_SHIP_HIT_SOUNDS = 4;
     private static final int COLLISION_SOUND_GAP = 250;
-    private static final float MIN_IMPULSE_TO_PLAY_SOUND = 2.0f;
-    private static final float PLAYER_EXPLOSION_SIZE = 3.0f;
+    private static final int NUM_ADDITIONAL_DEBRIS_OBJECTS = 6;
+
+    private static final float EXPLOSION_SPARK_SIZE = 0.07f;
+    private static final int NUM_EXPLOSION_PARTICLES = 128;
+    private static final int EXPLOSION_SPARK_MIN_VELOCITY = 1;
+    private static final int EXPLOSION_SPARK_MAX_VELOCITY = 4;
+    private static final int EXPLOSION_SPARK_MIN_LIFE_TIME = 2300;
+    private static final int EXPLOSION_SPARK_MAX_LIFE_TIME = 3800;
 
     private static final com.jme3.math.Vector3f ZERO_VELOCITY = new com.jme3.math.Vector3f(0, 0, 0);
     private static final com.jme3.math.Vector3f PREVENT_XY_AXES_ROTATION = new com.jme3.math.Vector3f(0.0f, 0.0f, 1.0f);
@@ -64,6 +78,21 @@ public class GameWorldView implements
     private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     private static final String SINGLE_PLAYER_STATUS_BAR = "singlePlayerStatusBar";
+
+    private static class RigidBodyObject {
+        public boolean _active;
+        public int _timeoutId;
+        public final PhysicsRigidBody _rigidBody;
+        public final DisplayMesh _displayMesh;
+        public final Matrix4f _modelMatrix;
+        public RigidBodyObject(PhysicsRigidBody rigidBody, DisplayMesh displayMesh, boolean active) {
+            _active = active;
+            _timeoutId = 0;
+            _rigidBody = rigidBody;
+            _displayMesh = displayMesh;
+            _modelMatrix = new Matrix4f();
+        }
+    }
 
     private final IEngine _engine;
     private final Renderer _renderer;
@@ -82,24 +111,11 @@ public class GameWorldView implements
     private Widget _singlePlayerStatusBar;
     private DisplayMesh _worldDisplayMesh;
 
-    private Vector4f _playerExplosionColour;
+    private final Vector4f _playerExplosionColour;
+    private float _explosionWakeScale;
     private DisplayMesh _explosionFlash;
+    private DisplayMesh _explosionWake;
     private boolean _playerExploding;
-
-    private static class RigidBodyObject {
-        public boolean _active;
-        public int _timeoutId;
-        public final PhysicsRigidBody _rigidBody;
-        public final DisplayMesh _displayMesh;
-        public final Matrix4f _modelMatrix;
-        public RigidBodyObject(PhysicsRigidBody rigidBody, DisplayMesh displayMesh, boolean active) {
-            _active = active;
-            _timeoutId = 0;
-            _rigidBody = rigidBody;
-            _displayMesh = displayMesh;
-            _modelMatrix = new Matrix4f();
-        }
-    }
 
     private final ArrayList<RigidBodyObject> _lunarLandersAndCrates;
     private final ArrayList<PhysicsRigidBody> _deliveryZones;
@@ -115,14 +131,17 @@ public class GameWorldView implements
     private final Vector3f[] _lunarLanderStartPoints;
     private final Matrix4f _mvpMatrix;
     private final Matrix4f _mvMatrix;
-    private final Matrix4f _explosionMatrix;
+    private final Matrix4f _vpMatrix;
+    private final Matrix4f _explosionFlashModelMatrix;
+    private final Matrix4f _explosionWakeModelMatrix;
+    private ParticleSystem _explosionParticleSystem;
     private long _lastCollisionTime;
 
     private SoundSource _playerShipShoot;
     private SoundSource _playerShipExplode;
     private SoundSource[] _playerShipHits;
-    private int _playerShipHitSoundIndex;
     private SoundSource _collectCrate;
+    private int _playerShipHitSoundIndex;
 
     public GameWorldView(WidgetManager widgetManager, IEngine engine, IGameWorldModel model) throws IOException {
         _widgetManager = widgetManager;
@@ -140,6 +159,7 @@ public class GameWorldView implements
 
         _mvpMatrix = new Matrix4f();
         _mvMatrix = new Matrix4f();
+        _vpMatrix = new Matrix4f();
         _lunarLandersAndCrates = new ArrayList<>();
         _deliveryZones = new ArrayList<>();
         _debris = new ArrayList<>();
@@ -149,8 +169,10 @@ public class GameWorldView implements
         _physicsMatrix = new com.jme3.math.Matrix4f();
         _jomlVector = new Vector3f();
         _jmeVector = new com.jme3.math.Vector3f();
-        _explosionMatrix = new Matrix4f();
+        _explosionFlashModelMatrix = new Matrix4f();
+        _explosionWakeModelMatrix = new Matrix4f();
         _lastCollisionTime = 0;
+        _explosionWakeScale = 1.0f;
 
         _cameras = new Transform[2];
         _cameras[0] = new Transform();
@@ -192,7 +214,23 @@ public class GameWorldView implements
         createLunarLanders();
         createDebris();
         createPlayerShots();
-        createExplosionFlash();
+
+        if (_explosionFlash != null) {
+            _explosionFlash.freeResources();
+        }
+        _explosionFlash = createExplosionFlash();
+
+        if (_explosionWake != null) {
+            _explosionWake.freeResources();
+        }
+        _explosionWake = createExplosionWake();
+
+        if (_explosionParticleSystem != null) {
+            _explosionParticleSystem.freeResources();
+        }
+        _explosionParticleSystem = new ParticleSystem(_renderer, NUM_EXPLOSION_PARTICLES,
+                "explosionParticleSystem", EXPLOSION_SPARK_SIZE, EXPLOSION_SPARK_SIZE,
+                WHITE, "images/Spark.png", _materialCache, _textureCache);
 
         loadSounds();
     }
@@ -243,7 +281,11 @@ public class GameWorldView implements
     @Override
     public void viewThink() {
         if (_playerExploding) {
-            _playerExplosionColour.w -= 0.016f;
+            _explosionParticleSystem.think(_engine.getNowMs());
+
+            _explosionWakeScale += EXPLOSION_WAKE_SCALE_INCREMENT;
+
+            _playerExplosionColour.w -= EXPLOSION_FLASH_FADE_INCREMENT;
             if (_playerExplosionColour.w < 0.0f) {
                 _playerExplosionColour.w = 0.0f;
                 _playerExploding = false;
@@ -301,8 +343,18 @@ public class GameWorldView implements
         }
 
         if (_playerExploding) {
-            _mvpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(_explosionMatrix);
+            glDepthMask(false);
+
+            _mvpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(_explosionFlashModelMatrix);
             _explosionFlash.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
+
+            _mvpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(_explosionWakeModelMatrix).scale(_explosionWakeScale);;
+            _explosionWake.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
+
+            _vpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix());
+            _explosionParticleSystem.draw(_vpMatrix);
+
+            glDepthMask(true);
         }
     }
 
@@ -378,6 +430,14 @@ public class GameWorldView implements
         if (_explosionFlash != null) {
             _explosionFlash.freeResources();
             _explosionFlash = null;
+        }
+        if (_explosionWake != null) {
+            _explosionWake.freeResources();
+            _explosionWake = null;
+        }
+        if (_explosionParticleSystem != null) {
+            _explosionParticleSystem.freeResources();
+            _explosionParticleSystem = null;
         }
 
         _model.resetPlayers();
@@ -539,9 +599,17 @@ public class GameWorldView implements
         spawnPlayerShipDebris(player);
         removePlayerShip(player);
 
-        _explosionMatrix.identity().translate(_jomlVector);
+        _explosionParticleSystem.spawn(_engine.getNowMs(), _jomlVector,
+                EXPLOSION_SPARK_MIN_VELOCITY, EXPLOSION_SPARK_MAX_VELOCITY,
+                EXPLOSION_SPARK_MIN_LIFE_TIME, EXPLOSION_SPARK_MAX_LIFE_TIME);
+
+        _explosionFlashModelMatrix.identity().translate(_jomlVector);
+        _explosionWakeModelMatrix.identity().translate(_jomlVector);
+
+        _explosionWakeScale = 0.1f;
         _playerExplosionColour.w = 1.0f;
         _playerExploding = true;
+
         _playerShipExplode.play();
     }
 
@@ -794,6 +862,16 @@ public class GameWorldView implements
             collisionMesh = _collisionMeshCache.getByPartialName(String.format("Debris.BoxShape.%03d", i));
             ++i;
         }
+
+        displayMesh = _displayMeshCache.getByExactName("EngineCube.Display");
+        collisionMesh = _collisionMeshCache.getByExactName("EngineCube.BoxShape");
+        if (displayMesh != null && collisionMesh != null) {
+            for (i = 0; i < NUM_ADDITIONAL_DEBRIS_OBJECTS; ++i) {
+                PhysicsRigidBody rigidBody = new PhysicsRigidBody(collisionMesh, 1.0f); // TODO: what about mass?
+                RigidBodyObject rbo = new RigidBodyObject(rigidBody, displayMesh, false);
+                _debris.add(rbo); // save for later insertion
+            }
+        }
     }
 
     // We'll allocate them now, but not insert them into the simulation
@@ -853,51 +931,19 @@ public class GameWorldView implements
         rbo._modelMatrix.m33(_physicsMatrix.m33);
     }
 
-    private void createExplosionFlash() throws IOException {
-        GlTexture texture = new GlTexture(BitmapImage.fromFile("images/ExplosionFlash.png"));
-        _textureCache.add(texture);
+    private DisplayMesh createExplosionFlash() throws IOException {
+        return _renderer.createSprite(
+                "ExplosionFlash", EXPLOSION_FLASH_SIZE, EXPLOSION_FLASH_SIZE,
+                WHITE, "images/ExplosionFlash.png",
+                _materialCache, _textureCache
+        );
+    }
 
-        Material material = new Material("ExplosionFlash");
-        material.setDiffuseColour(WHITE);
-        material.setDiffuseTextureFileName("images/ExplosionFlash.png");
-        _materialCache.add(material);
-
-        float halfW = PLAYER_EXPLOSION_SIZE / 2.0f;
-        float halfH = PLAYER_EXPLOSION_SIZE / 2.0f;
-        
-        final float[] vertices = new float[] {
-                // Triangle 0
-                -halfW,  halfH, 0.0f,
-                -halfW, -halfH, 0.0f,
-                 halfW, -halfH, 0.0f,
-                // Triangle 1
-                -halfW,  halfH, 0.0f,
-                 halfW, -halfH, 0.0f,
-                 halfW,  halfH, 0.0f,
-        };
-
-        final float[] texCoordinates = new float[] {
-                // Triangle 0
-                0.0f, 1.0f,
-                0.0f, 0.0f,
-                1.0f, 0.0f,
-                // Triangle 1
-                0.0f, 1.0f,
-                1.0f, 0.0f,
-                1.0f, 1.0f,
-        };
-        final float[] normals = new float[] {
-                0.0f, 0.0f, 1.0f,
-                0.0f, 0.0f, 1.0f,
-                0.0f, 0.0f, 1.0f,
-
-                0.0f, 0.0f, 1.0f,
-                0.0f, 0.0f, 1.0f,
-                0.0f, 0.0f, 1.0f,
-        };
-
-        _explosionFlash = new DisplayMesh("ExplosionFlash");
-        _explosionFlash.addPiece(new GlStaticMeshPiece("ExplosionFlash", new PolyhedraVxTcNm(vertices, texCoordinates, normals)));
-        _explosionFlash.bindMaterials(_materialCache, _textureCache);
+    private DisplayMesh createExplosionWake() throws IOException {
+        return _renderer.createSprite(
+                "ExplosionWake", EXPLOSION_WAKE_SIZE, EXPLOSION_WAKE_SIZE,
+                WHITE, "images/ExplosionWake.png",
+                _materialCache, _textureCache
+        );
     }
 }

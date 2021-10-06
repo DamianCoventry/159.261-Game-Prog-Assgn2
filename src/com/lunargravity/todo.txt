@@ -1,16 +1,22 @@
-add more explosion flare?
+For collisions: Sparks, dust cloud, scraping sound
+For explosions: Central flash, ring that increases in size, Sparks, cubes, ship debris, explosion sound, smoke
+For low health ships: Sparks, smoke, electrical sound
+For collecting and delivering crates: progress animation, completion sound, change the texture of the crate specifically it's colour
+
 remove the saved game feature
-stream music
-add an explosion sprite
-add an explosion ring
-Make a simple menu background
-Put a spinning lunar lander in the menu
-make menu widgets that don't suck
-make loading screens that don't suck
-make a hud that doesn't suck
 Remove the race button
 Remove the dogfight button
 Remove the shooting ability of the lunar lander
+
+stream music
+
+make loading screens that don't suck
+
+Make a simple menu background
+Put a spinning lunar lander in the menu
+make menu widgets that don't suck
+make a hud that doesn't suck
+
 Finish as many levels as possible
 Better looking levels:
     mix of textures
