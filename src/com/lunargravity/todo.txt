@@ -1,5 +1,3 @@
-For collisions: Sparks, dust cloud, scraping sound
-For explosions: Central flash, ring that increases in size, Sparks, cubes, ship debris, explosion sound, smoke
 For low health ships: Sparks, smoke, electrical sound
 For collecting and delivering crates: progress animation, completion sound, change the texture of the crate specifically it's colour
 

@@ -14,6 +14,7 @@
 
 package com.lunargravity.world.controller;
 
+import com.jme3.math.Vector3f;
 import com.lunargravity.world.model.Crate;
 import com.lunargravity.world.model.Player;
 import com.lunargravity.world.model.PlayerShot;
@@ -25,7 +26,7 @@ public interface IGameWorldControllerObserver {
     void crateDeliveryCompleted(Crate crate);
     void respawnCrateAtStartPosition(Crate crate);
     void allCratesDelivered();
-    void playerShipCollided(Player player, float appliedImpulse);
+    void playerShipCollided(Player player, float appliedImpulse, Vector3f impactPoint);
     void playerShipTookDamage(int player, int hitPointsDamage, int hitPointsRemaining);
     void playerShipExploding(int player);
     void playerShipDead(int player);

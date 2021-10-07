@@ -45,6 +45,10 @@ public class ParticleSystem {
                 diffuseTextureFileName, materialCache, textureCache);
     }
 
+    public boolean isDead() {
+        return _dead;
+    }
+
     public void freeResources() {
         _displayMesh.freeResources();
     }

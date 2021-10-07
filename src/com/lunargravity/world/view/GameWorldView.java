@@ -63,19 +63,32 @@ public class GameWorldView implements
     private static final int NUM_PLAYER_SHOTS = 20;
     private static final int NUM_PLAYER_SHIP_HIT_SOUNDS = 4;
     private static final int COLLISION_SOUND_GAP = 250;
-    private static final int NUM_ADDITIONAL_DEBRIS_OBJECTS = 6;
+    private static final int NUM_ADDITIONAL_DEBRIS_OBJECTS = 8;
 
-    private static final float EXPLOSION_SPARK_SIZE = 0.07f;
+    private static final float EXPLOSION_SPARK_SIZE = 0.15f;
     private static final int NUM_EXPLOSION_PARTICLES = 128;
     private static final int EXPLOSION_SPARK_MIN_VELOCITY = 1;
     private static final int EXPLOSION_SPARK_MAX_VELOCITY = 4;
-    private static final int EXPLOSION_SPARK_MIN_LIFE_TIME = 2300;
-    private static final int EXPLOSION_SPARK_MAX_LIFE_TIME = 3800;
+    private static final int EXPLOSION_SPARK_MIN_LIFE_TIME = 2000;
+    private static final int EXPLOSION_SPARK_MAX_LIFE_TIME = 4000;
+
+    private static final float SCRAPE_SPARK_SIZE = 0.05f;
+    private static final int NUM_SCRAPE_PARTICLES = 16;
+    private static final int SCRAPE_SPARK_MIN_VELOCITY = 1;
+    private static final int SCRAPE_SPARK_MAX_VELOCITY = 4;
+    private static final int SCRAPE_SPARK_MIN_LIFE_TIME = 100;
+    private static final int SCRAPE_SPARK_MAX_LIFE_TIME = 250;
+
+    private static final int MAX_DUST_CLOUDS = 10;
+    private static final int NUM_DUST_PARTICLES_PER_CLOUD = 3;
+    private static final float DUST_CLOUD_SIZE = 1.0f;
+    private static final float DUST_CLOUD_ROTATE_INCREMENT = 0.008f;
 
     private static final com.jme3.math.Vector3f ZERO_VELOCITY = new com.jme3.math.Vector3f(0, 0, 0);
     private static final com.jme3.math.Vector3f PREVENT_XY_AXES_ROTATION = new com.jme3.math.Vector3f(0.0f, 0.0f, 1.0f);
     private static final com.jme3.math.Vector3f PREVENT_Z_AXIS_MOVEMENT = new com.jme3.math.Vector3f(1.0f, 1.0f, 0.0f);
     private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    private static final Vector3f Z_AXIS = new Vector3f(0.0f, 0.0f, 1.0f);
 
     private static final String SINGLE_PLAYER_STATUS_BAR = "singlePlayerStatusBar";
 
@@ -93,6 +106,17 @@ public class GameWorldView implements
             _modelMatrix = new Matrix4f();
         }
     }
+
+    private static class DustCloud {
+        public boolean _active;
+        public Vector3f _position;
+        public Vector4f _diffuseColour;
+        public Matrix4f[] _modelMatrices;
+        public float[] _rotations;
+    }
+    private DisplayMesh _dustCloudDisplayMesh;
+    private final DustCloud[] _dustClouds;
+    private int _nextDustCloudIndex;
 
     private final IEngine _engine;
     private final Renderer _renderer;
@@ -116,6 +140,7 @@ public class GameWorldView implements
     private DisplayMesh _explosionFlash;
     private DisplayMesh _explosionWake;
     private boolean _playerExploding;
+    private boolean _playerScraping;
 
     private final ArrayList<RigidBodyObject> _lunarLandersAndCrates;
     private final ArrayList<PhysicsRigidBody> _deliveryZones;
@@ -135,6 +160,7 @@ public class GameWorldView implements
     private final Matrix4f _explosionFlashModelMatrix;
     private final Matrix4f _explosionWakeModelMatrix;
     private ParticleSystem _explosionParticleSystem;
+    private ParticleSystem _scrapeParticleSystem;
     private long _lastCollisionTime;
 
     private SoundSource _playerShipShoot;
@@ -186,6 +212,20 @@ public class GameWorldView implements
         _playerShipHitSoundIndex = 0;
         _crateStartPoints = new ArrayList<>();
         _deliveryZoneStartPoints = new ArrayList<>();
+
+        _nextDustCloudIndex = 0;
+        _dustClouds = new DustCloud[MAX_DUST_CLOUDS];
+        for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
+            _dustClouds[i] = new DustCloud();
+            _dustClouds[i]._active = false;
+            _dustClouds[i]._position = new Vector3f();
+            _dustClouds[i]._diffuseColour = new Vector4f(WHITE);
+            _dustClouds[i]._rotations = new float[NUM_DUST_PARTICLES_PER_CLOUD];
+            _dustClouds[i]._modelMatrices = new Matrix4f[NUM_DUST_PARTICLES_PER_CLOUD];
+            for (int j = 0; j < NUM_DUST_PARTICLES_PER_CLOUD; ++j) {
+                _dustClouds[i]._modelMatrices[j] = new Matrix4f();
+            }
+        }
     }
 
     @Override
@@ -215,6 +255,11 @@ public class GameWorldView implements
         createDebris();
         createPlayerShots();
 
+        if (_dustCloudDisplayMesh != null) {
+            _dustCloudDisplayMesh.freeResources();
+        }
+        _dustCloudDisplayMesh = createDustCloud();
+
         if (_explosionFlash != null) {
             _explosionFlash.freeResources();
         }
@@ -231,6 +276,18 @@ public class GameWorldView implements
         _explosionParticleSystem = new ParticleSystem(_renderer, NUM_EXPLOSION_PARTICLES,
                 "explosionParticleSystem", EXPLOSION_SPARK_SIZE, EXPLOSION_SPARK_SIZE,
                 WHITE, "images/Spark.png", _materialCache, _textureCache);
+
+        if (_scrapeParticleSystem != null) {
+            _scrapeParticleSystem.freeResources();
+        }
+        _scrapeParticleSystem = new ParticleSystem(_renderer, NUM_SCRAPE_PARTICLES,
+                "scrapeParticleSystem", SCRAPE_SPARK_SIZE, SCRAPE_SPARK_SIZE,
+                WHITE, "images/Spark.png", _materialCache, _textureCache);
+
+        _nextDustCloudIndex = 0;
+        for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
+            _dustClouds[i]._active = false;
+        }
 
         loadSounds();
     }
@@ -291,6 +348,39 @@ public class GameWorldView implements
                 _playerExploding = false;
             }
         }
+
+        if (_playerScraping) {
+            _scrapeParticleSystem.think(_engine.getNowMs());
+            _playerScraping = !_scrapeParticleSystem.isDead();
+        }
+
+        for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
+            if (!_dustClouds[i]._active) {
+                continue;
+            }
+            _dustClouds[i]._rotations[0] += DUST_CLOUD_ROTATE_INCREMENT;
+            _dustClouds[i]._rotations[1] -= DUST_CLOUD_ROTATE_INCREMENT;
+            _dustClouds[i]._rotations[2] += DUST_CLOUD_ROTATE_INCREMENT;
+
+            _dustClouds[i]._modelMatrices[0]
+                    .identity()
+                    .translate(_dustClouds[i]._position)
+                    .rotate(_dustClouds[i]._rotations[0], Z_AXIS);
+            _dustClouds[i]._modelMatrices[1]
+                    .identity()
+                    .translate(_dustClouds[i]._position)
+                    .rotate(_dustClouds[i]._rotations[1], Z_AXIS);
+            _dustClouds[i]._modelMatrices[2]
+                    .identity()
+                    .translate(_dustClouds[i]._position)
+                    .rotate(_dustClouds[i]._rotations[2], Z_AXIS);
+
+            _dustClouds[i]._diffuseColour.w -= EXPLOSION_FLASH_FADE_INCREMENT;
+            if (_dustClouds[i]._diffuseColour.w < 0.0f) {
+                _dustClouds[i]._diffuseColour.w = 0.0f;
+                _dustClouds[i]._active = false;
+            }
+        }
     }
 
     @Override
@@ -342,20 +432,34 @@ public class GameWorldView implements
             }
         }
 
-        if (_playerExploding) {
-            glDepthMask(false);
+        glDepthMask(false);
+        _vpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix());
 
-            _mvpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(_explosionFlashModelMatrix);
+        if (_playerExploding) {
+            _mvpMatrix.set(_vpMatrix).mul(_explosionFlashModelMatrix);
             _explosionFlash.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
 
-            _mvpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix()).mul(_explosionWakeModelMatrix).scale(_explosionWakeScale);;
+            _mvpMatrix.set(_vpMatrix).mul(_explosionWakeModelMatrix).scale(_explosionWakeScale);;
             _explosionWake.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
 
-            _vpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix());
             _explosionParticleSystem.draw(_vpMatrix);
-
-            glDepthMask(true);
         }
+
+        for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
+            if (!_dustClouds[i]._active) {
+                continue;
+            }
+            for (int j = 0; j < NUM_DUST_PARTICLES_PER_CLOUD; ++j) {
+                _mvpMatrix.set(_vpMatrix).mul(_dustClouds[i]._modelMatrices[j]);
+                _dustCloudDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _dustClouds[i]._diffuseColour);
+            }
+        }
+
+        if (_playerScraping) {
+            _scrapeParticleSystem.draw(_vpMatrix);
+        }
+
+        glDepthMask(true);
     }
 
     @Override
@@ -438,6 +542,10 @@ public class GameWorldView implements
         if (_explosionParticleSystem != null) {
             _explosionParticleSystem.freeResources();
             _explosionParticleSystem = null;
+        }
+        if (_dustCloudDisplayMesh != null) {
+            _dustCloudDisplayMesh.freeResources();
+            _dustCloudDisplayMesh = null;
         }
 
         _model.resetPlayers();
@@ -571,14 +679,39 @@ public class GameWorldView implements
     }
 
     @Override
-    public void playerShipCollided(Player player, float appliedImpulse) {
-        //System.out.printf("appliedImpulse = %.2f\n", appliedImpulse);
-        if (appliedImpulse >= MIN_IMPULSE_TO_PLAY_SOUND && _engine.getNowMs() - _lastCollisionTime >= COLLISION_SOUND_GAP) {
-            _lastCollisionTime = _engine.getNowMs();
-            _playerShipHits[_playerShipHitSoundIndex].play();
-            if (++_playerShipHitSoundIndex > 3) {
-                _playerShipHitSoundIndex = 0;
-            }
+    public void playerShipCollided(Player player, float appliedImpulse, com.jme3.math.Vector3f impactPoint) {
+        if (appliedImpulse < MIN_IMPULSE_TO_PLAY_SOUND || _engine.getNowMs() - _lastCollisionTime < COLLISION_SOUND_GAP) {
+            return;
+        }
+        _lastCollisionTime = _engine.getNowMs();
+
+        _playerShipHits[_playerShipHitSoundIndex].play();
+        if (++_playerShipHitSoundIndex >= NUM_PLAYER_SHIP_HIT_SOUNDS) {
+            _playerShipHitSoundIndex = 0;
+        }
+
+        _jomlVector.x = impactPoint.x;
+        _jomlVector.y = impactPoint.y;
+        _jomlVector.z = impactPoint.z;
+
+        _playerScraping = true;
+        _scrapeParticleSystem.spawn(_engine.getNowMs(), _jomlVector,
+                SCRAPE_SPARK_MIN_VELOCITY, SCRAPE_SPARK_MAX_VELOCITY,
+                SCRAPE_SPARK_MIN_LIFE_TIME, SCRAPE_SPARK_MAX_LIFE_TIME);
+
+        _dustClouds[_nextDustCloudIndex]._active = true;
+        _dustClouds[_nextDustCloudIndex]._position.set(_jomlVector);
+        _dustClouds[_nextDustCloudIndex]._diffuseColour.w = 1.0f;
+        float angleDegrees = randomInteger(0, 359);
+        for (int j = 0; j < NUM_DUST_PARTICLES_PER_CLOUD; ++j) {
+            float r = (float)Math.toRadians(angleDegrees);
+            _dustClouds[_nextDustCloudIndex]._rotations[j] = r;
+            _dustClouds[_nextDustCloudIndex]._modelMatrices[j].identity().translate(_jomlVector).rotate(r, Z_AXIS);
+            angleDegrees += 120.0f; // <-- 360/3
+        }
+
+        if (++_nextDustCloudIndex >= MAX_DUST_CLOUDS) {
+            _nextDustCloudIndex = 0;
         }
     }
 
@@ -943,6 +1076,14 @@ public class GameWorldView implements
         return _renderer.createSprite(
                 "ExplosionWake", EXPLOSION_WAKE_SIZE, EXPLOSION_WAKE_SIZE,
                 WHITE, "images/ExplosionWake.png",
+                _materialCache, _textureCache
+        );
+    }
+
+    private DisplayMesh createDustCloud() throws IOException {
+        return _renderer.createSprite(
+                "DustCloud", DUST_CLOUD_SIZE, DUST_CLOUD_SIZE,
+                WHITE, "images/DustCloud.png",
                 _materialCache, _textureCache
         );
     }

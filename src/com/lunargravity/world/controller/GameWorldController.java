@@ -15,6 +15,7 @@
 package com.lunargravity.world.controller;
 
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
+import com.jme3.math.Vector3f;
 import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.view.ICampaignView;
@@ -40,12 +41,14 @@ public class GameWorldController implements
     private final ICampaignController _logicController;
     private final IGameWorldModel _model;
     private final IEngine _engine;
+    private final Vector3f _impactPoint;
 
     public GameWorldController(IEngine engine, IController controller, IGameWorldModel model) {
         _engine = engine;
         _engine.setPhysicsCollisionListener(this::processPhysicsCollisionEvent);
         _logicController = (ICampaignController)controller;
         _observers = new ArrayList<>();
+        _impactPoint = new Vector3f();
 
         _model = model;
         _model.setPlayerObserver(this);
@@ -249,7 +252,7 @@ public class GameWorldController implements
             else if (event.getObjectB().getUserObject() instanceof PlayerShot playerShot) {
                 playerShot.explode();
             }
-            damagePlayerShip(player, event.getAppliedImpulse());
+            damagePlayerShip(player, event.getAppliedImpulse(), event.getPositionWorldOnA(_impactPoint));
         }
         else if (event.getObjectB().getUserObject() instanceof Player player) {
             if (event.getObjectA().getUserObject() instanceof Crate crate) {
@@ -261,7 +264,7 @@ public class GameWorldController implements
             else if (event.getObjectA().getUserObject() instanceof PlayerShot playerShot) {
                 playerShot.explode();
             }
-            damagePlayerShip(player, event.getAppliedImpulse());
+            damagePlayerShip(player, event.getAppliedImpulse(), event.getPositionWorldOnB(_impactPoint));
         }
         else if (event.getObjectA().getUserObject() instanceof DeliveryZone deliveryZone) {
             if (event.getObjectB().getUserObject() instanceof Crate crate) {
@@ -281,12 +284,12 @@ public class GameWorldController implements
         }
     }
 
-    private void damagePlayerShip(Player player, float appliedImpulse) {
+    private void damagePlayerShip(Player player, float appliedImpulse, Vector3f impactPoint) {
         if (appliedImpulse >= MIN_IMPULSE_TO_CAUSE_DAMAGE) {
             player.takeDamage((int)(appliedImpulse * PLAYER_SHIP_DAMAGE_SCALE));
         }
         for (var observer : _observers) {
-            observer.playerShipCollided(player, appliedImpulse);
+            observer.playerShipCollided(player, appliedImpulse, impactPoint);
         }
     }
 
