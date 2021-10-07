@@ -8,7 +8,7 @@ import com.lunargravity.engine.timeouts.TimeoutManager;
 import java.util.ArrayList;
 
 public class Player {
-    private static final int CRATE_COLLECTION_TIME = 1000;
+    public static final int CRATE_COLLECTION_TIME = 2000;
     private static final int CRATE_DELIVERY_SPEED = 1000; // 1 second must pass between crate deliveries
     private static final int EXPLODING_TIME = 2000;
     private static final int WEAPON_COOL_DOWN_TIME = 500;
@@ -43,6 +43,7 @@ public class Player {
     private boolean _rotateCwActive;
     private boolean _shootActive;
 
+    private Crate _collectingCrate;
     private State _state;
     private WeaponState _weaponState;
     private int _hitPoints;
@@ -64,6 +65,7 @@ public class Player {
         _angularVelocity = new Vector3f();
         _linearVelocity = new Vector3f();
         _collectedCrates = new ArrayList<>();
+        _collectingCrate = null;
 
         _state = State.IDLE;
         _weaponState = WeaponState.IDLE;
@@ -89,6 +91,10 @@ public class Player {
         return _fuel;
     }
 
+    public Crate getCollectingCrate() {
+        return _collectingCrate;
+    }
+
     public boolean isExplodingOrDead() {
         return _state == State.EXPLODING || _state == State.DEAD;
     }
@@ -106,6 +112,7 @@ public class Player {
         _hitPoints = MAX_HIT_POINTS;
         _state = State.IDLE;
         _weaponState = WeaponState.IDLE;
+        _collectingCrate = null;
     }
 
     public void setObserver(IPlayerObserver observer) {
@@ -119,36 +126,17 @@ public class Player {
         return _rigidBody;
     }
 
-    public Vector3f getThrustForce() {
-        return _thrustForce;
-    }
-
     public void setThrustActive(boolean thrustActive) {
         _thrustActive = thrustActive;
     }
-    public boolean isThrustActive() {
-        return _thrustActive;
-    }
-
     public void setRotateCcwActive(boolean rotateCcwActive) {
         _rotateCcwActive = rotateCcwActive;
     }
-    public boolean isRotateCcwActive() {
-        return _rotateCcwActive;
-    }
-
     public void setRotateCwActive(boolean rotateCwActive) {
         _rotateCwActive = rotateCwActive;
     }
-    public boolean isRotateCwActive() {
-        return _rotateCwActive;
-    }
-
     public void setShootActive(boolean shootActive) {
         _shootActive = shootActive;
-    }
-    public boolean isShootActive() {
-        return _shootActive;
     }
 
     public boolean hasCollectedAtLeastOneCrate() {
@@ -160,12 +148,16 @@ public class Player {
             return;
         }
         _state = State.COLLECTING;
+        _collectingCrate = crate;
+        _observer.crateCollectingStarted(this, crate);
+
         _collectionTimeoutId = _timeoutManager.addTimeout(CRATE_COLLECTION_TIME, callCount -> {
             _collectedCrates.add(crate);
             crate.setState(Crate.State.COLLECTED);
 
             _state = State.IDLE;
             _collectionTimeoutId = 0;
+            _collectingCrate = null;
 
             if (_observer != null) {
                 _observer.crateCollectionCompleted(crate);
@@ -177,8 +169,10 @@ public class Player {
     public void stopCollectingCrateIfMoving() {
         if (isMoving() && _collectionTimeoutId != 0) {
             removeTimeouts(_timeoutManager);
+            _state = State.IDLE;
+            _collectingCrate = null;
             if (_observer != null) {
-                _observer.crateCollectionAborted();
+                _observer.crateCollectionAborted(this);
             }
         }
     }

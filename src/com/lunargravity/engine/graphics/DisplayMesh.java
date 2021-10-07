@@ -99,4 +99,10 @@ public class DisplayMesh {
             piece.draw(renderer, program, mvMatrix, projectionMatrix);
         }
     }
+
+    public void draw(Renderer renderer, GLSpecularDirectionalLightProgram program, GlTexture diffuseTexture, Matrix4f mvMatrix, Matrix4f projectionMatrix) {
+        for (var piece : _pieces) {
+            piece.draw(renderer, program, diffuseTexture, mvMatrix, projectionMatrix);
+        }
+    }
 }

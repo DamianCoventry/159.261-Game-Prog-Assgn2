@@ -164,6 +164,13 @@ public class GameWorldController implements
     }
 
     @Override
+    public void crateCollectingStarted(Player player, Crate crate) {
+        for (var observer : _observers) {
+            observer.crateCollectingStarted(player, crate);
+        }
+    }
+
+    @Override
     public void crateCollectionCompleted(Crate crate) {
         for (var observer : _observers) {
             observer.crateCollectionCompleted(crate);
@@ -171,9 +178,9 @@ public class GameWorldController implements
     }
 
     @Override
-    public void crateCollectionAborted() {
+    public void crateCollectionAborted(Player player) {
         for (var observer : _observers) {
-            observer.crateCollectionAborted();
+            observer.crateCollectionAborted(player);
         }
     }
 
@@ -294,7 +301,7 @@ public class GameWorldController implements
     }
 
     private void processPlayerToCrateCollision(Player player, Crate crate) {
-        if (player.isIdle() && !player.isMoving() && !crate.isDroppedForDelivery()) {
+        if (player.isIdle() && !player.isMoving() && crate.isIdle()) {
             player.startCollectingCrate(crate);
         }
     }

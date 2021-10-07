@@ -48,6 +48,10 @@ public class Crate {
         return _state == State.DELIVERED;
     }
 
+    public boolean isDelivering() {
+        return _state == State.DELIVERING;
+    }
+
     public boolean isDroppedForDelivery() {
         return _state == State.DROPPED_FOR_DELIVERY;
     }

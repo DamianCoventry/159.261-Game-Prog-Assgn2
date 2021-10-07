@@ -127,13 +127,13 @@ public class Renderer {
 
         final float[] texCoordinates = new float[] {
                 // Triangle 0
-                0.0f, 1.0f,
                 0.0f, 0.0f,
-                1.0f, 0.0f,
-                // Triangle 1
                 0.0f, 1.0f,
-                1.0f, 0.0f,
                 1.0f, 1.0f,
+                // Triangle 1
+                0.0f, 0.0f,
+                1.0f, 1.0f,
+                1.0f, 0.0f,
         };
         final float[] normals = new float[] {
                 0.0f, 0.0f, 1.0f,

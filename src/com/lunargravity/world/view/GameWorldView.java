@@ -58,6 +58,15 @@ public class GameWorldView implements
     private static final float EXPLOSION_WAKE_SIZE = 7.0f;
     private static final float EXPLOSION_WAKE_SCALE_INCREMENT = 0.035f;
 
+    private static final int MAX_PROGRESS_BUFFS = 6;
+    private static final float PROGRESS_BUFF_Y_OFFSET = 1.15f;
+    private static final float PROGRESS_RING_SIZE = 1.0F;
+    private static final float COLLECTING_RING_ROTATE_DELTA = 3.0f;
+    private static final float DELIVERING_RING_ROTATE_DELTA = 1.5f;
+    private static final float PROGRESS_TEXT_WIDTH = 1.6f;
+    private static final float PROGRESS_TEXT_HEIGHT = 0.4f;
+    private static final long PROGRESS_TEXT_BLINK_TIME = 250;
+
     private static final int MIN_EXPLOSION_FORCE = 250;
     private static final int MAX_EXPLOSION_FORCE = 400;
     private static final int NUM_PLAYER_SHOTS = 20;
@@ -86,8 +95,10 @@ public class GameWorldView implements
     private static final int SMOKE_MIN_LIFE_TIME = 3750;
     private static final int SMOKE_MAX_LIFE_TIME = 5250;
 
-    private static final int NUM_SMALL_SMOKE_PARTICLES = 32;
+    private static final int NUM_SMALL_SMOKE_PARTICLES = 48;
     private static final float SMALL_SMOKE_PARTICLE_SIZE = 0.7f;
+    private static final long[] SMOKE_HIT_POINT_SCALE = { 60, 40, 25, 10 };
+    private static final long[] SMOKE_TIMEOUT_MS_SCALE = { 1000, 700, 400, 100 };
 
     private static final int MAX_DUST_CLOUDS = 10;
     private static final int NUM_DUST_PARTICLES_PER_CLOUD = 3;
@@ -101,13 +112,6 @@ public class GameWorldView implements
     private static final Vector3f Z_AXIS = new Vector3f(0.0f, 0.0f, 1.0f);
 
     private static final String SINGLE_PLAYER_STATUS_BAR = "singlePlayerStatusBar";
-
-    private static final long[] SMOKE_HIT_POINT_SCALE = {
-            60, 40, 25, 10
-    };
-    private static final long[] SMOKE_TIMEOUT_MS_SCALE = {
-            1000, 700, 400, 100
-    };
 
     private static class RigidBodyObject {
         public boolean _active;
@@ -131,9 +135,29 @@ public class GameWorldView implements
         public Matrix4f[] _modelMatrices;
         public float[] _rotations;
     }
+
     private DisplayMesh _dustCloudDisplayMesh;
     private final DustCloud[] _dustClouds;
     private int _nextDustCloudIndex;
+
+    private static class ProgressBuff {
+        public enum Type { COLLECTING, DELIVERING }
+        public Type _type;
+        public boolean _active;
+        public boolean _showText;
+        public long _toggleTime;
+        public long _expiryTime;
+        public float _rotation;
+        public float _rotateDelta;
+        public Vector3f _position;
+        public Matrix4f _modelMatrix;
+        public Player _player;
+        public Crate _crate;
+    }
+
+    public DisplayMesh _progressBuffRing;
+    public DisplayMesh _progressBuffText;
+    private final ArrayList<ProgressBuff> _progressBuffs;
 
     private final IEngine _engine;
     private final Renderer _renderer;
@@ -159,7 +183,8 @@ public class GameWorldView implements
     private boolean _playerExploding;
     private boolean _showSparks;
 
-    private final ArrayList<RigidBodyObject> _lunarLandersAndCrates;
+    private final ArrayList<RigidBodyObject> _lunarLanders;
+    private final ArrayList<RigidBodyObject> _crates;
     private final ArrayList<PhysicsRigidBody> _deliveryZones;
     private final ArrayList<RigidBodyObject> _debris;
     private final ArrayList<RigidBodyObject> _playerShots;
@@ -191,6 +216,13 @@ public class GameWorldView implements
     private int _playerShipHitSoundIndex;
     private int _playerShipDamageSoundIndex;
     private GlTexture _blueSparkTexture;
+    private GlTexture _crateCollectingTexture;
+    private GlTexture _crateDroppedForDeliveryTexture;
+    private GlTexture _crateDeliveringTexture;
+    private GlTexture _collectingProgressRingTexture;
+    private GlTexture _deliveringProgressRingTexture;
+    private GlTexture _collectingProgressTextTexture;
+    private GlTexture _deliveringProgressTextTexture;
 
     private long _lastSmokeTime;
 
@@ -211,10 +243,12 @@ public class GameWorldView implements
         _mvpMatrix = new Matrix4f();
         _mvMatrix = new Matrix4f();
         _vpMatrix = new Matrix4f();
-        _lunarLandersAndCrates = new ArrayList<>();
+        _lunarLanders = new ArrayList<>();
+        _crates = new ArrayList<>();
         _deliveryZones = new ArrayList<>();
         _debris = new ArrayList<>();
         _playerShots = new ArrayList<>();
+        _progressBuffs = new ArrayList<>();
 
         _physicsTransform = new com.jme3.math.Transform();
         _physicsMatrix = new com.jme3.math.Matrix4f();
@@ -271,7 +305,8 @@ public class GameWorldView implements
             });
         }
 
-        _lunarLandersAndCrates.clear();
+        _lunarLanders.clear();
+        _crates.clear();
         _debris.clear();
         _playerShots.clear();
         _model.clearCrates();
@@ -282,6 +317,14 @@ public class GameWorldView implements
         createLunarLanders();
         createDebris();
         createPlayerShots();
+
+        if (_progressBuffRing != null) {
+            _progressBuffRing.freeResources();
+        }
+        if (_progressBuffText != null) {
+            _progressBuffText.freeResources();
+        }
+        createProgressBuffs();
 
         if (_dustCloudDisplayMesh != null) {
             _dustCloudDisplayMesh.freeResources();
@@ -338,6 +381,33 @@ public class GameWorldView implements
         }
 
         loadSounds();
+    }
+
+    private void createProgressBuffs() throws IOException {
+        _progressBuffRing = _renderer.createSprite(
+                "progressBuffRing", PROGRESS_RING_SIZE, PROGRESS_RING_SIZE,
+                WHITE, "images/CollectingProgressRing.png", _materialCache, _textureCache);
+        _collectingProgressRingTexture = _progressBuffRing.getFirstDiffuseTexture();
+        _deliveringProgressRingTexture = new GlTexture(BitmapImage.fromFile("images/DeliveringProgressRing.png"));
+        
+        _progressBuffText = _renderer.createSprite(
+                "progressBuffText", PROGRESS_TEXT_WIDTH, PROGRESS_TEXT_HEIGHT,
+                WHITE, "images/Collecting.png", _materialCache, _textureCache);
+        _collectingProgressTextTexture = _progressBuffText.getFirstDiffuseTexture();
+        _deliveringProgressTextTexture = new GlTexture(BitmapImage.fromFile("images/Delivering.png"));
+
+        _progressBuffs.clear();
+        for (int i = 0; i < MAX_PROGRESS_BUFFS; ++i) {
+            ProgressBuff progressBuff = new ProgressBuff();
+            progressBuff._active = false;
+            progressBuff._showText = true;
+            progressBuff._toggleTime = 0;
+            progressBuff._expiryTime = 0;
+            progressBuff._rotation = 0.0f;
+            progressBuff._position = new Vector3f();
+            progressBuff._modelMatrix = new Matrix4f();
+            _progressBuffs.add(progressBuff);
+        }
     }
 
     private void loadSounds() throws UnsupportedAudioFileException, IOException {
@@ -452,6 +522,43 @@ public class GameWorldView implements
                 _dustClouds[i]._active = false;
             }
         }
+
+        progressBuffsThink(_engine.getNowMs());
+    }
+
+    private void progressBuffsThink(long nowMs) {
+        for (var a : _progressBuffs) {
+            if (a._active) {
+                progressBuffThink(nowMs, a);
+            }
+        }
+    }
+
+    private void progressBuffThink(long nowMs, ProgressBuff progressBuff) {
+        progressBuff._rotation += progressBuff._rotateDelta;
+        if (progressBuff._rotation >= 360.0f) {
+            progressBuff._rotation -= 360.0f;
+        }
+
+        if (progressBuff._type == ProgressBuff.Type.DELIVERING) {
+            progressBuff._crate.getRigidBody().getPhysicsLocation(_jmeVector);
+            _jomlVector.x = _jmeVector.x;
+            _jomlVector.y = _jmeVector.y;
+            _jomlVector.z = _jmeVector.z;
+            progressBuff._position.set(_jomlVector).add(0.0f, PROGRESS_BUFF_Y_OFFSET, 0.0f);
+        }
+
+        progressBuff._modelMatrix
+                .identity()
+                .translate(progressBuff._position)
+                .rotate((float)Math.toRadians(progressBuff._rotation), Z_AXIS);
+
+        if (nowMs >= progressBuff._toggleTime) {
+            progressBuff._showText = !progressBuff._showText;
+            progressBuff._toggleTime = nowMs + PROGRESS_TEXT_BLINK_TIME;
+        }
+
+        progressBuff._active = progressBuff._expiryTime >= nowMs;
     }
 
     private void emitPeriodicSmokeIfRequired(long nowMs) {
@@ -500,7 +607,10 @@ public class GameWorldView implements
         }
 
         // Synchronise first so that we can attach a camera to each player's lunar lander
-        for (var rbo : _lunarLandersAndCrates) {
+        for (var rbo : _lunarLanders) {
+            synchroniseDisplayMeshWithCollisionMesh(rbo);
+        }
+        for (var rbo : _crates) {
             synchroniseDisplayMeshWithCollisionMesh(rbo);
         }
 
@@ -523,9 +633,26 @@ public class GameWorldView implements
             _worldDisplayMesh.draw(_renderer, _renderer.getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
         }
 
-        for (var rbo : _lunarLandersAndCrates) {
+        for (var rbo : _lunarLanders) {
             _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
             rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+        }
+
+        for (var rbo : _crates) {
+            _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
+            Crate crate = (Crate)rbo._rigidBody.getUserObject();
+            if (crate.isDroppedForDelivery()) {
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _crateDroppedForDeliveryTexture, _mvMatrix, projectionMatrix);
+            }
+            else if (crate.isDelivering()) {
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _crateDeliveringTexture, _mvMatrix, projectionMatrix);
+            }
+            else if (_model.getPlayerState(1).getCollectingCrate() == crate || _model.getPlayerState(0).getCollectingCrate() == crate) {
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _crateCollectingTexture, _mvMatrix, projectionMatrix);
+            }
+            else {
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+            }
         }
 
         for (var rbo : _debris) {
@@ -549,7 +676,9 @@ public class GameWorldView implements
             _largeSmokeParticleSystem.draw(_vpMatrix);
         }
 
-        _smallSmokeParticleSystem.draw(_vpMatrix);
+        if (_smallSmokeParticleSystem != null) {
+            _smallSmokeParticleSystem.draw(_vpMatrix);
+        }
         
         if (_playerExploding) {
             _mvpMatrix.set(_vpMatrix).mul(_explosionFlashModelMatrix);
@@ -575,6 +704,33 @@ public class GameWorldView implements
             _sparkParticleSystem.draw(_vpMatrix);
         }
 
+        for (var progressBuff : _progressBuffs) {
+            if (progressBuff._active) {
+                GlTexture ring, text;
+                if (progressBuff._type == ProgressBuff.Type.COLLECTING) {
+                    ring = _collectingProgressRingTexture; text = _collectingProgressTextTexture;
+                }
+                else {
+                    ring = _deliveringProgressRingTexture; text = _deliveringProgressTextTexture;
+                }
+
+                progressBuff._modelMatrix
+                        .identity()
+                        .translate(progressBuff._position)
+                        .rotate((float)Math.toRadians(progressBuff._rotation), Z_AXIS);
+                _mvpMatrix.set(_vpMatrix).mul(progressBuff._modelMatrix);
+                _progressBuffRing.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, ring, WHITE);
+
+                if (progressBuff._showText) {
+                    progressBuff._modelMatrix
+                            .identity()
+                            .translate(progressBuff._position);
+                    _mvpMatrix.set(_vpMatrix).mul(progressBuff._modelMatrix);
+                    _progressBuffText.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, text, WHITE);
+                }
+            }
+        }
+        
         glDepthMask(true);
     }
 
@@ -620,7 +776,8 @@ public class GameWorldView implements
 
     @Override
     public void resetState() {
-        resetRigidBodyObjects(_lunarLandersAndCrates); // <-- player ship rigid bodies, and crate rigid bodies, are in here
+        resetRigidBodyObjects(_lunarLanders);
+        resetRigidBodyObjects(_crates);
         resetRigidBodyObjects(_debris);
         resetRigidBodyObjects(_playerShots);
 
@@ -645,6 +802,9 @@ public class GameWorldView implements
         _materialCache.clear();
         _textureCache.freeResources();
         _blueSparkTexture = null;
+        _crateCollectingTexture = null;
+        _crateDeliveringTexture = null;
+        _crateDroppedForDeliveryTexture = null;
         _crateStartPoints.clear();
         _deliveryZoneStartPoints.clear();
         _soundBufferCache.freeResources();
@@ -678,6 +838,15 @@ public class GameWorldView implements
         if (_smallSmokeParticleSystem != null) {
             _smallSmokeParticleSystem.freeResources();
             _smallSmokeParticleSystem = null;
+        }
+
+        if (_progressBuffRing != null) {
+            _progressBuffRing.freeResources();
+            _progressBuffRing = null;
+        }
+        if (_progressBuffText != null) {
+            _progressBuffText.freeResources();
+            _progressBuffText = null;
         }
 
         _model.resetPlayers();
@@ -776,14 +945,24 @@ public class GameWorldView implements
     }
 
     @Override
+    public void crateCollectingStarted(Player player, Crate crate) {
+        startProgressBuff(player, ProgressBuff.Type.COLLECTING, Player.CRATE_COLLECTION_TIME);
+    }
+
+    @Override
     public void crateCollectionCompleted(Crate crate) {
         removeCrate(crate);
         _collectCrate.play();
     }
 
     @Override
-    public void crateCollectionAborted() {
-        // TODO
+    public void crateCollectionAborted(Player player) {
+        for (var progressBuff : _progressBuffs) {
+            if (progressBuff._active && progressBuff._player == player) {
+                progressBuff._active = false;
+                break;
+            }
+        }
     }
 
     @Override
@@ -792,6 +971,7 @@ public class GameWorldView implements
         _jomlVector.y = playerPosition.y;
         _jomlVector.z = playerPosition.z;
         createCrateRigidBody(_jomlVector, crate);
+        startProgressBuff(crate, ProgressBuff.Type.DELIVERING, DeliveryZone.CRATE_DELIVERY_TIME);
     }
 
     @Override
@@ -917,24 +1097,24 @@ public class GameWorldView implements
     }
 
     private void removePlayerShip(Player player) {
-        for (var rbo : _lunarLandersAndCrates) {
+        for (var rbo : _lunarLanders) {
             if (rbo._rigidBody == player.getRigidBody()) {
                 _engine.getPhysicsSpace().removeCollisionObject(rbo._rigidBody);
                 rbo._rigidBody.setUserObject(null);
                 player.setRigidBody(null);
-                _lunarLandersAndCrates.remove(rbo);
+                _lunarLanders.remove(rbo);
                 break;
             }
         }
     }
 
     private void removeCrate(Crate crate) {
-        for (var rbo : _lunarLandersAndCrates) {
+        for (var rbo : _crates) {
             if (rbo._rigidBody.getUserObject() == crate) {
                 _engine.getPhysicsSpace().removeCollisionObject(rbo._rigidBody);
                 rbo._rigidBody.setUserObject(null);
                 crate.setRigidBody(null, null);
-                _lunarLandersAndCrates.remove(rbo);
+                _crates.remove(rbo);
 
                 if (_model.getPlayerState(0).getRigidBody() != null) {
                     _model.getPlayerState(0).getRigidBody().activate();
@@ -1059,7 +1239,7 @@ public class GameWorldView implements
         rigidBody.setLinearFactor(PREVENT_Z_AXIS_MOVEMENT);
         rigidBody.setAngularFactor(PREVENT_XY_AXES_ROTATION);
 
-        _lunarLandersAndCrates.add(new RigidBodyObject(rigidBody, displayMesh, true));
+        _lunarLanders.add(new RigidBodyObject(rigidBody, displayMesh, true));
         _engine.getPhysicsSpace().addCollisionObject(rigidBody);
 
         Player player = _model.getPlayerState(i);
@@ -1068,11 +1248,14 @@ public class GameWorldView implements
         rigidBody.setUserObject(player);
     }
 
-    private void createCrates() {
+    private void createCrates() throws IOException {
         _model.setCrateLimit(_crateStartPoints.size());
         for (var point : _crateStartPoints) {
             createCrateRigidBody(point, null);
         }
+        _crateCollectingTexture = _textureCache.add(new GlTexture(BitmapImage.fromFile("images/CrateCollecting.png")));
+        _crateDeliveringTexture = _textureCache.add(new GlTexture(BitmapImage.fromFile("images/CrateDelivering.png")));
+        _crateDroppedForDeliveryTexture = _textureCache.add(new GlTexture(BitmapImage.fromFile("images/CrateDroppedForDelivery.png")));
     }
 
     private void createCrateRigidBody(Vector3f point, Crate existingCrate) {
@@ -1088,7 +1271,7 @@ public class GameWorldView implements
 
         rigidBody.setLinearFactor(PREVENT_Z_AXIS_MOVEMENT);
 
-        _lunarLandersAndCrates.add(new RigidBodyObject(rigidBody, displayMesh, true));
+        _crates.add(new RigidBodyObject(rigidBody, displayMesh, true));
         _engine.getPhysicsSpace().addCollisionObject(rigidBody);
 
         if (existingCrate == null) {
@@ -1219,5 +1402,51 @@ public class GameWorldView implements
                 WHITE, "images/DustCloud.png",
                 _materialCache, _textureCache
         );
+    }
+
+    public void startProgressBuff(Player player, ProgressBuff.Type type, long timeoutMs) {
+        player.getRigidBody().getPhysicsLocation(_jmeVector);
+        _jomlVector.x = _jmeVector.x;
+        _jomlVector.y = _jmeVector.y;
+        _jomlVector.z = _jmeVector.z;
+
+        for (var progressBuff : _progressBuffs) {
+            if (!progressBuff._active) {
+                progressBuff._active = true;
+                progressBuff._type = type;
+                progressBuff._player = player;
+                progressBuff._crate = null;
+                progressBuff._position.set(_jomlVector).add(0.0f, PROGRESS_BUFF_Y_OFFSET, 0.0f);
+                progressBuff._rotation = 0.0f;
+                progressBuff._rotateDelta = COLLECTING_RING_ROTATE_DELTA;
+                progressBuff._showText = true;
+                progressBuff._toggleTime = _engine.getNowMs() + PROGRESS_TEXT_BLINK_TIME;
+                progressBuff._expiryTime = _engine.getNowMs() + timeoutMs;
+                break;
+            }
+        }
+    }
+
+    public void startProgressBuff(Crate crate, ProgressBuff.Type type, long timeoutMs) {
+        crate.getRigidBody().getPhysicsLocation(_jmeVector);
+        _jomlVector.x = _jmeVector.x;
+        _jomlVector.y = _jmeVector.y;
+        _jomlVector.z = _jmeVector.z;
+
+        for (var progressBuff : _progressBuffs) {
+            if (!progressBuff._active) {
+                progressBuff._active = true;
+                progressBuff._type = type;
+                progressBuff._player = null;
+                progressBuff._crate = crate;
+                progressBuff._position.set(_jomlVector).add(0.0f, PROGRESS_BUFF_Y_OFFSET, 0.0f);
+                progressBuff._rotation = 0.0f;
+                progressBuff._rotateDelta = DELIVERING_RING_ROTATE_DELTA;
+                progressBuff._showText = true;
+                progressBuff._toggleTime = _engine.getNowMs() + PROGRESS_TEXT_BLINK_TIME;
+                progressBuff._expiryTime = _engine.getNowMs() + timeoutMs;
+                break;
+            }
+        }
     }
 }

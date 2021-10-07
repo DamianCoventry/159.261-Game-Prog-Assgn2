@@ -4,7 +4,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
 public class DeliveryZone {
-    private static final int CRATE_DELIVERY_TIME = 2000;
+    public static final int CRATE_DELIVERY_TIME = 4000;
 
     private State _state;
     private PhysicsRigidBody _rigidBody;
