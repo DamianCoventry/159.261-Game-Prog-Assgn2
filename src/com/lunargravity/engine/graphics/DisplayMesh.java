@@ -72,6 +72,12 @@ public class DisplayMesh {
         }
     }
 
+    public void draw(Renderer renderer, GlDiffuseTextureProgram program, Matrix4f mvpMatrix, GlTexture diffuseTexture, Vector4f diffuseColour) {
+        for (var piece : _pieces) {
+            piece.draw(renderer, program, mvpMatrix, diffuseTexture, diffuseColour);
+        }
+    }
+
     public void draw(Renderer renderer, GLDirectionalLightProgram program, Matrix4f mvMatrix, Matrix4f projectionMatrix) {
         for (var piece : _pieces) {
             piece.draw(renderer, program, mvMatrix, projectionMatrix);

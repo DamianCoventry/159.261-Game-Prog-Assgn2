@@ -70,6 +70,14 @@ public class GlStaticMeshPiece {
         _polyhedra.draw();
     }
 
+    public void draw(Renderer renderer, GlDiffuseTextureProgram program, Matrix4f mvpMatrix, GlTexture diffuseTexture, Vector4f diffuseColour) {
+        renderer.activateTextureImageUnit(0);
+        glBindTexture(GL_TEXTURE_2D, diffuseTexture.getId());
+        program.setDiffuseColour(diffuseColour);
+        program.activate(mvpMatrix);
+        _polyhedra.draw();
+    }
+
     public void draw(Renderer renderer, GLDirectionalLightProgram program, Matrix4f mvMatrix, Matrix4f projectionMatrix) {
         renderer.activateTextureImageUnit(0);
         glBindTexture(GL_TEXTURE_2D, _material.getDiffuseTexture().getId());

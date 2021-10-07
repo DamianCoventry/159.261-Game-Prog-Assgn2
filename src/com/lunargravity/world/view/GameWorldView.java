@@ -79,6 +79,12 @@ public class GameWorldView implements
     private static final int SCRAPE_SPARK_MIN_LIFE_TIME = 100;
     private static final int SCRAPE_SPARK_MAX_LIFE_TIME = 250;
 
+    private static final float SMOKE_PARTICLE_SIZE = 3.0f;
+    private static final int NUM_SMOKE_PARTICLES = 64;
+    private static final int SMOKE_RADIUS = 3;
+    private static final int SMOKE_MIN_LIFE_TIME = 3750;
+    private static final int SMOKE_MAX_LIFE_TIME = 5250;
+
     private static final int MAX_DUST_CLOUDS = 10;
     private static final int NUM_DUST_PARTICLES_PER_CLOUD = 3;
     private static final float DUST_CLOUD_SIZE = 1.0f;
@@ -159,8 +165,10 @@ public class GameWorldView implements
     private final Matrix4f _vpMatrix;
     private final Matrix4f _explosionFlashModelMatrix;
     private final Matrix4f _explosionWakeModelMatrix;
-    private ParticleSystem _explosionParticleSystem;
-    private ParticleSystem _scrapeParticleSystem;
+    private ExplosionParticleSystem _explosionParticleSystem;
+    private ExplosionParticleSystem _scrapeParticleSystem;
+    private SmokeParticleSystem _smokeParticleSystem;
+    private boolean _playerSmokeActive;
     private long _lastCollisionTime;
 
     private SoundSource _playerShipShoot;
@@ -273,17 +281,29 @@ public class GameWorldView implements
         if (_explosionParticleSystem != null) {
             _explosionParticleSystem.freeResources();
         }
-        _explosionParticleSystem = new ParticleSystem(_renderer, NUM_EXPLOSION_PARTICLES,
+        _explosionParticleSystem = new ExplosionParticleSystem(_renderer, NUM_EXPLOSION_PARTICLES,
                 "explosionParticleSystem", EXPLOSION_SPARK_SIZE, EXPLOSION_SPARK_SIZE,
                 WHITE, "images/Spark.png", _materialCache, _textureCache);
+        _explosionParticleSystem.setMinVelocity(EXPLOSION_SPARK_MIN_VELOCITY);
+        _explosionParticleSystem.setMaxVelocity(EXPLOSION_SPARK_MAX_VELOCITY);
 
         if (_scrapeParticleSystem != null) {
             _scrapeParticleSystem.freeResources();
         }
-        _scrapeParticleSystem = new ParticleSystem(_renderer, NUM_SCRAPE_PARTICLES,
+        _scrapeParticleSystem = new ExplosionParticleSystem(_renderer, NUM_SCRAPE_PARTICLES,
                 "scrapeParticleSystem", SCRAPE_SPARK_SIZE, SCRAPE_SPARK_SIZE,
                 WHITE, "images/Spark.png", _materialCache, _textureCache);
+        _scrapeParticleSystem.setMinVelocity(SCRAPE_SPARK_MIN_VELOCITY);
+        _scrapeParticleSystem.setMaxVelocity(SCRAPE_SPARK_MAX_VELOCITY);
 
+        if (_smokeParticleSystem != null) {
+            _smokeParticleSystem.freeResources();
+        }
+        _smokeParticleSystem = new SmokeParticleSystem(_renderer, NUM_SMOKE_PARTICLES,
+                "smokeParticleSystem", SMOKE_PARTICLE_SIZE, SMOKE_PARTICLE_SIZE,
+                WHITE, "images/Smoke0.png", _materialCache, _textureCache);;
+        _smokeParticleSystem.setSmokeRadius(SMOKE_RADIUS);
+        
         _nextDustCloudIndex = 0;
         for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
             _dustClouds[i]._active = false;
@@ -351,7 +371,12 @@ public class GameWorldView implements
 
         if (_playerScraping) {
             _scrapeParticleSystem.think(_engine.getNowMs());
-            _playerScraping = !_scrapeParticleSystem.isDead();
+            _playerScraping = _scrapeParticleSystem.isAlive();
+        }
+
+        if (_playerSmokeActive) {
+            _smokeParticleSystem.think(_engine.getNowMs());
+            _playerSmokeActive = _smokeParticleSystem.isAlive();
         }
 
         for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
@@ -435,6 +460,10 @@ public class GameWorldView implements
         glDepthMask(false);
         _vpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix());
 
+        if (_playerSmokeActive) {
+            _smokeParticleSystem.draw(_vpMatrix);
+        }
+
         if (_playerExploding) {
             _mvpMatrix.set(_vpMatrix).mul(_explosionFlashModelMatrix);
             _explosionFlash.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
@@ -508,6 +537,9 @@ public class GameWorldView implements
         resetRigidBodyObjects(_debris);
         resetRigidBodyObjects(_playerShots);
 
+        _playerScraping = false;
+        _playerSmokeActive = false;
+
         for (int i = 0; i < _model.getNumPlayers(); ++i){
             _model.getPlayerState(i).setRigidBody(null);
         }
@@ -546,6 +578,14 @@ public class GameWorldView implements
         if (_dustCloudDisplayMesh != null) {
             _dustCloudDisplayMesh.freeResources();
             _dustCloudDisplayMesh = null;
+        }
+        if (_scrapeParticleSystem != null) {
+            _scrapeParticleSystem.freeResources();
+            _scrapeParticleSystem = null;
+        }
+        if (_smokeParticleSystem != null) {
+            _smokeParticleSystem.freeResources();
+            _smokeParticleSystem = null;
         }
 
         _model.resetPlayers();
@@ -696,7 +736,6 @@ public class GameWorldView implements
 
         _playerScraping = true;
         _scrapeParticleSystem.spawn(_engine.getNowMs(), _jomlVector,
-                SCRAPE_SPARK_MIN_VELOCITY, SCRAPE_SPARK_MAX_VELOCITY,
                 SCRAPE_SPARK_MIN_LIFE_TIME, SCRAPE_SPARK_MAX_LIFE_TIME);
 
         _dustClouds[_nextDustCloudIndex]._active = true;
@@ -733,15 +772,18 @@ public class GameWorldView implements
         removePlayerShip(player);
 
         _explosionParticleSystem.spawn(_engine.getNowMs(), _jomlVector,
-                EXPLOSION_SPARK_MIN_VELOCITY, EXPLOSION_SPARK_MAX_VELOCITY,
                 EXPLOSION_SPARK_MIN_LIFE_TIME, EXPLOSION_SPARK_MAX_LIFE_TIME);
+        _playerExploding = true;
 
         _explosionFlashModelMatrix.identity().translate(_jomlVector);
         _explosionWakeModelMatrix.identity().translate(_jomlVector);
 
         _explosionWakeScale = 0.1f;
         _playerExplosionColour.w = 1.0f;
-        _playerExploding = true;
+
+        _smokeParticleSystem.spawn(_engine.getNowMs(), _jomlVector,
+                SMOKE_MIN_LIFE_TIME, SMOKE_MAX_LIFE_TIME);
+        _playerSmokeActive = true;
 
         _playerShipExplode.play();
     }

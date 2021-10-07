@@ -6,22 +6,27 @@ import org.joml.Vector4f;
 
 import java.io.IOException;
 
-public class ParticleSystem {
-    private static final float VELOCITY_SCALE = 0.016f;
-    private final Renderer _renderer;
-    private final DisplayMesh _displayMesh;
-    private final Matrix4f _mvpMatrix;
+public abstract class ParticleSystem {
+    protected static final float VELOCITY_SCALE = 0.016f;
+    protected final Renderer _renderer;
+    protected final DisplayMesh _displayMesh;
+    protected final Matrix4f _mvpMatrix;
 
-    private static class Particle {
+    protected static class Particle {
         public Vector3f _position;
         public Vector3f _velocity;
+        public Vector4f _diffuseColour;
         public Matrix4f _modelMatrix;
+        public float _rotation;
+        public float _rotationDelta;
+        public float _alphaDelta;
         public long _lifeTimeMs;
         public boolean _dead;
+        public GlTexture _diffuseTexture;
     }
-    private final Particle[] _particles;
-    private boolean _spawned;
-    private boolean _dead;
+    protected final Particle[] _particles;
+    protected boolean _spawned;
+    protected boolean _dead;
 
     public ParticleSystem(Renderer renderer, int numParticles, String spriteName,
                           float spriteWidth, float spriteHeight,
@@ -37,7 +42,11 @@ public class ParticleSystem {
             _particles[i] = new Particle();
             _particles[i]._position = new Vector3f();
             _particles[i]._velocity = new Vector3f();
+            _particles[i]._diffuseColour = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
             _particles[i]._modelMatrix = new Matrix4f();
+            _particles[i]._rotation = 0.0f;
+            _particles[i]._rotationDelta = 0.0f;
+            _particles[i]._alphaDelta = 0.0f;
             _particles[i]._dead = true;
         }
 
@@ -45,44 +54,17 @@ public class ParticleSystem {
                 diffuseTextureFileName, materialCache, textureCache);
     }
 
-    public boolean isDead() {
-        return _dead;
+    public boolean isAlive() {
+        return !_dead;
     }
 
     public void freeResources() {
         _displayMesh.freeResources();
     }
 
-    public void spawn(long nowMs, Vector3f startPosition, int minVelocity, int maxVelocity, int minLifeTimeMs, int maxLifeTimeMs) {
-        _spawned = true;
-        _dead = false;
+    public abstract void spawn(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs);
 
-        for (var particle : _particles) {
-            particle._position.set(startPosition);
-            particle._velocity = generateVelocityVector(minVelocity, maxVelocity);
-            particle._modelMatrix.identity();
-            particle._lifeTimeMs = nowMs + randomInteger(minLifeTimeMs, maxLifeTimeMs);
-            particle._dead = false;
-        }
-    }
-
-    public void think(long nowMs) {
-        if (!_spawned || _dead) {
-            return;
-        }
-        int count = 0;
-        for (var particle : _particles) {
-            if (particle._dead) {
-                ++count;
-            }
-            else {
-                particle._position.add(particle._velocity);
-                particle._modelMatrix.identity().translate(particle._position);
-                particle._dead = nowMs >= particle._lifeTimeMs;
-            }
-        }
-        _dead = count == _particles.length;
-    }
+    public abstract void think(long nowMs);
 
     public void draw(Matrix4f vpMatrix) {
         if (!_spawned || _dead) {
@@ -91,12 +73,12 @@ public class ParticleSystem {
         for (var particle : _particles) {
             if (!particle._dead) {
                 _mvpMatrix.set(vpMatrix).mul(particle._modelMatrix);
-                _displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
+                _displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, particle._diffuseColour);
             }
         }
     }
 
-    private Vector3f generateVelocityVector(int minVelocity, int maxVelocity) {
+    protected Vector3f generateRandomVelocityVector(int minVelocity, int maxVelocity) {
         int angle0 = randomInteger(0, 359);
         int angle1 = randomInteger(0, 359);
         float x = (float)Math.sin(angle0);
@@ -106,7 +88,7 @@ public class ParticleSystem {
         return direction.mul(randomInteger(minVelocity, maxVelocity) * VELOCITY_SCALE);
     }
 
-    private int randomInteger(int min, int max) {
+    protected int randomInteger(int min, int max) {
         return min + (int)(Math.random() * ((max - min) + 1));
     }
 }
