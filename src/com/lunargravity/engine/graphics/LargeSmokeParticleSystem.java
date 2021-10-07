@@ -6,7 +6,7 @@ import org.joml.Vector4f;
 
 import java.io.IOException;
 
-public class SmokeParticleSystem extends ParticleSystem {
+public class LargeSmokeParticleSystem extends ParticleSystem {
     private static final int NUM_PARTICLE_RINGS = 3;
     private static final int ALPHA_DELTA_MIN = 4;
     private static final int ALPHA_DELTA_MAX = 16;
@@ -22,10 +22,10 @@ public class SmokeParticleSystem extends ParticleSystem {
     private final TextureCache _textureCache;
     private int _smokeRadius;
 
-    public SmokeParticleSystem(Renderer renderer, int numParticles, String spriteName,
-                                   float spriteWidth, float spriteHeight,
-                                   Vector4f diffuseColour, String diffuseTextureFileName,
-                                   MaterialCache materialCache, TextureCache textureCache) throws IOException {
+    public LargeSmokeParticleSystem(Renderer renderer, int numParticles, String spriteName,
+                                    float spriteWidth, float spriteHeight,
+                                    Vector4f diffuseColour, String diffuseTextureFileName,
+                                    MaterialCache materialCache, TextureCache textureCache) throws IOException {
         super(renderer, numParticles, spriteName, spriteWidth, spriteHeight, diffuseColour, diffuseTextureFileName, materialCache, textureCache);
         _textureCache = textureCache;
         for (var textureFileName : SMOKE_TEXTURE_FILE_NAMES) {
@@ -37,7 +37,7 @@ public class SmokeParticleSystem extends ParticleSystem {
         _smokeRadius = smokeRadius;
     }
 
-    public void spawn(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs) {
+    public void emitAll(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs) {
         _spawned = true;
         _dead = false;
 
@@ -66,7 +66,7 @@ public class SmokeParticleSystem extends ParticleSystem {
             particle._modelMatrix.identity();
             particle._lifeTimeMs = nowMs + randomInteger(minLifeTimeMs, maxLifeTimeMs);
             particle._dead = false;
-            particle._rotation = randomInteger(0, 359);
+            particle._rotation = (float)Math.toRadians(randomInteger(0, 359));
             particle._rotationDelta = randomInteger(1, 10) > 5 ? ROTATION_DELTA_POSITIVE : ROTATION_DELTA_NEGATIVE;
             particle._alphaDelta = (float)randomInteger(ALPHA_DELTA_MIN, ALPHA_DELTA_MAX) / ALPHA_DELTA_DIVISOR;
 
@@ -116,7 +116,7 @@ public class SmokeParticleSystem extends ParticleSystem {
         for (var particle : _particles) {
             if (!particle._dead) {
                 _mvpMatrix.set(vpMatrix).mul(particle._modelMatrix);
-                _displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, particle._diffuseColour);
+                _displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, particle._diffuseTexture, particle._diffuseColour);
             }
         }
     }

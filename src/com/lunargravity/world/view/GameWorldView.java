@@ -62,6 +62,7 @@ public class GameWorldView implements
     private static final int MAX_EXPLOSION_FORCE = 400;
     private static final int NUM_PLAYER_SHOTS = 20;
     private static final int NUM_PLAYER_SHIP_HIT_SOUNDS = 4;
+    private static final int NUM_PLAYER_SHIP_DAMAGE_SOUNDS = 2;
     private static final int COLLISION_SOUND_GAP = 250;
     private static final int NUM_ADDITIONAL_DEBRIS_OBJECTS = 8;
 
@@ -79,11 +80,14 @@ public class GameWorldView implements
     private static final int SCRAPE_SPARK_MIN_LIFE_TIME = 100;
     private static final int SCRAPE_SPARK_MAX_LIFE_TIME = 250;
 
-    private static final float SMOKE_PARTICLE_SIZE = 3.0f;
-    private static final int NUM_SMOKE_PARTICLES = 64;
+    private static final float LARGE_SMOKE_PARTICLE_SIZE = 3.0f;
+    private static final int NUM_LARGE_SMOKE_PARTICLES = 64;
     private static final int SMOKE_RADIUS = 3;
     private static final int SMOKE_MIN_LIFE_TIME = 3750;
     private static final int SMOKE_MAX_LIFE_TIME = 5250;
+
+    private static final int NUM_SMALL_SMOKE_PARTICLES = 32;
+    private static final float SMALL_SMOKE_PARTICLE_SIZE = 0.7f;
 
     private static final int MAX_DUST_CLOUDS = 10;
     private static final int NUM_DUST_PARTICLES_PER_CLOUD = 3;
@@ -97,6 +101,13 @@ public class GameWorldView implements
     private static final Vector3f Z_AXIS = new Vector3f(0.0f, 0.0f, 1.0f);
 
     private static final String SINGLE_PLAYER_STATUS_BAR = "singlePlayerStatusBar";
+
+    private static final long[] SMOKE_HIT_POINT_SCALE = {
+            60, 40, 25, 10
+    };
+    private static final long[] SMOKE_TIMEOUT_MS_SCALE = {
+            1000, 700, 400, 100
+    };
 
     private static class RigidBodyObject {
         public boolean _active;
@@ -146,7 +157,7 @@ public class GameWorldView implements
     private DisplayMesh _explosionFlash;
     private DisplayMesh _explosionWake;
     private boolean _playerExploding;
-    private boolean _playerScraping;
+    private boolean _showSparks;
 
     private final ArrayList<RigidBodyObject> _lunarLandersAndCrates;
     private final ArrayList<PhysicsRigidBody> _deliveryZones;
@@ -166,16 +177,22 @@ public class GameWorldView implements
     private final Matrix4f _explosionFlashModelMatrix;
     private final Matrix4f _explosionWakeModelMatrix;
     private ExplosionParticleSystem _explosionParticleSystem;
-    private ExplosionParticleSystem _scrapeParticleSystem;
-    private SmokeParticleSystem _smokeParticleSystem;
+    private ExplosionParticleSystem _sparkParticleSystem;
+    private LargeSmokeParticleSystem _largeSmokeParticleSystem;
+    private SmallSmokeParticleSystem _smallSmokeParticleSystem;
     private boolean _playerSmokeActive;
     private long _lastCollisionTime;
 
+    private SoundSource[] _playerShipDamage;
     private SoundSource _playerShipShoot;
     private SoundSource _playerShipExplode;
     private SoundSource[] _playerShipHits;
     private SoundSource _collectCrate;
     private int _playerShipHitSoundIndex;
+    private int _playerShipDamageSoundIndex;
+    private GlTexture _blueSparkTexture;
+
+    private long _lastSmokeTime;
 
     public GameWorldView(WidgetManager widgetManager, IEngine engine, IGameWorldModel model) throws IOException {
         _widgetManager = widgetManager;
@@ -218,6 +235,7 @@ public class GameWorldView implements
         _playerExplosionColour = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
         _playerShipHitSoundIndex = 0;
+        _playerShipDamageSoundIndex = 0;
         _crateStartPoints = new ArrayList<>();
         _deliveryZoneStartPoints = new ArrayList<>();
 
@@ -234,6 +252,8 @@ public class GameWorldView implements
                 _dustClouds[i]._modelMatrices[j] = new Matrix4f();
             }
         }
+
+        _lastSmokeTime = 0;
     }
 
     @Override
@@ -283,26 +303,34 @@ public class GameWorldView implements
         }
         _explosionParticleSystem = new ExplosionParticleSystem(_renderer, NUM_EXPLOSION_PARTICLES,
                 "explosionParticleSystem", EXPLOSION_SPARK_SIZE, EXPLOSION_SPARK_SIZE,
-                WHITE, "images/Spark.png", _materialCache, _textureCache);
+                WHITE, "images/YellowSpark.png", _materialCache, _textureCache);
         _explosionParticleSystem.setMinVelocity(EXPLOSION_SPARK_MIN_VELOCITY);
         _explosionParticleSystem.setMaxVelocity(EXPLOSION_SPARK_MAX_VELOCITY);
 
-        if (_scrapeParticleSystem != null) {
-            _scrapeParticleSystem.freeResources();
+        if (_sparkParticleSystem != null) {
+            _sparkParticleSystem.freeResources();
         }
-        _scrapeParticleSystem = new ExplosionParticleSystem(_renderer, NUM_SCRAPE_PARTICLES,
+        _sparkParticleSystem = new ExplosionParticleSystem(_renderer, NUM_SCRAPE_PARTICLES,
                 "scrapeParticleSystem", SCRAPE_SPARK_SIZE, SCRAPE_SPARK_SIZE,
-                WHITE, "images/Spark.png", _materialCache, _textureCache);
-        _scrapeParticleSystem.setMinVelocity(SCRAPE_SPARK_MIN_VELOCITY);
-        _scrapeParticleSystem.setMaxVelocity(SCRAPE_SPARK_MAX_VELOCITY);
+                WHITE, "images/YellowSpark.png", _materialCache, _textureCache);
+        _sparkParticleSystem.setMinVelocity(SCRAPE_SPARK_MIN_VELOCITY);
+        _sparkParticleSystem.setMaxVelocity(SCRAPE_SPARK_MAX_VELOCITY);
+        _blueSparkTexture = _textureCache.add(new GlTexture(BitmapImage.fromFile("images/BlueSpark.png")));
 
-        if (_smokeParticleSystem != null) {
-            _smokeParticleSystem.freeResources();
+        if (_largeSmokeParticleSystem != null) {
+            _largeSmokeParticleSystem.freeResources();
         }
-        _smokeParticleSystem = new SmokeParticleSystem(_renderer, NUM_SMOKE_PARTICLES,
-                "smokeParticleSystem", SMOKE_PARTICLE_SIZE, SMOKE_PARTICLE_SIZE,
+        _largeSmokeParticleSystem = new LargeSmokeParticleSystem(_renderer, NUM_LARGE_SMOKE_PARTICLES,
+                "largeSmokeParticleSystem", LARGE_SMOKE_PARTICLE_SIZE, LARGE_SMOKE_PARTICLE_SIZE,
                 WHITE, "images/Smoke0.png", _materialCache, _textureCache);;
-        _smokeParticleSystem.setSmokeRadius(SMOKE_RADIUS);
+        _largeSmokeParticleSystem.setSmokeRadius(SMOKE_RADIUS);
+
+        if (_smallSmokeParticleSystem != null) {
+            _smallSmokeParticleSystem.freeResources();
+        }
+        _smallSmokeParticleSystem = new SmallSmokeParticleSystem(_renderer, NUM_SMALL_SMOKE_PARTICLES,
+                "smallSmokeParticleSystem", SMALL_SMOKE_PARTICLE_SIZE, SMALL_SMOKE_PARTICLE_SIZE,
+                WHITE, "images/Smoke0.png", _materialCache, _textureCache);;
         
         _nextDustCloudIndex = 0;
         for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
@@ -331,6 +359,14 @@ public class GameWorldView implements
             _playerShipHits[i].setBuffer(soundBuffer);
         }
 
+        _playerShipDamage = new SoundSource[NUM_PLAYER_SHIP_DAMAGE_SOUNDS];
+        for (int i = 0; i < NUM_PLAYER_SHIP_DAMAGE_SOUNDS; ++i) {
+            soundBuffer = SoundBuffer.fromFile(String.format("sounds/Damage%d.wav", i));
+            _soundBufferCache.add(soundBuffer);
+            _playerShipDamage[i] = new SoundSource(false, false);
+            _playerShipDamage[i].setBuffer(soundBuffer);
+        }
+
         soundBuffer = SoundBuffer.fromFile("sounds/CollectCrate.wav");
         _soundBufferCache.add(soundBuffer);
         _collectCrate = new SoundSource(false, false);
@@ -346,6 +382,11 @@ public class GameWorldView implements
         }
         if (_playerShipHits != null) {
             for (var a : _playerShipHits) {
+                a.freeResources();
+            }
+        }
+        if (_playerShipDamage != null) {
+            for (var a : _playerShipDamage) {
                 a.freeResources();
             }
         }
@@ -369,14 +410,19 @@ public class GameWorldView implements
             }
         }
 
-        if (_playerScraping) {
-            _scrapeParticleSystem.think(_engine.getNowMs());
-            _playerScraping = _scrapeParticleSystem.isAlive();
+        if (_showSparks) {
+            _sparkParticleSystem.think(_engine.getNowMs());
+            _showSparks = _sparkParticleSystem.isAlive();
         }
 
         if (_playerSmokeActive) {
-            _smokeParticleSystem.think(_engine.getNowMs());
-            _playerSmokeActive = _smokeParticleSystem.isAlive();
+            _largeSmokeParticleSystem.think(_engine.getNowMs());
+            _playerSmokeActive = _largeSmokeParticleSystem.isAlive();
+        }
+
+        if (_smallSmokeParticleSystem != null) {
+            _smallSmokeParticleSystem.think(_engine.getNowMs());
+            emitPeriodicSmokeIfRequired(_engine.getNowMs());
         }
 
         for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
@@ -405,6 +451,45 @@ public class GameWorldView implements
                 _dustClouds[i]._diffuseColour.w = 0.0f;
                 _dustClouds[i]._active = false;
             }
+        }
+    }
+
+    private void emitPeriodicSmokeIfRequired(long nowMs) {
+        for (int i = 0; i < _model.getNumPlayers(); ++i) {
+            emitPeriodicSmokeIfRequired(nowMs, _model.getPlayerState(i));
+        }
+    }
+
+    private void emitPeriodicSmokeIfRequired(long nowMs, Player player) {
+        if (player.isExplodingOrDead() || player.getRigidBody() == null || player.getHitPoints() > SMOKE_HIT_POINT_SCALE[0]) {
+            return;
+        }
+
+        int scale = SMOKE_HIT_POINT_SCALE.length - 1;
+        for (int i = 1; i < SMOKE_HIT_POINT_SCALE.length; ++i) {
+            if (player.getHitPoints() > SMOKE_HIT_POINT_SCALE[i]) {
+                scale = i - 1;
+                break;
+            }
+        }
+        
+        if (nowMs - _lastSmokeTime < SMOKE_TIMEOUT_MS_SCALE[scale]) {
+            return;
+        }
+        _lastSmokeTime = nowMs;
+        
+        player.getRigidBody().getPhysicsLocation(_jmeVector);
+        _jomlVector.x = _jmeVector.x;
+        _jomlVector.y = _jmeVector.y;
+        _jomlVector.z = _jmeVector.z;
+
+        _smallSmokeParticleSystem.emitSome(nowMs, _jomlVector, SMOKE_MIN_LIFE_TIME, SMOKE_MAX_LIFE_TIME);
+        _sparkParticleSystem.emitAll(nowMs, _jomlVector, SCRAPE_SPARK_MIN_LIFE_TIME, SCRAPE_SPARK_MAX_LIFE_TIME, _blueSparkTexture);
+        _showSparks = true;
+
+        _playerShipDamage[_playerShipDamageSoundIndex].play();
+        if (++_playerShipDamageSoundIndex >= NUM_PLAYER_SHIP_DAMAGE_SOUNDS) {
+            _playerShipDamageSoundIndex = 0;
         }
     }
 
@@ -461,9 +546,11 @@ public class GameWorldView implements
         _vpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix());
 
         if (_playerSmokeActive) {
-            _smokeParticleSystem.draw(_vpMatrix);
+            _largeSmokeParticleSystem.draw(_vpMatrix);
         }
 
+        _smallSmokeParticleSystem.draw(_vpMatrix);
+        
         if (_playerExploding) {
             _mvpMatrix.set(_vpMatrix).mul(_explosionFlashModelMatrix);
             _explosionFlash.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
@@ -484,8 +571,8 @@ public class GameWorldView implements
             }
         }
 
-        if (_playerScraping) {
-            _scrapeParticleSystem.draw(_vpMatrix);
+        if (_showSparks) {
+            _sparkParticleSystem.draw(_vpMatrix);
         }
 
         glDepthMask(true);
@@ -537,7 +624,7 @@ public class GameWorldView implements
         resetRigidBodyObjects(_debris);
         resetRigidBodyObjects(_playerShots);
 
-        _playerScraping = false;
+        _showSparks = false;
         _playerSmokeActive = false;
 
         for (int i = 0; i < _model.getNumPlayers(); ++i){
@@ -557,6 +644,7 @@ public class GameWorldView implements
         _collisionMeshCache.clear();
         _materialCache.clear();
         _textureCache.freeResources();
+        _blueSparkTexture = null;
         _crateStartPoints.clear();
         _deliveryZoneStartPoints.clear();
         _soundBufferCache.freeResources();
@@ -579,13 +667,17 @@ public class GameWorldView implements
             _dustCloudDisplayMesh.freeResources();
             _dustCloudDisplayMesh = null;
         }
-        if (_scrapeParticleSystem != null) {
-            _scrapeParticleSystem.freeResources();
-            _scrapeParticleSystem = null;
+        if (_sparkParticleSystem != null) {
+            _sparkParticleSystem.freeResources();
+            _sparkParticleSystem = null;
         }
-        if (_smokeParticleSystem != null) {
-            _smokeParticleSystem.freeResources();
-            _smokeParticleSystem = null;
+        if (_largeSmokeParticleSystem != null) {
+            _largeSmokeParticleSystem.freeResources();
+            _largeSmokeParticleSystem = null;
+        }
+        if (_smallSmokeParticleSystem != null) {
+            _smallSmokeParticleSystem.freeResources();
+            _smallSmokeParticleSystem = null;
         }
 
         _model.resetPlayers();
@@ -734,9 +826,8 @@ public class GameWorldView implements
         _jomlVector.y = impactPoint.y;
         _jomlVector.z = impactPoint.z;
 
-        _playerScraping = true;
-        _scrapeParticleSystem.spawn(_engine.getNowMs(), _jomlVector,
-                SCRAPE_SPARK_MIN_LIFE_TIME, SCRAPE_SPARK_MAX_LIFE_TIME);
+        _showSparks = true;
+        _sparkParticleSystem.emitAll(_engine.getNowMs(), _jomlVector, SCRAPE_SPARK_MIN_LIFE_TIME, SCRAPE_SPARK_MAX_LIFE_TIME);
 
         _dustClouds[_nextDustCloudIndex]._active = true;
         _dustClouds[_nextDustCloudIndex]._position.set(_jomlVector);
@@ -771,7 +862,7 @@ public class GameWorldView implements
         spawnPlayerShipDebris(player);
         removePlayerShip(player);
 
-        _explosionParticleSystem.spawn(_engine.getNowMs(), _jomlVector,
+        _explosionParticleSystem.emitAll(_engine.getNowMs(), _jomlVector,
                 EXPLOSION_SPARK_MIN_LIFE_TIME, EXPLOSION_SPARK_MAX_LIFE_TIME);
         _playerExploding = true;
 
@@ -781,7 +872,7 @@ public class GameWorldView implements
         _explosionWakeScale = 0.1f;
         _playerExplosionColour.w = 1.0f;
 
-        _smokeParticleSystem.spawn(_engine.getNowMs(), _jomlVector,
+        _largeSmokeParticleSystem.emitAll(_engine.getNowMs(), _jomlVector,
                 SMOKE_MIN_LIFE_TIME, SMOKE_MAX_LIFE_TIME);
         _playerSmokeActive = true;
 

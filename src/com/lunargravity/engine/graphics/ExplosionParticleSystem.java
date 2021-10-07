@@ -1,5 +1,6 @@
 package com.lunargravity.engine.graphics;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -24,7 +25,11 @@ public class ExplosionParticleSystem extends ParticleSystem {
         _maxVelocity = velocity;
     }
 
-    public void spawn(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs) {
+    public void emitAll(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs) {
+        emitAll(nowMs, startPosition, minLifeTimeMs, maxLifeTimeMs, _originalDiffuseTexture);
+    }
+
+    public void emitAll(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs, GlTexture diffuseTexture) {
         _spawned = true;
         _dead = false;
 
@@ -33,6 +38,7 @@ public class ExplosionParticleSystem extends ParticleSystem {
             particle._velocity = generateRandomVelocityVector(_minVelocity, _maxVelocity);
             particle._modelMatrix.identity();
             particle._lifeTimeMs = nowMs + randomInteger(minLifeTimeMs, maxLifeTimeMs);
+            particle._diffuseTexture = diffuseTexture;
             particle._dead = false;
         }
     }
@@ -53,5 +59,17 @@ public class ExplosionParticleSystem extends ParticleSystem {
             }
         }
         _dead = count == _particles.length;
+    }
+
+    public void draw(Matrix4f vpMatrix) {
+        if (!_spawned || _dead) {
+            return;
+        }
+        for (var particle : _particles) {
+            if (!particle._dead) {
+                _mvpMatrix.set(vpMatrix).mul(particle._modelMatrix);
+                _displayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, particle._diffuseTexture, particle._diffuseColour);
+            }
+        }
     }
 }

@@ -45,6 +45,16 @@ public class DisplayMesh {
         return _midPoint;
     }
 
+    public GlTexture getFirstDiffuseTexture() {
+        if (_pieces.isEmpty()) {
+            return null;
+        }
+        if (_pieces.get(0).getMaterial() == null) {
+            return null;
+        }
+        return _pieces.get(0).getMaterial().getDiffuseTexture();
+    }
+
     public void addPiece(GlStaticMeshPiece piece) {
         _pieces.add(piece);
         _midPoint.set(0);

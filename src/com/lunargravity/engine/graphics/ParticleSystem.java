@@ -11,6 +11,7 @@ public abstract class ParticleSystem {
     protected final Renderer _renderer;
     protected final DisplayMesh _displayMesh;
     protected final Matrix4f _mvpMatrix;
+    protected final GlTexture _originalDiffuseTexture;
 
     protected static class Particle {
         public Vector3f _position;
@@ -52,6 +53,7 @@ public abstract class ParticleSystem {
 
         _displayMesh = renderer.createSprite(spriteName, spriteWidth, spriteHeight, diffuseColour,
                 diffuseTextureFileName, materialCache, textureCache);
+        _originalDiffuseTexture = _displayMesh.getFirstDiffuseTexture();
     }
 
     public boolean isAlive() {
@@ -62,7 +64,17 @@ public abstract class ParticleSystem {
         _displayMesh.freeResources();
     }
 
-    public abstract void spawn(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs);
+    public void emitAll(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs) {
+        // No default implementation. This method is optional
+    }
+
+    public void emitSome(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs) {
+        // No default implementation. This method is optional
+    }
+
+    public void emitOne(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs) {
+        // No default implementation. This method is optional
+    }
 
     public abstract void think(long nowMs);
 
