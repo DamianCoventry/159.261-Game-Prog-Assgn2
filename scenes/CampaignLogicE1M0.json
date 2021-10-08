@@ -278,8 +278,8 @@
                 "y": 0.0
             },
             "_size": {
-                "x": 190.0,
-                "y": 126.0
+                "x": 300.0,
+                "y": 250.0
             },
             "_properties": {
                 "backgroundImage": "images/GamePaused.png",
@@ -290,12 +290,12 @@
                     "_id": "resumeMission",
                     "_type": "ButtonWidget",
                     "_position": {
-                        "x": 15.0,
-                        "y": 55.0
+                        "x": 50.0,
+                        "y": 145.0
                     },
                     "_size": {
-                        "x": 150.0,
-                        "y": 30.0
+                        "x": 200.0,
+                        "y": 50.0
                     },
                     "_properties": {
                         "backgroundImage": "images/ResumeMissionButton_Normal.png",
@@ -307,12 +307,12 @@
                     "_id": "mainMenuButton",
                     "_type": "ButtonWidget",
                     "_position": {
-                        "x": 15.0,
-                        "y": 15.0
+                        "x": 50.0,
+                        "y": 75.0
                     },
                     "_size": {
-                        "x": 150.0,
-                        "y": 30.0
+                        "x": 200.0,
+                        "y": 50.0
                     },
                     "_properties": {
                         "backgroundImage": "images/MainMenuButton_Normal.png",
@@ -347,8 +347,8 @@
                 "y": 0.0
             },
             "_size": {
-                "x": 250.0,
-                "y": 50.0
+                "x": 350.0,
+                "y": 150.0
             },
             "_properties": {
                 "backgroundImage": "images/GetReady3.png",
@@ -364,8 +364,8 @@
                 "y": 0.0
             },
             "_size": {
-                "x": 300.0,
-                "y": 50.0
+                "x": 350.0,
+                "y": 150.0
             },
             "_properties": {
                 "backgroundImage": "images/Player1Died.png",

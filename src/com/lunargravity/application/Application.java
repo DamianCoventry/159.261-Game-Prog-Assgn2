@@ -284,7 +284,7 @@ public class Application implements
 
         _worldModel = new MenuWorldModel();
         _worldController = new MenuWorldController(this, (IMenuWorldModel)_worldModel);
-        _worldView = new MenuWorldView((IMenuWorldModel)_worldModel);
+        _worldView = new MenuWorldView(_widgetManager, _engine, (IMenuWorldModel)_worldModel);
 
         _logicModel = new MenuModel();
         _logicController = new MenuController(_engine, _playerInputBindings, (IMenuModel)_logicModel);

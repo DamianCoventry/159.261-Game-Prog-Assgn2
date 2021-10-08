@@ -1,3 +1,6 @@
 {
-    "DoStuff": 1
+    "_name": "Menu",
+    "_displayMeshFileNames": [
+        "meshes/Moon.obj"
+    ]
 }

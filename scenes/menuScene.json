@@ -5,16 +5,15 @@
             "_id": "main",
             "_type": "MainWidget",
             "_position": {
-                "x": 0.0,
-                "y": 0.0
+                "x": 200.0,
+                "y": 280.0
             },
             "_size": {
                 "x": 300.0,
                 "y": 400.0
             },
             "_properties": {
-                "backgroundImage": "images/MainWidget_Normal.png",
-                "initialPosition": "centerInViewport"
+                "backgroundImage": "images/MainWidget_Normal.png"
             },
             "_children": [
                 {

@@ -164,8 +164,8 @@
                 "y": 0.0
             },
             "_size": {
-                "x": 250.0,
-                "y": 50.0
+                "x": 350.0,
+                "y": 150.0
             },
             "_properties": {
                 "backgroundImage": "images/GetReady3.png",
