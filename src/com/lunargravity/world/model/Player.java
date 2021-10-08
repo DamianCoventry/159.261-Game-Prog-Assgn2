@@ -87,6 +87,10 @@ public class Player {
         return _hitPoints;
     }
 
+    public float getHitPointsPercentage() {
+        return (float)_hitPoints / (float)MAX_HIT_POINTS;
+    }
+
     public int getFuel() {
         return _fuel;
     }
@@ -139,10 +143,6 @@ public class Player {
         _shootActive = shootActive;
     }
 
-    public boolean hasCollectedAtLeastOneCrate() {
-        return !_collectedCrates.isEmpty();
-    }
-
     public void startCollectingCrate(Crate crate) {
         if (_collectionTimeoutId != 0 || _state != State.IDLE) {
             return;
@@ -169,12 +169,36 @@ public class Player {
     public void stopCollectingCrateIfMoving() {
         if (isMoving() && _collectionTimeoutId != 0) {
             removeTimeouts(_timeoutManager);
+
             _state = State.IDLE;
             _collectingCrate = null;
+
             if (_observer != null) {
                 _observer.crateCollectionAborted(this);
             }
         }
+    }
+
+    public void removeTimeouts(TimeoutManager timeoutManager) {
+        if (_collectionTimeoutId != 0) {
+            timeoutManager.removeTimeout(_collectionTimeoutId);
+            _collectionTimeoutId = 0;
+        }
+        if (_droppingForDeliveryTimeoutId != 0) {
+            timeoutManager.removeTimeout(_droppingForDeliveryTimeoutId);
+            _droppingForDeliveryTimeoutId = 0;
+        }
+        if (_explodingTimeoutId != 0) {
+            timeoutManager.removeTimeout(_explodingTimeoutId);
+            _explodingTimeoutId = 0;
+        }
+        if (_weaponCoolDownTimeoutId != 0) {
+            timeoutManager.removeTimeout(_weaponCoolDownTimeoutId);
+            _weaponCoolDownTimeoutId = 0;
+        }
+        _state = State.IDLE;
+        _weaponState = WeaponState.IDLE;
+        _collectingCrate = null;
     }
 
     public ArrayList<Crate> getCollectedCrates() {
@@ -202,27 +226,6 @@ public class Player {
             _droppingForDeliveryTimeoutId = 0;
             return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;
         });
-    }
-
-    public void removeTimeouts(TimeoutManager timeoutManager) {
-        if (_collectionTimeoutId != 0) {
-            timeoutManager.removeTimeout(_collectionTimeoutId);
-            _collectionTimeoutId = 0;
-        }
-        if (_droppingForDeliveryTimeoutId != 0) {
-            timeoutManager.removeTimeout(_droppingForDeliveryTimeoutId);
-            _droppingForDeliveryTimeoutId = 0;
-        }
-        if (_explodingTimeoutId != 0) {
-            timeoutManager.removeTimeout(_explodingTimeoutId);
-            _explodingTimeoutId = 0;
-        }
-        if (_weaponCoolDownTimeoutId != 0) {
-            timeoutManager.removeTimeout(_weaponCoolDownTimeoutId);
-            _weaponCoolDownTimeoutId = 0;
-        }
-        _state = State.IDLE;
-        _weaponState = WeaponState.IDLE;
     }
 
     public void applyInputCommands() {

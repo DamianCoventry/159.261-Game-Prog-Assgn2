@@ -51,7 +51,7 @@ public abstract class ParticleSystem {
             _particles[i]._dead = true;
         }
 
-        _displayMesh = renderer.createSprite(spriteName, spriteWidth, spriteHeight, diffuseColour,
+        _displayMesh = renderer.createSpriteWithOriginAtCenter(spriteName, spriteWidth, spriteHeight, diffuseColour,
                 diffuseTextureFileName, materialCache, textureCache);
         _originalDiffuseTexture = _displayMesh.getFirstDiffuseTexture();
     }

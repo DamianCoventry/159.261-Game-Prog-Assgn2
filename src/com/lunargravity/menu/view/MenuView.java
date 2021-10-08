@@ -160,7 +160,8 @@ public class MenuView implements
     @Override
     public void campaignGameButtonClicked() {
         _widgetManager.hideAll();
-        _widgetManager.show(_campaign, WidgetManager.ShowAs.FIRST);
+        //_widgetManager.show(_campaign, WidgetManager.ShowAs.FIRST);
+        _controller.startNewCampaign(1); // this changes the application's current state
     }
 
     @Override

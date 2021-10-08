@@ -34,6 +34,7 @@ public class Crate {
     public enum State { IDLE, COLLECTED, DROPPED_FOR_DELIVERY, DELIVERING, DELIVERED }
     public void setState(State state) {
         _state = state;
+        removeTimeouts(_timeoutManager);
     }
 
     public boolean isIdle() {
@@ -93,8 +94,9 @@ public class Crate {
         }
 
         _state = State.DROPPED_FOR_DELIVERY;
-        _observer.crateStartedDelivering(this, playerPosition);
+        _observer.crateDroppedForDelivery(this, playerPosition);
 
+        removeTimeouts(_timeoutManager);
         _droppedForDeliveryTimeoutId = _timeoutManager.addTimeout(DROPPED_FOR_DELIVERY_EXPIRY, callCount -> {
             if (_state == State.DROPPED_FOR_DELIVERY) {
                 _state = State.IDLE;

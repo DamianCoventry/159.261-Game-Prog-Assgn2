@@ -222,9 +222,9 @@ public class GameWorldController implements
     }
 
     @Override
-    public void crateStartedDelivering(Crate crate, com.jme3.math.Vector3f playerPosition) {
+    public void crateDroppedForDelivery(Crate crate, com.jme3.math.Vector3f playerPosition) {
         for (var observer : _observers) {
-            observer.crateStartedDelivering(crate, playerPosition);
+            observer.crateDroppedForDelivery(crate, playerPosition);
         }
     }
 
@@ -307,7 +307,7 @@ public class GameWorldController implements
     }
 
     private void processPlayerToDeliveryZoneCollision(Player player, DeliveryZone deliveryZone) {
-        if (player.isIdle() && !player.isMoving() && player.hasCollectedAtLeastOneCrate() && deliveryZone.isIdle()) {
+        if (player.isIdle() && !player.isMoving() && !player.getCollectedCrates().isEmpty() && deliveryZone.isIdle()) {
             player.dropCrateForDelivery();
         }
     }

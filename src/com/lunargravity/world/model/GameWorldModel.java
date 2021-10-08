@@ -125,7 +125,12 @@ public class GameWorldModel implements IGameWorldModel {
     }
 
     @Override
-    public int getNumCratesRemaining() {
+    public int getTotalCrates() {
+        return _crates.size();
+    }
+
+    @Override
+    public int getNumIdleCrates() {
         int count = 0;
         for (var crate : _crates) {
             if (crate.isIdle()) {

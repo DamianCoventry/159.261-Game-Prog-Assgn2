@@ -1,7 +1,7 @@
 package com.lunargravity.campaign.model;
 
 public class CampaignModel implements ICampaignModel {
-    private static final int INITIAL_SHIP_COUNT = 3;
+    public static final int INITIAL_SHIP_COUNT = 3;
 
     private int _episode;
     private int _mission;

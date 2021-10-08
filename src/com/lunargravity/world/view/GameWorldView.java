@@ -18,6 +18,7 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsBody;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.lunargravity.application.LargeNumberFont;
+import com.lunargravity.campaign.model.CampaignModel;
 import com.lunargravity.engine.audio.SoundBuffer;
 import com.lunargravity.engine.audio.SoundBufferCache;
 import com.lunargravity.engine.audio.SoundSource;
@@ -34,6 +35,7 @@ import com.lunargravity.world.controller.GameWorldController;
 import com.lunargravity.world.controller.IGameWorldControllerObserver;
 import com.lunargravity.world.model.*;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -57,6 +59,20 @@ public class GameWorldView implements
     private static final float EXPLOSION_FLASH_FADE_INCREMENT = 0.008f;
     private static final float EXPLOSION_WAKE_SIZE = 7.0f;
     private static final float EXPLOSION_WAKE_SCALE_INCREMENT = 0.035f;
+
+    private static final Vector2f HUD_PLAYER_SHIP_ICON_OFFSET = new Vector2f(440.0f, 25.0f);
+    private static final Vector2f HUD_CRATE_ICON_OFFSET = new Vector2f(645.0f, 25.0f);
+    private static final Vector2f HUD_FUEL_PROGRESS_BAR_OFFSET = new Vector2f(15.0f, 385.0f);
+    private static final Vector2f HUD_DAMAGE_PROGRESS_BAR_OFFSET = new Vector2f(1265.0f, 385.0f);
+    private static final float HUD_ICON_SPACING = 40.0f;
+    private static final int NUM_HUD_PLAYER_SHIP_ICONS = 2;
+    private static final int NUM_HUD_CRATE_ICONS = 3;
+    private static final int HUD_ICON_SIZE = 32;
+    private static final int HUD_PROGRESS_BAR_WIDTH = 20;
+    private static final int HUD_PROGRESS_BAR_HEIGHT = 200;
+    private static final int NUM_HUD_PROGRESS_BAR_TEXTURES = 4;
+    private static final int[] HUD_HIT_POINT_SCALE = { 60, 40, 20 };
+    private static final long HUD_DAMAGE_BLINK_SPEED = 200;
 
     private static final int MAX_PROGRESS_BUFFS = 6;
     private static final float PROGRESS_BUFF_Y_OFFSET = 1.15f;
@@ -111,7 +127,10 @@ public class GameWorldView implements
     private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
     private static final Vector3f Z_AXIS = new Vector3f(0.0f, 0.0f, 1.0f);
 
-    private static final String SINGLE_PLAYER_STATUS_BAR = "singlePlayerStatusBar";
+    private static final String EPISODE_MISSION_STATUS_BAR = "episodeMissionStatusBar";
+    private static final String FUEL_STATUS_BAR = "fuelStatusBar";
+    private static final String DAMAGE_STATUS_BAR = "damageStatusBar";
+    private static final String PLAYER_SHIPS_CRATES_STATUS_BAR = "playerShipsCratesStatusBar";
 
     private static class RigidBodyObject {
         public boolean _active;
@@ -173,7 +192,10 @@ public class GameWorldView implements
     private final Vector3f _jomlVector;
     private final com.jme3.math.Vector3f _jmeVector;
 
-    private Widget _singlePlayerStatusBar;
+    private Widget _episodeMissionStatusBar;
+    private Widget _playerShipsCratesStatusBar;
+    private Widget _fuelStatusBar;
+    private Widget _damageStatusBar;
     private DisplayMesh _worldDisplayMesh;
 
     private final Vector4f _playerExplosionColour;
@@ -223,7 +245,14 @@ public class GameWorldView implements
     private GlTexture _deliveringProgressRingTexture;
     private GlTexture _collectingProgressTextTexture;
     private GlTexture _deliveringProgressTextTexture;
+    private GlTexture[] _hudPlayerShipIconTextures;
+    private GlTexture[] _hudCrateTextures;
+    private DisplayMesh _hudIconDisplayMesh;
+    private DisplayMesh _hudProgressBarDisplayMesh;
+    private GlTexture[] _hudProgressBarTextures;
 
+    private boolean _hudDamageBlinkOn;
+    private long _lastHudDamageBlinkTime;
     private long _lastSmokeTime;
 
     public GameWorldView(WidgetManager widgetManager, IEngine engine, IGameWorldModel model) throws IOException {
@@ -380,17 +409,63 @@ public class GameWorldView implements
             _dustClouds[i]._active = false;
         }
 
+        if (_hudPlayerShipIconTextures != null) {
+            for (var a : _hudPlayerShipIconTextures) {
+                a.freeResources();
+            }
+        }
+        _hudPlayerShipIconTextures = new GlTexture[NUM_HUD_PLAYER_SHIP_ICONS];
+        _hudPlayerShipIconTextures[0] = new GlTexture(BitmapImage.fromFile("images/LunarLanderIconPanel.png"));
+        _hudPlayerShipIconTextures[1] = new GlTexture(BitmapImage.fromFile("images/LunarLanderIconPanel_Dead.png"));
+
+        if (_hudCrateTextures != null) {
+            for (var a : _hudCrateTextures) {
+                a.freeResources();
+            }
+        }
+        _hudCrateTextures = new GlTexture[NUM_HUD_CRATE_ICONS];
+        _hudCrateTextures[0] = new GlTexture(BitmapImage.fromFile("images/CrateIconPanel_Idle.png"));
+        _hudCrateTextures[1] = new GlTexture(BitmapImage.fromFile("images/CrateIconPanel_Collected.png"));
+        _hudCrateTextures[2] = new GlTexture(BitmapImage.fromFile("images/CrateIconPanel_Delivered.png"));
+
+        if (_hudIconDisplayMesh != null) {
+            _hudIconDisplayMesh.freeResources();
+        }
+        _hudIconDisplayMesh = _renderer.createSpriteWithOriginAtCenter("hudSprite",
+                HUD_ICON_SIZE, HUD_ICON_SIZE, WHITE, "images/CrateIconPanel_Idle.png",
+                _materialCache, _textureCache);
+
+        if (_hudProgressBarTextures != null) {
+            for (var a : _hudProgressBarTextures) {
+                a.freeResources();
+            }
+        }
+        _hudProgressBarTextures = new GlTexture[NUM_HUD_PROGRESS_BAR_TEXTURES];
+        _hudProgressBarTextures[0] = new GlTexture(BitmapImage.fromFile("images/60to100ProgressBar.png"));
+        _hudProgressBarTextures[1] = new GlTexture(BitmapImage.fromFile("images/40to59ProgressBar.png"));
+        _hudProgressBarTextures[2] = new GlTexture(BitmapImage.fromFile("images/20to39ProgressBar.png"));
+        _hudProgressBarTextures[3] = new GlTexture(BitmapImage.fromFile("images/00to19ProgressBar.png"));
+
+        if (_hudProgressBarDisplayMesh != null) {
+            _hudProgressBarDisplayMesh.freeResources();
+        }
+        _hudDamageBlinkOn = true;
+        _lastHudDamageBlinkTime = 0;
+        _hudProgressBarDisplayMesh = _renderer.createSpriteWithOriginAtYZero("hudProgressBar",
+                HUD_PROGRESS_BAR_WIDTH, HUD_PROGRESS_BAR_HEIGHT, WHITE, "images/60to100ProgressBar.png",
+                _materialCache, _textureCache);
+        
         loadSounds();
     }
 
     private void createProgressBuffs() throws IOException {
-        _progressBuffRing = _renderer.createSprite(
+        _progressBuffRing = _renderer.createSpriteWithOriginAtCenter(
                 "progressBuffRing", PROGRESS_RING_SIZE, PROGRESS_RING_SIZE,
                 WHITE, "images/CollectingProgressRing.png", _materialCache, _textureCache);
         _collectingProgressRingTexture = _progressBuffRing.getFirstDiffuseTexture();
         _deliveringProgressRingTexture = new GlTexture(BitmapImage.fromFile("images/DeliveringProgressRing.png"));
         
-        _progressBuffText = _renderer.createSprite(
+        _progressBuffText = _renderer.createSpriteWithOriginAtCenter(
                 "progressBuffText", PROGRESS_TEXT_WIDTH, PROGRESS_TEXT_HEIGHT,
                 WHITE, "images/Collecting.png", _materialCache, _textureCache);
         _collectingProgressTextTexture = _progressBuffText.getFirstDiffuseTexture();
@@ -520,6 +595,13 @@ public class GameWorldView implements
             if (_dustClouds[i]._diffuseColour.w < 0.0f) {
                 _dustClouds[i]._diffuseColour.w = 0.0f;
                 _dustClouds[i]._active = false;
+            }
+        }
+
+        if (_model.getPlayerState(0).getHitPoints() < HUD_HIT_POINT_SCALE[2]) {
+            if (_engine.getNowMs() >= _lastHudDamageBlinkTime + HUD_DAMAGE_BLINK_SPEED) {
+                _lastHudDamageBlinkTime = _engine.getNowMs();
+                _hudDamageBlinkOn = !_hudDamageBlinkOn;
             }
         }
 
@@ -736,20 +818,68 @@ public class GameWorldView implements
 
     @Override
     public void drawView2d(Matrix4f projectionMatrix) {
-        if (!_widgetManager.isVisible(_singlePlayerStatusBar)) {
+        if (!_widgetManager.isVisible(_episodeMissionStatusBar)) {
             return;
         }
 
-        final float horizontalSpacing = 110.0f;
-        float x = 30.0f;
-        _font.drawNumber(projectionMatrix, _model.getEpisode()+1, x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
-        _font.drawNumber(projectionMatrix, _model.getMission()+1, x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
-        _font.drawNumber(projectionMatrix, _model.getPlayerState(0).getHitPoints(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
-        _font.drawNumber(projectionMatrix, _model.getPlayerState(0).getFuel(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
-        _font.drawNumber(projectionMatrix, _model.getShipsRemaining(0), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
-        _font.drawNumber(projectionMatrix, _model.getNumCratesRemaining(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
-        _font.drawNumber(projectionMatrix, _model.getNumCratesCollected(), x, 892.0f, 1.0f, WHITE); x += horizontalSpacing;
-        _font.drawNumber(projectionMatrix, _model.getNumCratesDelivered(), x, 892.0f, 1.0f, WHITE);
+        // Draw HUD:
+        //   1. Episode and Mission
+        //   2. Fuel
+        //   3. Damage
+        //   4. Player and Crates
+        final int shipsRemaining = (int) (_model.getShipsRemaining(0) + 1);
+        float x = HUD_PLAYER_SHIP_ICON_OFFSET.x;
+        for (int i = 0; i < shipsRemaining; ++i) {
+            _mvpMatrix.set(projectionMatrix).translate(x, HUD_PLAYER_SHIP_ICON_OFFSET.y, 0.0f);
+            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudPlayerShipIconTextures[0], WHITE);
+            x += HUD_ICON_SPACING;
+        }
+        for (int i = 0; i < CampaignModel.INITIAL_SHIP_COUNT - shipsRemaining; ++i) {
+            _mvpMatrix.set(projectionMatrix).translate(x, HUD_PLAYER_SHIP_ICON_OFFSET.y, 0.0f);
+            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudPlayerShipIconTextures[1], WHITE);
+            x += HUD_ICON_SPACING;
+        }
+
+        x = HUD_CRATE_ICON_OFFSET.x;
+        int numCrates = _model.getTotalCrates() - (_model.getNumCratesCollected() + _model.getNumCratesDelivered());
+        for (int i = 0; i < numCrates; ++i) {
+            _mvpMatrix.set(projectionMatrix).translate(x, HUD_CRATE_ICON_OFFSET.y, 0.0f);
+            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudCrateTextures[0], WHITE);
+            x += HUD_ICON_SPACING;
+        }
+        for (int i = 0; i < _model.getNumCratesCollected(); ++i) {
+            _mvpMatrix.set(projectionMatrix).translate(x, HUD_CRATE_ICON_OFFSET.y, 0.0f);
+            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudCrateTextures[1], WHITE);
+            x += HUD_ICON_SPACING;
+        }
+        for (int i = 0; i < _model.getNumCratesDelivered(); ++i) {
+            _mvpMatrix.set(projectionMatrix).translate(x, HUD_CRATE_ICON_OFFSET.y, 0.0f);
+            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudCrateTextures[2], WHITE);
+            x += HUD_ICON_SPACING;
+        }
+
+        if (_hudProgressBarDisplayMesh != null) {
+            _mvpMatrix.set(projectionMatrix)
+                    .translate(HUD_FUEL_PROGRESS_BAR_OFFSET.x, HUD_FUEL_PROGRESS_BAR_OFFSET.y, 0.0f);
+            _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[0], WHITE);
+
+            float yScale = _model.getPlayerState(0).getHitPointsPercentage();
+            _mvpMatrix.set(projectionMatrix)
+                    .translate(HUD_DAMAGE_PROGRESS_BAR_OFFSET.x, HUD_DAMAGE_PROGRESS_BAR_OFFSET.y, 0.0f)
+                    .scale(1.0f, yScale, 1.0f);
+            if (_model.getPlayerState(0).getHitPoints() > HUD_HIT_POINT_SCALE[0]) {
+                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[0], WHITE);
+            }
+            else if (_model.getPlayerState(0).getHitPoints() > HUD_HIT_POINT_SCALE[1]) {
+                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[1], WHITE);
+            }
+            else if (_model.getPlayerState(0).getHitPoints() > HUD_HIT_POINT_SCALE[2]) {
+                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[2], WHITE);
+            }
+            else if (_hudDamageBlinkOn){
+                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[3], WHITE);
+            }
+        }
 
         // TODO: what to do about player two?
     }
@@ -849,6 +979,33 @@ public class GameWorldView implements
             _progressBuffText = null;
         }
 
+        if (_hudPlayerShipIconTextures != null) {
+            for (var a : _hudPlayerShipIconTextures) {
+                a.freeResources();
+            }
+            _hudPlayerShipIconTextures = null;
+        }
+        if (_hudCrateTextures != null) {
+            for (var a : _hudCrateTextures) {
+                a.freeResources();
+            }
+            _hudCrateTextures = null;
+        }
+        if (_hudIconDisplayMesh != null) {
+            _hudIconDisplayMesh.freeResources();
+            _hudIconDisplayMesh = null;
+        }
+
+        if (_hudProgressBarTextures != null) {
+            for (var a : _hudProgressBarTextures) {
+                a.freeResources();
+            }
+        }
+        if (_hudProgressBarDisplayMesh != null) {
+            _hudProgressBarDisplayMesh.freeResources();
+            _hudProgressBarDisplayMesh = null;
+        }
+
         _model.resetPlayers();
         _model.clearCrates();
         _model.clearDeliveryZones();
@@ -866,7 +1023,10 @@ public class GameWorldView implements
     @Override
     public void showMissionStatusBar() {
         _widgetManager.hideAll();
-        _widgetManager.show(_singlePlayerStatusBar, WidgetManager.ShowAs.FIRST);
+        _widgetManager.show(_episodeMissionStatusBar, WidgetManager.ShowAs.FIRST);
+        _widgetManager.show(_fuelStatusBar, WidgetManager.ShowAs.LAST);
+        _widgetManager.show(_damageStatusBar, WidgetManager.ShowAs.LAST);
+        _widgetManager.show(_playerShipsCratesStatusBar, WidgetManager.ShowAs.LAST);
     }
 
     @Override
@@ -939,8 +1099,17 @@ public class GameWorldView implements
             System.out.print("GameWorldView.widgetLoaded() was passed a null WidgetCreateInfo object");
             return;
         }
-        if (wci._id.equals(SINGLE_PLAYER_STATUS_BAR) && wci._type.equals("ImageWidget")) {
-            _singlePlayerStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
+        if (wci._id.equals(EPISODE_MISSION_STATUS_BAR) && wci._type.equals("ImageWidget")) {
+            _episodeMissionStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
+        }
+        else if (wci._id.equals(FUEL_STATUS_BAR) && wci._type.equals("ImageWidget")) {
+            _fuelStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
+        }
+        else if (wci._id.equals(DAMAGE_STATUS_BAR) && wci._type.equals("ImageWidget")) {
+            _damageStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
+        }
+        else if (wci._id.equals(PLAYER_SHIPS_CRATES_STATUS_BAR) && wci._type.equals("ImageWidget")) {
+            _playerShipsCratesStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
     }
 
@@ -966,7 +1135,7 @@ public class GameWorldView implements
     }
 
     @Override
-    public void crateStartedDelivering(Crate crate, com.jme3.math.Vector3f playerPosition) {
+    public void crateDroppedForDelivery(Crate crate, com.jme3.math.Vector3f playerPosition) {
         _jomlVector.x = playerPosition.x;
         _jomlVector.y = playerPosition.y;
         _jomlVector.z = playerPosition.z;
@@ -1079,21 +1248,11 @@ public class GameWorldView implements
     }
 
     private void dropCollectedCrates(Player player) {
-        if (!player.hasCollectedAtLeastOneCrate()) {
-            return;
-        }
-
-        int numDropped = 0;
         for (var crate : player.getCollectedCrates()) {
             crate.removeTimeouts(_engine.getTimeoutManager());
             crate.setState(Crate.State.IDLE);
             createCrateRigidBody(_jomlVector, crate);
-            if (++numDropped >= _model.getNumCratesRemaining()) {
-                break;
-            }
         }
-
-        player.clearCollectedCrates();
     }
 
     private void removePlayerShip(Player player) {
@@ -1381,7 +1540,7 @@ public class GameWorldView implements
     }
 
     private DisplayMesh createExplosionFlash() throws IOException {
-        return _renderer.createSprite(
+        return _renderer.createSpriteWithOriginAtCenter(
                 "ExplosionFlash", EXPLOSION_FLASH_SIZE, EXPLOSION_FLASH_SIZE,
                 WHITE, "images/ExplosionFlash.png",
                 _materialCache, _textureCache
@@ -1389,7 +1548,7 @@ public class GameWorldView implements
     }
 
     private DisplayMesh createExplosionWake() throws IOException {
-        return _renderer.createSprite(
+        return _renderer.createSpriteWithOriginAtCenter(
                 "ExplosionWake", EXPLOSION_WAKE_SIZE, EXPLOSION_WAKE_SIZE,
                 WHITE, "images/ExplosionWake.png",
                 _materialCache, _textureCache
@@ -1397,7 +1556,7 @@ public class GameWorldView implements
     }
 
     private DisplayMesh createDustCloud() throws IOException {
-        return _renderer.createSprite(
+        return _renderer.createSpriteWithOriginAtCenter(
                 "DustCloud", DUST_CLOUD_SIZE, DUST_CLOUD_SIZE,
                 WHITE, "images/DustCloud.png",
                 _materialCache, _textureCache

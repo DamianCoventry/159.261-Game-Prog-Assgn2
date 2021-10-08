@@ -99,10 +99,10 @@ public class Renderer {
         glActiveTexture(GL_TEXTURE0 + unit);
     }
 
-    public DisplayMesh createSprite(String spriteName,
-                                    float spriteWidth, float spriteHeight,
-                                    Vector4f diffuseColour, String diffuseTextureFileName,
-                                    MaterialCache materialCache, TextureCache textureCache) throws IOException {
+    public DisplayMesh createSpriteWithOriginAtCenter(String spriteName,
+                                                      float spriteWidth, float spriteHeight,
+                                                      Vector4f diffuseColour, String diffuseTextureFileName,
+                                                      MaterialCache materialCache, TextureCache textureCache) throws IOException {
         GlTexture texture = new GlTexture(BitmapImage.fromFile(diffuseTextureFileName));
         textureCache.add(texture);
 
@@ -123,6 +123,57 @@ public class Renderer {
                 -halfW,  halfH, 0.0f,
                 halfW, -halfH, 0.0f,
                 halfW,  halfH, 0.0f,
+        };
+
+        final float[] texCoordinates = new float[] {
+                // Triangle 0
+                0.0f, 0.0f,
+                0.0f, 1.0f,
+                1.0f, 1.0f,
+                // Triangle 1
+                0.0f, 0.0f,
+                1.0f, 1.0f,
+                1.0f, 0.0f,
+        };
+        final float[] normals = new float[] {
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+        };
+
+        DisplayMesh sprite = new DisplayMesh(spriteName);
+        sprite.addPiece(new GlStaticMeshPiece(spriteName, new PolyhedraVxTcNm(vertices, texCoordinates, normals)));
+        sprite.bindMaterials(materialCache, textureCache);
+        return sprite;
+    }
+
+    public DisplayMesh createSpriteWithOriginAtYZero(String spriteName,
+                                                     float spriteWidth, float spriteHeight,
+                                                     Vector4f diffuseColour, String diffuseTextureFileName,
+                                                     MaterialCache materialCache, TextureCache textureCache) throws IOException {
+        GlTexture texture = new GlTexture(BitmapImage.fromFile(diffuseTextureFileName));
+        textureCache.add(texture);
+
+        Material material = new Material(spriteName);
+        material.setDiffuseColour(diffuseColour);
+        material.setDiffuseTextureFileName(diffuseTextureFileName);
+        materialCache.add(material);
+
+        float halfW = spriteWidth / 2.0f;
+
+        final float[] vertices = new float[] {
+                // Triangle 0
+                -halfW,  spriteHeight, 0.0f,
+                -halfW, 0.0f, 0.0f,
+                halfW, 0.0f, 0.0f,
+                // Triangle 1
+                -halfW,  spriteHeight, 0.0f,
+                halfW, 0.0f, 0.0f,
+                halfW,  spriteHeight, 0.0f,
         };
 
         final float[] texCoordinates = new float[] {
