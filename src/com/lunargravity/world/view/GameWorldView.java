@@ -909,6 +909,8 @@ public class GameWorldView implements
 
     @Override
     public void resetState() {
+        _playerExplosionAlpha.unregister();
+        _playerExplosionWakeScale.unregister();
         resetRigidBodyObjects(_lunarLanders);
         resetRigidBodyObjects(_crates);
         resetRigidBodyObjects(_debris);
@@ -1205,6 +1207,9 @@ public class GameWorldView implements
     @Override
     public void playerShipExploding(int i) {
         Player player = _model.getPlayerState(i);
+        if (player.getRigidBody() == null) {
+            return;
+        }
         player.getRigidBody().getPhysicsLocation(_jmeVector);
         _jomlVector.x = _jmeVector.x;
         _jomlVector.y = _jmeVector.y;

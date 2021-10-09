@@ -18,8 +18,6 @@ import com.lunargravity.application.IStateMachineContext;
 import com.lunargravity.application.StateBase;
 import com.lunargravity.menu.view.MenuBuilderObserver;
 
-import java.io.IOException;
-
 public class LoadingMenuState extends StateBase {
     public LoadingMenuState(IStateMachineContext context) {
         super(context);

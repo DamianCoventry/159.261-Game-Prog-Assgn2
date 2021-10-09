@@ -31,13 +31,13 @@ public class DisplayMeshCache {
         return null;
     }
 
-    public DisplayMesh add(DisplayMesh material) {
-        DisplayMesh cachedDisplayMesh = getByExactName(material.getName());
+    public DisplayMesh add(DisplayMesh displayMesh) {
+        DisplayMesh cachedDisplayMesh = getByExactName(displayMesh.getName());
         if (cachedDisplayMesh != null) {
             return cachedDisplayMesh;
         }
-        _displayMeshes.add(material);
-        return material;
+        _displayMeshes.add(displayMesh);
+        return displayMesh;
     }
 
     public void freeResources() {

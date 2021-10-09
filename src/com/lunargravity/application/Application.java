@@ -321,7 +321,7 @@ public class Application implements
 
         _logicModel = new CampaignModel(savedGameFile.getEpisode(), savedGameFile.getMission(), savedGameFile.getNumPlayers());
         _logicController = new CampaignController(_engine, (ICampaignModel)_logicModel);
-        _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
+        _logicView = new CampaignView(_widgetManager, _engine, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
 
         _worldModel = new GameWorldModel(_engine.getTimeoutManager(), savedGameFile.getNumPlayers(), (ICampaignModel)_logicModel, _playerInputBindings);
         _worldView = new GameWorldView(_widgetManager, _engine, (IGameWorldModel)_worldModel);
@@ -339,7 +339,7 @@ public class Application implements
 
         _logicModel = new CampaignModel(FIRST_EPISODE, FIRST_MISSION, numPlayers);
         _logicController = new CampaignController(_engine, (ICampaignModel)_logicModel);
-        _logicView = new CampaignView(_widgetManager, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
+        _logicView = new CampaignView(_widgetManager, _engine, (ICampaignController)_logicController, (ICampaignModel)_logicModel);
 
         _worldModel = new GameWorldModel(_engine.getTimeoutManager(), numPlayers, (ICampaignModel)_logicModel, _playerInputBindings);
         _worldView = new GameWorldView(_widgetManager, _engine, (IGameWorldModel)_worldModel);

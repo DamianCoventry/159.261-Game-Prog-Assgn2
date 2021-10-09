@@ -14,6 +14,7 @@
 
 package com.lunargravity.engine.widgetsystem;
 
+import com.lunargravity.engine.animation.AnimationManager;
 import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.engine.core.IInputObserver;
 import com.lunargravity.engine.desktopwindow.GlfwWindow;
@@ -45,6 +46,10 @@ public class WidgetManager implements IInputObserver {
         _keyboardFocus = null;
         _mouseCapture = null;
         _hoveringOver = null;
+    }
+
+    public AnimationManager getAnimationManager() {
+        return _engine.getAnimationManager();
     }
 
     public Renderer getRenderer() {
@@ -115,6 +120,7 @@ public class WidgetManager implements IInputObserver {
         else {
             _visibleWidgets.addLast(widget);
         }
+        widget.startFadingIn();
         widget.getObserver().widgetShown();
 
         widget.getObserver().widgetOpened();
@@ -127,13 +133,29 @@ public class WidgetManager implements IInputObserver {
         if (widget.getObserver().widgetClosing() == IWidgetObserver.CloseResult.CANCEL_CLOSE) {
             return;
         }
+        if (isVisible(widget)) {
+            widget.startFadingOutThenClose();
+        }
+        else {
+            closeNow(widget);
+        }
+    }
+
+    public void closeNow(Widget widget) {
+        if (!isOpen(widget)) {
+            return;
+        }
+        if (widget.getObserver().widgetClosing() == IWidgetObserver.CloseResult.CANCEL_CLOSE) {
+            return;
+        }
+
+        if (isVisible(widget)) {
+            widget.getObserver().widgetHiding();
+            _visibleWidgets.remove(widget);
+            widget.getObserver().widgetHidden();
+        }
 
         _allWidgets.remove(widget);
-
-        widget.getObserver().widgetHiding();
-        _visibleWidgets.remove(widget);
-        widget.getObserver().widgetHidden();
-
         widget.getObserver().widgetClosed();
     }
 
@@ -182,10 +204,19 @@ public class WidgetManager implements IInputObserver {
         else {
             _visibleWidgets.addLast(widget);
         }
+        widget.startFadingIn();
         widget.getObserver().widgetShown();
     }
 
     public void hide(Widget widget) {
+        if (!isOpen(widget) || !isVisible(widget)) {
+            return;
+        }
+
+        widget.startFadingOut();
+    }
+
+    public void hideNow(Widget widget) {
         if (!isOpen(widget) || !isVisible(widget)) {
             return;
         }
@@ -226,6 +257,7 @@ public class WidgetManager implements IInputObserver {
             widget.getObserver().widgetZOrderChanging();
             _visibleWidgets.remove(i);
             _visibleWidgets.addFirst(widget);
+            widget.startFadingIn();
             setKeyboardFocusToFrontOfList(); // this might end up too annoying
             widget.getObserver().widgetZOrderChanged();
         }
@@ -252,6 +284,7 @@ public class WidgetManager implements IInputObserver {
             _visibleWidgets.remove(i);
             _visibleWidgets.addLast(widget);
             setKeyboardFocusToFrontOfList(); // this might end up too annoying
+            widget.startFadingIn();
             widget.getObserver().widgetZOrderChanged();
         }
     }

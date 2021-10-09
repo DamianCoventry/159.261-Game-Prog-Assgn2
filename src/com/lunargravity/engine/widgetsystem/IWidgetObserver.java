@@ -22,6 +22,7 @@ public interface IWidgetObserver {
     void freeResources();
     void widgetOpening();
     void widgetOpened();
+
     enum CloseResult { CANCEL_CLOSE, PROCEED_WITH_CLOSE }
     CloseResult widgetClosing();
     void widgetClosed();

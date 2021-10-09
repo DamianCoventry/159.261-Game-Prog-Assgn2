@@ -90,6 +90,34 @@ public class Widget implements IInputObserver {
         }
     }
 
+    public void startFadingIn() {
+        _observer.startFadingIn();
+        if (_children != null) {
+            for (var child : _children) {
+                child.startFadingIn();
+            }
+        }
+    }
+
+    public void startFadingOut() {
+        _observer.startFadingOut();
+        if (_children != null) {
+            for (var child : _children) {
+                child.startFadingOut();
+            }
+        }
+    }
+
+
+    public void startFadingOutThenClose() {
+        _observer.startFadingOutThenClose();
+        if (_children != null) {
+            for (var child : _children) {
+                child.startFadingOut();
+            }
+        }
+    }
+
     public void setPosition(Vector2f position) {
         _position = position;
     }

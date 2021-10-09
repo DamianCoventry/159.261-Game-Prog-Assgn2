@@ -110,7 +110,7 @@ public class StateBase implements IState {
     }
 
     @Override
-    public void mouseButtonEvent(int button, int action, int mods) {
+    public void mouseButtonEvent(int button, int action, int mods) throws Exception {
         // TODO
     }
 

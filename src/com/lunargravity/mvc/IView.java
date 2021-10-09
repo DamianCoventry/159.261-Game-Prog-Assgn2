@@ -24,7 +24,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 
 public interface IView extends ISceneAssetOwner {
-    void initialLoadCompleted() throws UnsupportedAudioFileException, IOException;
+    void initialLoadCompleted() throws Exception;
     void viewThink();
     void drawView3d(int viewport, Matrix4f projectionMatrix);
     void drawView2d(Matrix4f projectionMatrix);

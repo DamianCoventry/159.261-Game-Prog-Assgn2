@@ -16,65 +16,68 @@ package com.lunargravity.engine.animation;
 
 import com.lunargravity.engine.core.IEngine;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 public class AnimationManager {
-    private static class AnimationInfo {
-        public long _timeoutMs;
-        public long _lastCallTimeMs;
-        public AnimationInfo(long nowMs, long timeoutMs) {
-            _timeoutMs = timeoutMs;
-            _lastCallTimeMs = nowMs;
-        }
-    }
-
+    private static int _nextId;
     private final IEngine _engine;
-    private final LinkedList<FCurve> _pendingRemovals;
-    private final LinkedList<FCurve> _pendingAdditions;
-    private final LinkedList<FCurve> _currentFCurves;
+    private final HashMap<Integer, FCurve> _fCurves;
+    private final HashSet<Integer> _activeFCurves;
+    private final LinkedList<Integer> _pendingStarts;
+    private final LinkedList<Integer> _pendingStops;
 
     public AnimationManager(IEngine engine) {
         _engine = engine;
-        _pendingRemovals = new LinkedList<>();
-        _pendingAdditions = new LinkedList<>();
-        _currentFCurves = new LinkedList<>();
+        _fCurves = new HashMap<>();
+        _pendingStarts = new LinkedList<>();
+        _pendingStops = new LinkedList<>();
+        _activeFCurves = new HashSet<>();
+        _nextId = 0;
     }
 
     public long getNowMs() {
         return _engine.getNowMs();
     }
 
-    public void start(FCurve fCurve) {
-        _pendingAdditions.add(fCurve);
+    public int register(FCurve fCurve) {
+        int id = ++_nextId;
+        _fCurves.put(id, fCurve);
+        return id;
     }
 
-    public void stop(FCurve fCurve) {
-        _pendingRemovals.remove(fCurve);
+    public void unregister(int id) {
+        _fCurves.remove(id);
+        if (_activeFCurves.contains(id)) {
+            _pendingStops.add(id);
+        }
+    }
+
+    public void start(int id) {
+        if (_fCurves.containsKey(id)) {
+            _activeFCurves.add(id); // Won't add duplicates
+        }
+    }
+
+    public void stop(int id) {
+        if (_fCurves.containsKey(id) && _activeFCurves.contains(id)) {
+            _pendingStops.add(id);
+        }
     }
 
     public void update(long nowMs) {
-        performPendingRemovals();
-        performPendingAdditions();
-        updateAnimations(nowMs);
-    }
+        _pendingStops.forEach(_activeFCurves::remove);
+        _pendingStops.clear();
 
-    private void performPendingAdditions() {
-        _currentFCurves.addAll(_pendingAdditions);
-        _pendingAdditions.clear();
-    }
+        _activeFCurves.addAll(_pendingStarts);
+        _pendingStarts.clear();
 
-    private void performPendingRemovals() {
-        for (var id : _pendingRemovals) {
-            _currentFCurves.remove(id);
-        }
-        _pendingRemovals.clear();
-    }
-
-    private void updateAnimations(long nowMs) {
-        for (var fCurve : _currentFCurves) {
+        for (var id : _activeFCurves) {
+            FCurve fCurve = _fCurves.get(id);
             fCurve.update(nowMs);
-            if (nowMs >= fCurve.getEndTime()) {
-                _pendingRemovals.add(fCurve);
+            if (fCurve.getEndBehaviour() == FCurve.EndBehaviour.STOP && nowMs >= fCurve.getEndTime()) {
+                _pendingStops.add(id);
                 fCurve.setValue(fCurve.getEndValue());
                 fCurve.completed(nowMs - fCurve.getEndTime());
             }

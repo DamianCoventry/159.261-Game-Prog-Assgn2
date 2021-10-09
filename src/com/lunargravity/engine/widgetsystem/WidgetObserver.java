@@ -14,6 +14,7 @@
 
 package com.lunargravity.engine.widgetsystem;
 
+import com.lunargravity.engine.animation.LinearInterpolation;
 import com.lunargravity.engine.core.IInputObserver;
 import com.lunargravity.engine.graphics.BitmapImage;
 import com.lunargravity.engine.graphics.GlDiffuseTextureProgram;
@@ -24,6 +25,7 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import java.io.IOException;
+import java.util.function.LongConsumer;
 
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
@@ -34,7 +36,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     public static final String BACKGROUND_IMAGE = "backgroundImage";
     public static final String BACKGROUND_ALPHA = "backgroundAlpha";
     public static final String HOVER_IMAGE = "hoverImage";
-    protected static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    public static final long FADE_IN_OUT_TIME = 400;
 
     protected WidgetManager _widgetManager;
     protected final GlDiffuseTextureProgram _program;
@@ -44,17 +46,63 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     protected PolyhedraVxTc _polyhedra;
     protected Matrix4f _modelMatrix;
     protected Vector4f _backgroundColour;
+    protected Vector4f _fadingColour;
+    protected LinearInterpolation _backgroundAlpha;
+    private boolean _fadingOut;
 
     protected WidgetObserver(WidgetManager widgetManager) {
         _widgetManager = widgetManager;
         _widget = null;
         _backgroundColour = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+        _fadingColour = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
         _program = _widgetManager.getRenderer().getDiffuseTextureProgram();
         _modelMatrix = new Matrix4f();
+        _backgroundAlpha = new LinearInterpolation(_widgetManager.getAnimationManager());
+        _fadingOut = false;
     }
 
     public WidgetManager getWidgetManager() {
         return _widgetManager;
+    }
+
+    public void startFadingIn() {
+        _fadingOut = false;
+        if (_widget.getParent() == null) {
+            _backgroundAlpha.setCompletedFunction(null);
+        }
+        _backgroundAlpha.start(0.0f, _backgroundColour.w, FADE_IN_OUT_TIME);
+    }
+
+    public void startFadingOut() {
+        if (_fadingOut) {
+            return;
+        }
+        _fadingOut = true;
+
+        if (_widget.getParent() == null) {
+            _backgroundAlpha.setCompletedFunction(elapsedTime -> {
+                _widgetManager.hideNow(_widget);
+            });
+        }
+        _backgroundAlpha.start(_backgroundColour.w, 0.0f, FADE_IN_OUT_TIME);
+    }
+
+    public void startFadingOutThenClose() {
+        if (_fadingOut) {
+            return;
+        }
+        _fadingOut = true;
+
+        if (_widget.getParent() == null) {
+            _backgroundAlpha.setCompletedFunction(elapsedTime -> {
+                _widgetManager.closeNow(_widget);
+            });
+        }
+        _backgroundAlpha.start(_backgroundColour.w, 0.0f, FADE_IN_OUT_TIME);
+    }
+
+    public void setFadingCompletedFunction(LongConsumer completedFunction) {
+        _backgroundAlpha.setCompletedFunction(completedFunction);
     }
 
     public void initialise(Widget widget, WidgetCreateInfo wci) throws IOException {
@@ -137,6 +185,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
         if (_hoverTexture != null) {
             _hoverTexture.freeResources();
         }
+        _backgroundAlpha.unregister();
     }
 
     @Override
@@ -230,11 +279,17 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
         _widgetManager.getRenderer().activateTextureImageUnit(0);
         if (_hoverTexture != null && _widget == _widgetManager.getHoveringOver()) {
             glBindTexture(GL_TEXTURE_2D, _hoverTexture.getId());
-            _program.setDiffuseColour(WHITE);
         }
         else {
             glBindTexture(GL_TEXTURE_2D, _backgroundTexture.getId());
+        }
+
+        if (_backgroundAlpha.isCompleted()) {
             _program.setDiffuseColour(_backgroundColour);
+        }
+        else {
+            _fadingColour.w = _backgroundAlpha.getValue();
+            _program.setDiffuseColour(_fadingColour);
         }
 
         _program.activate(mvpMatrix);

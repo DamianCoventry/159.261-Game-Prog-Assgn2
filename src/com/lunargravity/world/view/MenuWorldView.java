@@ -15,6 +15,7 @@
 package com.lunargravity.world.view;
 
 import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.lunargravity.engine.animation.LinearInterpolationLoop;
 import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
@@ -30,8 +31,7 @@ import java.io.IOException;
 import static org.lwjgl.opengl.GL11C.glDepthMask;
 
 public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
-    private static final float MOON_ROTATION_DEGREES_PER_SEC = 1.5f;
-    private static final float FRAME_RATE_SCALE = 0.016f;
+    private static final long MOON_ROTATION_TIME = 360000; // 360 seconds to rotate 360°
     private static final float SPACE_BACKGROUND_WIDTH = 1280.0f;
     private static final float SPACE_BACKGROUND_HEIGHT = 960.0f;
     private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -41,9 +41,8 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     private final DisplayMeshCache _displayMeshCache;
     private final MaterialCache _materialCache;
     private final TextureCache _textureCache;
-    private final WidgetManager _widgetManager;
-    private final IEngine _engine;
     private final Renderer _renderer;
+    private final WidgetManager _widgetManager;
     private final IMenuWorldModel _model;
     private DisplayMesh _moonDisplayMesh;
     private DisplayMesh _spaceDisplayMesh;
@@ -51,12 +50,11 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     private final Matrix4f _mvMatrix;
     private final Matrix4f _moonModelMatrix;
     private final Transform _camera;
-    private float _moonRotationDegrees;
+    private final LinearInterpolationLoop _moonRotation;
 
     public MenuWorldView(WidgetManager widgetManager, IEngine engine, IMenuWorldModel model) {
-        _widgetManager = widgetManager;
-        _engine = engine;
         _renderer = engine.getRenderer();
+        _widgetManager = widgetManager;
         _model = model;
         _displayMeshCache = new DisplayMeshCache();
         _materialCache = new MaterialCache();
@@ -74,7 +72,7 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
         _camera._position.z = 75.0f;
         _camera.calculateViewMatrix();
 
-        _moonRotationDegrees = 0;
+        _moonRotation = new LinearInterpolationLoop(engine.getAnimationManager());
     }
 
     @Override
@@ -82,14 +80,12 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
         _spaceDisplayMesh = _renderer.createSpriteWithOriginAtCenter("spaceBackground",
                 SPACE_BACKGROUND_WIDTH, SPACE_BACKGROUND_HEIGHT, WHITE,
                 "images/StarsBackground.png", _materialCache, _textureCache);
+        _moonRotation.start(0.0f, 359.0f, MOON_ROTATION_TIME);
     }
 
     @Override
     public void viewThink() {
-        _moonRotationDegrees += MOON_ROTATION_DEGREES_PER_SEC * FRAME_RATE_SCALE;
-        if (_moonRotationDegrees >= 360.0f) {
-            _moonRotationDegrees -= 360.0f;
-        }
+        // Nothing to do
     }
 
     @Override
@@ -102,7 +98,7 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
         _spaceDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
         glDepthMask(true);
 
-        _moonModelMatrix.identity().rotate((float)Math.toRadians(_moonRotationDegrees), Y_AXIS);
+        _moonModelMatrix.identity().rotate((float)Math.toRadians(_moonRotation.getValue()), Y_AXIS);
         _mvMatrix.set(_camera.getViewMatrix()).mul(_moonModelMatrix);
         GLDirectionalLightProgram program = _renderer.getDirectionalLightProgram();
         program.setAmbientLight(MOON_AMBIENT_LIGHT);
@@ -136,6 +132,7 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
 
     @Override
     public void resetState() {
+        _moonRotation.unregister();
         if (_moonDisplayMesh != null) {
             _moonDisplayMesh.freeResources();
             _moonDisplayMesh = null;

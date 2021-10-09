@@ -22,13 +22,12 @@ import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
 import com.lunargravity.engine.widgetsystem.WidgetManager;
 import com.lunargravity.menu.controller.IMenuController;
 import com.lunargravity.menu.model.IMenuModel;
-import com.lunargravity.mvc.IView;
 import org.joml.Matrix4f;
 
 import java.io.IOException;
 
 public class MenuView implements
-        IView,
+        IMenuView,
         ISceneAssetOwner,
         IMainWidgetObserver,
         ICampaignWidgetObserver,
@@ -65,7 +64,12 @@ public class MenuView implements
     }
 
     @Override
-    public void initialLoadCompleted() throws IOException {
+    public void initialLoadCompleted() {
+        // Nothing to do
+    }
+
+    @Override
+    public void showMainWidget() throws IOException {
         _widgetManager.show(_main, WidgetManager.ShowAs.FIRST);
     }
 

@@ -235,15 +235,20 @@ public class KeyBindingWidget extends WidgetObserver {
         _widgetManager.getRenderer().activateTextureImageUnit(0);
         if (_listening && _pressAnyKeyTexture != null) {
             glBindTexture(GL_TEXTURE_2D, _pressAnyKeyTexture.getId());
-            _program.setDiffuseColour(WHITE);
         }
         else if (_hoverTexture != null && _widget == _widgetManager.getHoveringOver()) {
             glBindTexture(GL_TEXTURE_2D, _hoverTexture.getId());
-            _program.setDiffuseColour(WHITE);
         }
         else {
             glBindTexture(GL_TEXTURE_2D, _backgroundTexture.getId());
+        }
+
+        if (_backgroundAlpha.isCompleted()) {
             _program.setDiffuseColour(_backgroundColour);
+        }
+        else {
+            _fadingColour.w = _backgroundAlpha.getValue();
+            _program.setDiffuseColour(_fadingColour);
         }
 
         _program.activate(mvpMatrix);
@@ -251,7 +256,7 @@ public class KeyBindingWidget extends WidgetObserver {
 
         if (!_listening && SUPPORTED_KEYS.containsKey(_key) && _currentKeyTexture != null) {
             glBindTexture(GL_TEXTURE_2D, _currentKeyTexture.getId());
-            _program.setDiffuseColour(WHITE);
+            _program.setDiffuseColour(_fadingColour);
             _program.activate(mvpMatrix);
             _polyhedra.draw();
         }

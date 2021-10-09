@@ -18,16 +18,21 @@ import com.lunargravity.application.IStateMachineContext;
 import com.lunargravity.application.StateBase;
 import com.lunargravity.campaign.statemachine.LoadingCampaignState;
 import com.lunargravity.dogfight.statemachine.LoadingDogfightState;
+import com.lunargravity.engine.timeouts.TimeoutManager;
 import com.lunargravity.menu.controller.IMenuController;
 import com.lunargravity.menu.controller.IMenuControllerObserver;
+import com.lunargravity.menu.view.IMenuView;
 import com.lunargravity.race.statemachine.LoadingRaceState;
 import com.lunargravity.world.controller.IMenuWorldController;
 
-// TODO: allow the user to move the camera around the 3d scene
+import java.io.IOException;
 
 public class RunningMenuState extends StateBase implements IMenuControllerObserver {
+    private int _timeoutId;
+
     public RunningMenuState(IStateMachineContext context) {
         super(context);
+        _timeoutId = 0;
     }
 
     private IMenuWorldController getMenuWorldController() {
@@ -38,14 +43,32 @@ public class RunningMenuState extends StateBase implements IMenuControllerObserv
         return (IMenuController)getContext().getLogicController();
     }
 
+    private IMenuView getMenuView() {
+        return (IMenuView)getContext().getLogicView();
+    }
+
     @Override
     public void begin() {
         getMenuController().addObserver(this);
+
+        _timeoutId = addTimeout(250, (callCount) -> {
+            try {
+                getMenuView().showMainWidget();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            _timeoutId = 0;
+            return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;
+        });
     }
 
     @Override
     public void end() {
         getMenuController().removeObserver(this);
+        if (_timeoutId > 0) {
+            removeTimeout(_timeoutId);
+            _timeoutId = 0;
+        }
     }
 
     @Override

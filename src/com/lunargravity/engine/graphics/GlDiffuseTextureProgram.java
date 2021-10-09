@@ -44,7 +44,7 @@ public class GlDiffuseTextureProgram extends GlProgram {
     }
 
     public void setDiffuseColour(Vector4f diffuseColour) {
-        _diffuseColour = diffuseColour;
+        _diffuseColour.set(diffuseColour);
     }
 
     public void activate(Matrix4f mvpMatrix) {
