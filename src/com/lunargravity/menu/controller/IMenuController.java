@@ -14,6 +14,7 @@
 
 package com.lunargravity.menu.controller;
 
+import com.lunargravity.application.PlayerInputBindings;
 import com.lunargravity.mvc.IController;
 
 public interface IMenuController extends IController {
@@ -41,6 +42,7 @@ public interface IMenuController extends IController {
     void setPlayerShootKey(int player, int key);
     void setPlayerKickKey(int player, int key);
     void setDefaultPlayerKeys();
+    PlayerInputBindings getPlayerInputBindings();
 
     void exitApplication();
 }

@@ -7,13 +7,15 @@ import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.menu.statemachine.LoadingMenuState;
 
+import java.io.IOException;
+
 public class MissionPausedState extends StateBase implements ICampaignControllerObserver {
     public MissionPausedState(IStateMachineContext context) {
         super(context);
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getCampaignController().addObserver(this);
         getCampaignView().showMissionPaused();
     }

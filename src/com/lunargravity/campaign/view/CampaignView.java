@@ -100,43 +100,43 @@ public class CampaignView implements
     }
 
     @Override
-    public void showEpisodeIntro() {
+    public void showEpisodeIntro() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_episodeIntro, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
-    public void showEpisodeOutro() {
+    public void showEpisodeOutro() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_episodeOutro, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
-    public void showMissionIntro() {
+    public void showMissionIntro() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_missionIntro, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
-    public void showGameWon() {
+    public void showGameWon() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_gameWon, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
-    public void showGameOver() {
+    public void showGameOver() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_gameOver, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
-    public void showMissionPaused() {
+    public void showMissionPaused() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_missionPaused, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
-    public void showMissionCompleted() {
+    public void showMissionCompleted() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_missionCompleted, WidgetManager.ShowAs.FIRST);
     }

@@ -14,9 +14,11 @@
 
 package com.lunargravity.menu.view;
 
+import java.io.IOException;
+
 public interface IRaceScoreboardObserver {
     void resetRaceScoreboardButtonClicked();
     void startSinglePlayerRaceButtonClicked();
     void startTwoPlayersRaceButtonClicked();
-    void mainMenuButtonClicked();
+    void mainMenuButtonClicked() throws IOException;
 }

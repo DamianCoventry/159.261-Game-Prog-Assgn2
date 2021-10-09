@@ -16,6 +16,8 @@ package com.lunargravity.engine.widgetsystem;
 
 import org.joml.Matrix4f;
 
+import java.io.IOException;
+
 public interface IWidgetObserver {
     void freeResources();
     void widgetOpening();
@@ -24,7 +26,7 @@ public interface IWidgetObserver {
     CloseResult widgetClosing();
     void widgetClosed();
     void widgetShowing();
-    void widgetShown();
+    void widgetShown() throws IOException;
     void widgetHiding();
     void widgetHidden();
     void widgetZOrderChanging();

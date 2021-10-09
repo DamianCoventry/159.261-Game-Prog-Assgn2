@@ -167,6 +167,7 @@ public class KeyBindingWidget extends WidgetObserver {
 
     public void setKey(int key) throws IOException {
         _key = key;
+        _listening = false;
         loadTextureForCurrentKey();
     }
     public int getKey() {
@@ -236,10 +237,6 @@ public class KeyBindingWidget extends WidgetObserver {
             glBindTexture(GL_TEXTURE_2D, _pressAnyKeyTexture.getId());
             _program.setDiffuseColour(WHITE);
         }
-        else if(SUPPORTED_KEYS.containsKey(_key) && _currentKeyTexture != null) {
-            glBindTexture(GL_TEXTURE_2D, _currentKeyTexture.getId());
-            _program.setDiffuseColour(WHITE);
-        }
         else if (_hoverTexture != null && _widget == _widgetManager.getHoveringOver()) {
             glBindTexture(GL_TEXTURE_2D, _hoverTexture.getId());
             _program.setDiffuseColour(WHITE);
@@ -251,6 +248,13 @@ public class KeyBindingWidget extends WidgetObserver {
 
         _program.activate(mvpMatrix);
         _polyhedra.draw();
+
+        if (!_listening && SUPPORTED_KEYS.containsKey(_key) && _currentKeyTexture != null) {
+            glBindTexture(GL_TEXTURE_2D, _currentKeyTexture.getId());
+            _program.setDiffuseColour(WHITE);
+            _program.activate(mvpMatrix);
+            _polyhedra.draw();
+        }
     }
 
     private void loadTextureForCurrentKey() throws IOException {

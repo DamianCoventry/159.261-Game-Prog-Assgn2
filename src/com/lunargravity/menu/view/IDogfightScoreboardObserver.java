@@ -14,9 +14,11 @@
 
 package com.lunargravity.menu.view;
 
+import java.io.IOException;
+
 public interface IDogfightScoreboardObserver {
     void resetDogfightScoreboardButtonClicked();
     void startSinglePlayerDogfightButtonClicked();
     void startTwoPlayersDogfightButtonClicked();
-    void mainMenuButtonClicked();
+    void mainMenuButtonClicked() throws IOException;
 }

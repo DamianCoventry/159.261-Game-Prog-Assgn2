@@ -19,7 +19,7 @@ public class EpisodeIntroState extends StateBase implements ICampaignControllerO
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getCampaignController().addObserver(this);
         getCampaignView().showEpisodeIntro();
 

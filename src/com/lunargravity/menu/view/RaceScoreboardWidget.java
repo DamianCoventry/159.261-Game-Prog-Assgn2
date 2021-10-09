@@ -83,7 +83,7 @@ public class RaceScoreboardWidget extends WidgetObserver implements IButtonObser
     }
 
     @Override
-    public void buttonClicked(String widgetId) {
+    public void buttonClicked(String widgetId) throws IOException {
         switch (widgetId) {
             case RESET_SCOREBOARD_BUTTON -> _observer.resetRaceScoreboardButtonClicked();
             case MAIN_MENU_BUTTON -> _observer.mainMenuButtonClicked();

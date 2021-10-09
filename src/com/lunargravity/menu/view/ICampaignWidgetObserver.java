@@ -14,9 +14,11 @@
 
 package com.lunargravity.menu.view;
 
+import java.io.IOException;
+
 public interface ICampaignWidgetObserver {
     void singlePlayerCampaignButtonClicked();
     void twoPlayersCampaignButtonClicked();
     void loadSavedCampaignButtonClicked(String fileName);
-    void mainMenuButtonClicked();
+    void mainMenuButtonClicked() throws IOException;
 }

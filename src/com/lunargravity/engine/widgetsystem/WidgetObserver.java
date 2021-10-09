@@ -166,7 +166,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     }
 
     @Override
-    public void widgetShown() {
+    public void widgetShown() throws IOException {
         // TODO: Any standard behaviour?
     }
 

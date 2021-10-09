@@ -7,6 +7,8 @@ import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
+import java.io.IOException;
+
 public class EpisodeOutroState extends StateBase implements ICampaignControllerObserver {
     private int _timeoutId;
 
@@ -16,7 +18,7 @@ public class EpisodeOutroState extends StateBase implements ICampaignControllerO
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getCampaignController().addObserver(this);
         getCampaignView().showEpisodeOutro();
 

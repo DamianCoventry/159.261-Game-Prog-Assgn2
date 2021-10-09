@@ -23,6 +23,8 @@ import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.campaign.view.MissionBuilderObserver;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
+import java.io.IOException;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_6;
 
@@ -34,7 +36,7 @@ public class MissionIntroState extends StateBase implements ICampaignControllerO
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getCampaignController().addObserver(this);
         getCampaignView().showMissionIntro();
 

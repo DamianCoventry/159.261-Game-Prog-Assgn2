@@ -7,6 +7,8 @@ import com.lunargravity.race.controller.IRaceController;
 import com.lunargravity.race.controller.IRaceControllerObserver;
 import com.lunargravity.race.view.IRaceView;
 
+import java.io.IOException;
+
 public class RaceResultsState extends StateBase implements IRaceControllerObserver {
     public RaceResultsState(IStateMachineContext context) {
         super(context);
@@ -21,7 +23,7 @@ public class RaceResultsState extends StateBase implements IRaceControllerObserv
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getRaceController().addObserver(this);
         getRaceView().showResultsWidget();
     }

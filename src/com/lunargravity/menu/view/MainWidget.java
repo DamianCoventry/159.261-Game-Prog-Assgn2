@@ -57,7 +57,7 @@ public class MainWidget extends WidgetObserver implements IButtonObserver {
     }
 
     @Override
-    public void buttonClicked(String widgetId) {
+    public void buttonClicked(String widgetId) throws IOException {
         switch (widgetId) {
             case CAMPAIGN_BUTTON -> _observer.campaignGameButtonClicked();
             case RACE_BUTTON -> _observer.raceGameButtonClicked();

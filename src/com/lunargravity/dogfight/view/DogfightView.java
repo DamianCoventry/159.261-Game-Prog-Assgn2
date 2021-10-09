@@ -117,13 +117,13 @@ public class DogfightView implements
     }
 
     @Override
-    public void showResultsWidget() {
+    public void showResultsWidget() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_dogfightResults, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
-    public void showPausedWidget() {
+    public void showPausedWidget() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_dogfightPaused, WidgetManager.ShowAs.FIRST);
     }
@@ -142,7 +142,7 @@ public class DogfightView implements
     }
 
     @Override
-    public void showCompletedWidget() {
+    public void showCompletedWidget() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_dogfightCompleted, WidgetManager.ShowAs.FIRST);
     }

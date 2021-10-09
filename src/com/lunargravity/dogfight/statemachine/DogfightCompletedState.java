@@ -19,13 +19,15 @@ import com.lunargravity.application.StateBase;
 import com.lunargravity.dogfight.view.IDogfightView;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
+import java.io.IOException;
+
 public class DogfightCompletedState extends StateBase {
     public DogfightCompletedState(IStateMachineContext context) {
         super(context);
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getDogfightView().showCompletedWidget();
 
         addTimeout(3500, (callCount) -> {

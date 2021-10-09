@@ -83,7 +83,7 @@ public class DogfightScoreboardWidget extends WidgetObserver implements IButtonO
     }
 
     @Override
-    public void buttonClicked(String widgetId) {
+    public void buttonClicked(String widgetId) throws IOException {
         switch (widgetId) {
             case RESET_SCOREBOARD_BUTTON -> _observer.resetDogfightScoreboardButtonClicked();
             case MAIN_MENU_BUTTON -> _observer.mainMenuButtonClicked();

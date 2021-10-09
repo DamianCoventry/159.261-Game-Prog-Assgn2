@@ -14,6 +14,7 @@
 
 package com.lunargravity.menu.view;
 
+import com.lunargravity.application.PlayerInputBindings;
 import com.lunargravity.engine.widgetsystem.*;
 
 import java.io.IOException;
@@ -42,10 +43,12 @@ public class OptionsWidget extends WidgetObserver implements
     private static final String MAIN_MENU_BUTTON = "mainMenuButton";
 
     private final IOptionsWidgetObserver _observer;
+    private final PlayerInputBindings _playerInputBindings;
 
-    public OptionsWidget(WidgetManager widgetManager, IOptionsWidgetObserver observer) {
+    public OptionsWidget(WidgetManager widgetManager, IOptionsWidgetObserver observer, PlayerInputBindings playerInputBindings) {
         super(widgetManager);
         _observer = observer;
+        _playerInputBindings = playerInputBindings;
     }
 
     @Override
@@ -117,9 +120,15 @@ public class OptionsWidget extends WidgetObserver implements
     }
 
     @Override
-    public void buttonClicked(String widgetId) {
+    public void widgetShown() throws IOException {
+        setupKeyBindingWidgets();
+    }
+
+    @Override
+    public void buttonClicked(String widgetId) throws IOException {
         if (widgetId.equals(RESET_TO_DEFAULTS_BUTTON)) {
             _observer.setDefaultPlayerKeysButtonClicked();
+            setupKeyBindingWidgets();
         }
         else if (widgetId.equals(MAIN_MENU_BUTTON)) {
             _observer.mainMenuButtonClicked();
@@ -176,5 +185,28 @@ public class OptionsWidget extends WidgetObserver implements
     public void freeResources() {
         super.freeResources();
         // anything to do?
+    }
+
+    private void setupKeyBindingWidgets() throws IOException {
+        Widget child = _widget.getChild(P1_ROTATE_CW_KEYBOARD_KEY);
+        if (child != null && child.getObserver() instanceof KeyBindingWidget keyBindingWidget) {
+            keyBindingWidget.setKey(_playerInputBindings.getPlayerRotateRightKey(0));
+        }
+        child = _widget.getChild(P1_ROTATE_CCW_KEYBOARD_KEY);
+        if (child != null && child.getObserver() instanceof KeyBindingWidget keyBindingWidget) {
+            keyBindingWidget.setKey(_playerInputBindings.getPlayerRotateLeftKey(0));
+        }
+        child = _widget.getChild(P1_THRUST_KEYBOARD_KEY);
+        if (child != null && child.getObserver() instanceof KeyBindingWidget keyBindingWidget) {
+            keyBindingWidget.setKey(_playerInputBindings.getPlayerThrustKey(0));
+        }
+        child = _widget.getChild(P1_KICK_KEYBOARD_KEY);
+        if (child != null && child.getObserver() instanceof KeyBindingWidget keyBindingWidget) {
+            keyBindingWidget.setKey(_playerInputBindings.getPlayerKickKey(0));
+        }
+        child = _widget.getChild(P1_SHOOT_KEYBOARD_KEY);
+        if (child != null && child.getObserver() instanceof KeyBindingWidget keyBindingWidget) {
+            keyBindingWidget.setKey(_playerInputBindings.getPlayerShootKey(0));
+        }
     }
 }

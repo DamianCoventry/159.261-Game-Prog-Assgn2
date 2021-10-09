@@ -21,6 +21,8 @@ import com.lunargravity.dogfight.controller.IDogfightControllerObserver;
 import com.lunargravity.dogfight.view.IDogfightView;
 import com.lunargravity.menu.statemachine.LoadingMenuState;
 
+import java.io.IOException;
+
 public class DogfightPausedState extends StateBase implements IDogfightControllerObserver {
     public DogfightPausedState(IStateMachineContext context) {
         super(context);
@@ -35,7 +37,7 @@ public class DogfightPausedState extends StateBase implements IDogfightControlle
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getDogfightController().addObserver(this);
         getDogfightView().showPausedWidget();
     }

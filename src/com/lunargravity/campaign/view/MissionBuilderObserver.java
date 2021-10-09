@@ -72,7 +72,7 @@ public class MissionBuilderObserver implements ISceneBuilderObserver {
     }
 
     @Override
-    public void sceneBuildBeginning() {
+    public void sceneBuildBeginning() throws IOException {
         _widgetManager.open(_backgroundImage, WidgetManager.OpenAs.FIRST, WidgetManager.AlreadyOpenBehaviour.BRING_TO_FRONT);
         _widgetManager.show(_backgroundImage, WidgetManager.ShowAs.FIRST);
     }

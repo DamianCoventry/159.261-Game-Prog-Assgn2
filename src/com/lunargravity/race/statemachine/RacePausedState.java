@@ -21,6 +21,8 @@ import com.lunargravity.race.controller.IRaceController;
 import com.lunargravity.race.controller.IRaceControllerObserver;
 import com.lunargravity.race.view.IRaceView;
 
+import java.io.IOException;
+
 public class RacePausedState extends StateBase implements IRaceControllerObserver {
     public RacePausedState(IStateMachineContext context) {
         super(context);
@@ -35,7 +37,7 @@ public class RacePausedState extends StateBase implements IRaceControllerObserve
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getRaceController().addObserver(this);
         getRaceView().showPausedWidget();
     }

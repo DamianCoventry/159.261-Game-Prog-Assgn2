@@ -14,10 +14,12 @@
 
 package com.lunargravity.menu.view;
 
+import java.io.IOException;
+
 public interface IMainWidgetObserver {
     void campaignGameButtonClicked();
-    void raceGameButtonClicked();
-    void dogfightGameButtonClicked();
-    void optionsButtonClicked();
+    void raceGameButtonClicked() throws IOException;
+    void dogfightGameButtonClicked() throws IOException;
+    void optionsButtonClicked() throws IOException;
     void exitApplicationButtonClicked();
 }

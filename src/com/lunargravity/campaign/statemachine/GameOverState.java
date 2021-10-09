@@ -8,6 +8,8 @@ import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 import com.lunargravity.menu.statemachine.LoadingMenuState;
 
+import java.io.IOException;
+
 public class GameOverState extends StateBase implements ICampaignControllerObserver {
     private int _timeoutId;
 
@@ -17,7 +19,7 @@ public class GameOverState extends StateBase implements ICampaignControllerObser
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getCampaignController().addObserver(this);
         getCampaignView().showGameOver();
 

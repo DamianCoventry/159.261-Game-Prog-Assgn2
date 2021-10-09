@@ -65,7 +65,7 @@ public class MenuView implements
     }
 
     @Override
-    public void initialLoadCompleted() {
+    public void initialLoadCompleted() throws IOException {
         _widgetManager.show(_main, WidgetManager.ShowAs.FIRST);
     }
 
@@ -147,7 +147,7 @@ public class MenuView implements
             _campaign = new Widget(viewportConfig, wci, new CampaignWidget(_widgetManager, this));
         }
         else if (wci._id.equals(OPTIONS) && wci._type.equals("OptionsWidget")) {
-            _options = new Widget(viewportConfig, wci, new OptionsWidget(_widgetManager, this));
+            _options = new Widget(viewportConfig, wci, new OptionsWidget(_widgetManager, this, _controller.getPlayerInputBindings()));
         }
         else if (wci._id.equals(RACE_SCOREBOARD) && wci._type.equals("RaceScoreboardWidget")) {
             _raceScoreboard = new Widget(viewportConfig, wci, new RaceScoreboardWidget(_widgetManager, this));
@@ -165,19 +165,19 @@ public class MenuView implements
     }
 
     @Override
-    public void raceGameButtonClicked() {
+    public void raceGameButtonClicked() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_raceScoreboard, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
-    public void dogfightGameButtonClicked() {
+    public void dogfightGameButtonClicked() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_dogfightScoreboard, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
-    public void optionsButtonClicked() {
+    public void optionsButtonClicked() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_options, WidgetManager.ShowAs.FIRST);
     }
@@ -233,7 +233,7 @@ public class MenuView implements
     }
 
     @Override
-    public void mainMenuButtonClicked() {
+    public void mainMenuButtonClicked() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_main, WidgetManager.ShowAs.FIRST);
     }

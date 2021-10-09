@@ -131,13 +131,13 @@ public class RaceView implements
     }
 
     @Override
-    public void showResultsWidget() {
+    public void showResultsWidget() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_raceResults, WidgetManager.ShowAs.FIRST);
     }
 
     @Override
-    public void showPausedWidget() {
+    public void showPausedWidget() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_racePaused, WidgetManager.ShowAs.FIRST);
     }
@@ -156,7 +156,7 @@ public class RaceView implements
     }
 
     @Override
-    public void showCompletedWidget() {
+    public void showCompletedWidget() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_raceCompleted, WidgetManager.ShowAs.FIRST);
     }

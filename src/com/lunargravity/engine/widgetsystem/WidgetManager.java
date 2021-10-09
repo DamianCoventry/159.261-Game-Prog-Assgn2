@@ -88,7 +88,7 @@ public class WidgetManager implements IInputObserver {
     public enum AlreadyOpenBehaviour { BRING_TO_FRONT, SEND_TO_BACK, RE_OPEN, CANCEL_OPEN }
     public enum OpenAs { FIRST, LAST }
 
-    public void open(Widget widget, OpenAs openAs, AlreadyOpenBehaviour behaviour) {
+    public void open(Widget widget, OpenAs openAs, AlreadyOpenBehaviour behaviour) throws IOException {
         if (isOpen(widget)) {
             switch (behaviour) {
                 case BRING_TO_FRONT:
@@ -153,7 +153,7 @@ public class WidgetManager implements IInputObserver {
 
     public enum ShowAs { FIRST, LAST }
 
-    public void show(Widget widget, ShowAs showAs) {
+    public void show(Widget widget, ShowAs showAs) throws IOException {
         if (!isOpen(widget)) {
             if (showAs == ShowAs.FIRST) {
                 open(widget, OpenAs.FIRST, AlreadyOpenBehaviour.BRING_TO_FRONT);
@@ -206,7 +206,7 @@ public class WidgetManager implements IInputObserver {
         _mouseCapture = null;
     }
     
-    public void bringToFront(Widget widget) {
+    public void bringToFront(Widget widget) throws IOException {
         if (!isOpen(widget)) {
             open(widget, OpenAs.FIRST, AlreadyOpenBehaviour.BRING_TO_FRONT);
             return;
@@ -231,7 +231,7 @@ public class WidgetManager implements IInputObserver {
         }
     }
 
-    public void sendToBack(Widget widget) {
+    public void sendToBack(Widget widget) throws IOException {
         if (!isOpen(widget)) {
             open(widget, OpenAs.LAST, AlreadyOpenBehaviour.BRING_TO_FRONT);
             return;

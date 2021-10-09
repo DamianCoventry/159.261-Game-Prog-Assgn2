@@ -43,7 +43,7 @@ public class CampaignWidget extends WidgetObserver implements IButtonObserver, I
     }
 
     @Override
-    public void buttonClicked(String widgetId) {
+    public void buttonClicked(String widgetId) throws IOException {
         switch (widgetId) {
             case SINGLE_PLAYER_BUTTON -> _observer.singlePlayerCampaignButtonClicked();
             case TWO_PLAYERS_BUTTON -> _observer.twoPlayersCampaignButtonClicked();

@@ -19,13 +19,15 @@ import com.lunargravity.application.StateBase;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 import com.lunargravity.race.view.IRaceView;
 
+import java.io.IOException;
+
 public class RaceCompletedState extends StateBase {
     public RaceCompletedState(IStateMachineContext context) {
         super(context);
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getRaceView().showCompletedWidget();
 
         addTimeout(3500, (callCount) -> {

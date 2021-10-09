@@ -33,7 +33,7 @@ public class MissionCompletedState extends StateBase implements ICampaignControl
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getCampaignController().addObserver(this);
         getCampaignView().showMissionCompleted();
 

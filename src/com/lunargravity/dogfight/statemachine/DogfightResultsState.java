@@ -7,6 +7,8 @@ import com.lunargravity.dogfight.controller.IDogfightControllerObserver;
 import com.lunargravity.dogfight.view.IDogfightView;
 import com.lunargravity.menu.statemachine.LoadingMenuState;
 
+import java.io.IOException;
+
 public class DogfightResultsState extends StateBase implements IDogfightControllerObserver {
     public DogfightResultsState(IStateMachineContext context) {
         super(context);
@@ -21,7 +23,7 @@ public class DogfightResultsState extends StateBase implements IDogfightControll
     }
 
     @Override
-    public void begin() {
+    public void begin() throws IOException {
         getDogfightController().addObserver(this);
         getDogfightView().showResultsWidget();
     }

@@ -1024,7 +1024,7 @@ public class GameWorldView implements
     }
 
     @Override
-    public void showMissionStatusBar() {
+    public void showMissionStatusBar() throws IOException {
         _widgetManager.hideAll();
         _widgetManager.show(_episodeMissionStatusBar, WidgetManager.ShowAs.FIRST);
         _widgetManager.show(_fuelStatusBar, WidgetManager.ShowAs.LAST);

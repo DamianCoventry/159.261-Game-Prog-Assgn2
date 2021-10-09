@@ -14,6 +14,8 @@
 
 package com.lunargravity.engine.widgetsystem;
 
+import java.io.IOException;
+
 public interface IButtonObserver {
-    void buttonClicked(String widgetId);
+    void buttonClicked(String widgetId) throws IOException;
 }

@@ -152,6 +152,11 @@ public class MenuController implements IMenuController {
     }
 
     @Override
+    public PlayerInputBindings getPlayerInputBindings() {
+        return _playerInputBindings;
+    }
+
+    @Override
     public void exitApplication() {
         _engine.exit();
     }
