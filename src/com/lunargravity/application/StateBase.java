@@ -105,7 +105,7 @@ public class StateBase implements IState {
     }
 
     @Override
-    public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws Exception {
         // TODO
     }
 

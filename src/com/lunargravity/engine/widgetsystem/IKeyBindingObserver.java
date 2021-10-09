@@ -1,5 +1,5 @@
 package com.lunargravity.engine.widgetsystem;
 
 public interface IKeyBindingObserver {
-    void keyBindingChanged(String widgetId, int key);
+    void keyBindingChanged(String widgetId, int oldKey, int newKey);
 }

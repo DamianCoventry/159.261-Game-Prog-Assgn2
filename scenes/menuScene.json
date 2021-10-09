@@ -98,7 +98,8 @@
                     },
                     "_properties": {
                         "backgroundImage": "images/KeyBinding_Normal.png",
-                        "hoverImage": "images/KeyBinding_Hover.png"
+                        "hoverImage": "images/KeyBinding_Hover.png",
+                        "pressAnyKeyImage": "images/KeyBinding_PressAnyKey.png"
                     },
                     "_children": []
                 },
@@ -115,7 +116,8 @@
                     },
                     "_properties": {
                         "backgroundImage": "images/KeyBinding_Normal.png",
-                        "hoverImage": "images/KeyBinding_Hover.png"
+                        "hoverImage": "images/KeyBinding_Hover.png",
+                        "pressAnyKeyImage": "images/KeyBinding_PressAnyKey.png"
                     },
                     "_children": []
                 },
@@ -132,7 +134,8 @@
                     },
                     "_properties": {
                         "backgroundImage": "images/KeyBinding_Normal.png",
-                        "hoverImage": "images/KeyBinding_Hover.png"
+                        "hoverImage": "images/KeyBinding_Hover.png",
+                        "pressAnyKeyImage": "images/KeyBinding_PressAnyKey.png"
                     },
                     "_children": []
                 },
@@ -149,7 +152,8 @@
                     },
                     "_properties": {
                         "backgroundImage": "images/KeyBinding_Normal.png",
-                        "hoverImage": "images/KeyBinding_Hover.png"
+                        "hoverImage": "images/KeyBinding_Hover.png",
+                        "pressAnyKeyImage": "images/KeyBinding_PressAnyKey.png"
                     },
                     "_children": []
                 },
@@ -166,7 +170,8 @@
                     },
                     "_properties": {
                         "backgroundImage": "images/KeyBinding_Normal.png",
-                        "hoverImage": "images/KeyBinding_Hover.png"
+                        "hoverImage": "images/KeyBinding_Hover.png",
+                        "pressAnyKeyImage": "images/KeyBinding_PressAnyKey.png"
                     },
                     "_children": []
                 },

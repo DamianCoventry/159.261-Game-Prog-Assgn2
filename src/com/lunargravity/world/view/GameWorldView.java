@@ -19,6 +19,8 @@ import com.jme3.bullet.objects.PhysicsBody;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.lunargravity.application.LargeNumberFont;
 import com.lunargravity.campaign.model.CampaignModel;
+import com.lunargravity.engine.animation.FCurve;
+import com.lunargravity.engine.animation.LinearInterpolation;
 import com.lunargravity.engine.audio.SoundBuffer;
 import com.lunargravity.engine.audio.SoundBufferCache;
 import com.lunargravity.engine.audio.SoundSource;
@@ -56,9 +58,9 @@ public class GameWorldView implements
     private static final float PLAYER_SHOT_OFFSET = 0.75f; // Measured using Blender
     private static final float MIN_IMPULSE_TO_PLAY_SOUND = 2.0f;
     private static final float EXPLOSION_FLASH_SIZE = 3.0f;
-    private static final float EXPLOSION_FLASH_FADE_INCREMENT = 0.008f;
-    private static final float EXPLOSION_WAKE_SIZE = 7.0f;
-    private static final float EXPLOSION_WAKE_SCALE_INCREMENT = 0.035f;
+    private static final long PLAYER_EXPLOSION_FADE_TIME = 2000;
+    private static final float EXPLOSION_WAKE_SIZE = 4.0f;
+    private static final long EXPLOSION_WAKE_SCALE_TIME  = 1750;
 
     private static final Vector2f HUD_PLAYER_SHIP_ICON_OFFSET = new Vector2f(440.0f, 25.0f);
     private static final Vector2f HUD_CRATE_ICON_OFFSET = new Vector2f(645.0f, 25.0f);
@@ -119,6 +121,7 @@ public class GameWorldView implements
     private static final int MAX_DUST_CLOUDS = 10;
     private static final int NUM_DUST_PARTICLES_PER_CLOUD = 3;
     private static final float DUST_CLOUD_SIZE = 1.0f;
+    private static final float DUST_CLOUD_FADE_INCREMENT = 0.008f;
     private static final float DUST_CLOUD_ROTATE_INCREMENT = 0.008f;
 
     private static final com.jme3.math.Vector3f ZERO_VELOCITY = new com.jme3.math.Vector3f(0, 0, 0);
@@ -199,11 +202,12 @@ public class GameWorldView implements
     private DisplayMesh _worldDisplayMesh;
 
     private final Vector4f _playerExplosionColour;
-    private float _explosionWakeScale;
     private DisplayMesh _explosionFlash;
     private DisplayMesh _explosionWake;
     private boolean _playerExploding;
     private boolean _showSparks;
+    private final FCurve _playerExplosionAlpha;
+    private final FCurve _playerExplosionWakeScale;
 
     private final ArrayList<RigidBodyObject> _lunarLanders;
     private final ArrayList<RigidBodyObject> _crates;
@@ -286,7 +290,9 @@ public class GameWorldView implements
         _explosionFlashModelMatrix = new Matrix4f();
         _explosionWakeModelMatrix = new Matrix4f();
         _lastCollisionTime = 0;
-        _explosionWakeScale = 1.0f;
+        _playerExplosionWakeScale = new LinearInterpolation(_engine.getAnimationManager());
+        _playerExplosionAlpha = new LinearInterpolation(_engine.getAnimationManager());
+        _playerExplosionAlpha.setCompletedFunction(elapsedMs -> _playerExploding = false);
 
         _cameras = new Transform[2];
         _cameras[0] = new Transform();
@@ -545,14 +551,7 @@ public class GameWorldView implements
     public void viewThink() {
         if (_playerExploding) {
             _explosionParticleSystem.think(_engine.getNowMs());
-
-            _explosionWakeScale += EXPLOSION_WAKE_SCALE_INCREMENT;
-
-            _playerExplosionColour.w -= EXPLOSION_FLASH_FADE_INCREMENT;
-            if (_playerExplosionColour.w < 0.0f) {
-                _playerExplosionColour.w = 0.0f;
-                _playerExploding = false;
-            }
+            _playerExplosionColour.w = _playerExplosionAlpha.getValue();
         }
 
         if (_showSparks) {
@@ -591,7 +590,7 @@ public class GameWorldView implements
                     .translate(_dustClouds[i]._position)
                     .rotate(_dustClouds[i]._rotations[2], Z_AXIS);
 
-            _dustClouds[i]._diffuseColour.w -= EXPLOSION_FLASH_FADE_INCREMENT;
+            _dustClouds[i]._diffuseColour.w -= DUST_CLOUD_FADE_INCREMENT;
             if (_dustClouds[i]._diffuseColour.w < 0.0f) {
                 _dustClouds[i]._diffuseColour.w = 0.0f;
                 _dustClouds[i]._active = false;
@@ -623,11 +622,13 @@ public class GameWorldView implements
         }
 
         if (progressBuff._type == ProgressBuff.Type.DELIVERING) {
-            progressBuff._crate.getRigidBody().getPhysicsLocation(_jmeVector);
-            _jomlVector.x = _jmeVector.x;
-            _jomlVector.y = _jmeVector.y;
-            _jomlVector.z = _jmeVector.z;
-            progressBuff._position.set(_jomlVector).add(0.0f, PROGRESS_BUFF_Y_OFFSET, 0.0f);
+            if (progressBuff._crate.getRigidBody() != null) {
+                progressBuff._crate.getRigidBody().getPhysicsLocation(_jmeVector);
+                _jomlVector.x = _jmeVector.x;
+                _jomlVector.y = _jmeVector.y;
+                _jomlVector.z = _jmeVector.z;
+                progressBuff._position.set(_jomlVector).add(0.0f, PROGRESS_BUFF_Y_OFFSET, 0.0f);
+            }
         }
 
         progressBuff._modelMatrix
@@ -766,7 +767,9 @@ public class GameWorldView implements
             _mvpMatrix.set(_vpMatrix).mul(_explosionFlashModelMatrix);
             _explosionFlash.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
 
-            _mvpMatrix.set(_vpMatrix).mul(_explosionWakeModelMatrix).scale(_explosionWakeScale);;
+            _mvpMatrix.set(_vpMatrix)
+                    .mul(_explosionWakeModelMatrix)
+                    .scale(_playerExplosionWakeScale.getValue(), _playerExplosionWakeScale.getValue(), 1.0f);
             _explosionWake.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
 
             _explosionParticleSystem.draw(_vpMatrix);
@@ -1214,11 +1217,12 @@ public class GameWorldView implements
         _explosionParticleSystem.emitAll(_engine.getNowMs(), _jomlVector,
                 EXPLOSION_SPARK_MIN_LIFE_TIME, EXPLOSION_SPARK_MAX_LIFE_TIME);
         _playerExploding = true;
+        _playerExplosionAlpha.start(1.0f, 0.0f, PLAYER_EXPLOSION_FADE_TIME);
+        _playerExplosionWakeScale.start(0.1f, EXPLOSION_WAKE_SIZE, EXPLOSION_WAKE_SCALE_TIME);
 
         _explosionFlashModelMatrix.identity().translate(_jomlVector);
         _explosionWakeModelMatrix.identity().translate(_jomlVector);
 
-        _explosionWakeScale = 0.1f;
         _playerExplosionColour.w = 1.0f;
 
         _largeSmokeParticleSystem.emitAll(_engine.getNowMs(), _jomlVector,
@@ -1230,7 +1234,7 @@ public class GameWorldView implements
 
     @Override
     public void playerShipDead(int player) {
-        //_playerExploding = false;
+        // Nothing to do
     }
 
     @Override

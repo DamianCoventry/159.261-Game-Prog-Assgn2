@@ -42,8 +42,8 @@ public class GLSpecularDirectionalLightProgram extends GlProgram {
     private float _shininess;
 
     public GLSpecularDirectionalLightProgram() throws IOException {
-        super(Files.readString(Paths.get("shaders/SpecularDirectionalLight.vert"), StandardCharsets.US_ASCII),
-              Files.readString(Paths.get("shaders/SpecularDirectionalLight.frag"), StandardCharsets.US_ASCII));
+        super(Files.readString(Paths.get("shaders/SpecularDirectionalLight.vert"), StandardCharsets.UTF_8),
+              Files.readString(Paths.get("shaders/SpecularDirectionalLight.frag"), StandardCharsets.UTF_8));
 
         _mvMatrixLocation = getUniformLocation("mvMatrix");
         _projectionMatrixLocation = getUniformLocation("projectionMatrix");

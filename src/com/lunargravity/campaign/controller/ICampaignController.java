@@ -15,7 +15,8 @@ public interface ICampaignController extends IController {
     void episodeIntroAborted() throws Exception;
     void episodeOutroAborted() throws Exception;
     void completeEpisode() throws Exception;
-    
+    void skipToMission(int i) throws Exception;
+
     void missionIntroAborted();
     void resumeMission();
     void completeMission() throws Exception;

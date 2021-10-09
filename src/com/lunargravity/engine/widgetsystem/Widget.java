@@ -167,7 +167,7 @@ public class Widget implements IInputObserver {
     }
 
     @Override
-    public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws IOException {
         if (_observer != null) {
             _observer.keyboardKeyEvent(key, scancode, action, mods);
         }

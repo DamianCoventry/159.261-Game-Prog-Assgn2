@@ -17,6 +17,7 @@ package com.lunargravity.engine.core;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.system.NativeLibraryLoader;
+import com.lunargravity.engine.animation.AnimationManager;
 import com.lunargravity.engine.audio.AudioDevice;
 import com.lunargravity.engine.audio.SoundListener;
 import com.lunargravity.engine.desktopwindow.GlfwWindow;
@@ -41,6 +42,7 @@ public class Engine implements IEngine {
 
     private final Renderer _renderer;
     private final TimeoutManager _timeoutManager;
+    private final AnimationManager _animationManager;
     private final PhysicsSpace _physicsSpace;
     private PhysicsCollisionListener _physicsCollisionListener;
     private GlfwWindow _window;
@@ -66,6 +68,7 @@ public class Engine implements IEngine {
         _inputObserver = inputObserver;
         _viewportSizeObserver = viewportSizeObserver;
         _timeoutManager = new TimeoutManager();
+        _animationManager = new AnimationManager(this);
 
         _physicsSpace = new PhysicsSpace(PhysicsSpace.BroadphaseType.DBVT);
         _physicsSpace.addOngoingCollisionListener(event -> {
@@ -116,6 +119,7 @@ public class Engine implements IEngine {
 
             _physicsSpace.update(PHYSICS_TIME_STEP, 0);
             _physicsSpace.distributeEvents();
+            _animationManager.update(_currentTimeMs);
             _frameObserver.onFrameThink();
 
             _renderer.clearBuffers();
@@ -212,6 +216,11 @@ public class Engine implements IEngine {
     @Override
     public TimeoutManager getTimeoutManager() {
         return _timeoutManager;
+    }
+
+    @Override
+    public AnimationManager getAnimationManager() {
+        return _animationManager;
     }
 
     @Override
@@ -340,7 +349,11 @@ public class Engine implements IEngine {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 if (_inputObserver != null) {
-                    _inputObserver.keyboardKeyEvent(key, scancode, action, mods);
+                    try {
+                        _inputObserver.keyboardKeyEvent(key, scancode, action, mods);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });

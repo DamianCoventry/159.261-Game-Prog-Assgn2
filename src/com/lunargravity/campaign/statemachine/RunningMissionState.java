@@ -21,6 +21,7 @@ import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.campaign.view.ICampaignView;
+import com.lunargravity.campaign.view.MissionBuilderObserver;
 import com.lunargravity.world.controller.IGameWorldController;
 import com.lunargravity.world.model.IGameWorldModel;
 import com.lunargravity.world.view.IGameWorldView;
@@ -51,14 +52,32 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
     }
 
     @Override
-    public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws Exception {
         PlayerInputBindings inputBindings = getGameWorldModel().getPlayerInputBindings();
 
         if (action == GLFW_PRESS) {
             if (key == GLFW_KEY_ESCAPE) {
                 changeState(new MissionPausedState(getContext()));
             }
-            
+            else if (key == GLFW_KEY_1) {
+                getCampaignController().skipToMission(0);
+            }
+            else if (key == GLFW_KEY_2) {
+                getCampaignController().skipToMission(1);
+            }
+            else if (key == GLFW_KEY_3) {
+                getCampaignController().skipToMission(2);
+            }
+            else if (key == GLFW_KEY_4) {
+                getCampaignController().skipToMission(3);
+            }
+            else if (key == GLFW_KEY_5) {
+                getCampaignController().skipToMission(4);
+            }
+            else if (key == GLFW_KEY_6) {
+                getCampaignController().skipToMission(5);
+            }
+
             if (inputBindings.getPlayerThrustKey(0) == key) {
                 getGameWorldController().playerStartThrust(0);
             }
@@ -173,7 +192,14 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
 
     @Override
     public void startNextEpisode() throws Exception {
-        // Nothing to do
+        // Only here for the cheat keys
+        MissionBuilderObserver missionBuilderObserver = new MissionBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
+
+        getContext().loadCampaignMission(missionBuilderObserver);
+
+        changeState(new MissionIntroState(getContext()));
+
+        missionBuilderObserver.freeResources();
     }
 
     @Override

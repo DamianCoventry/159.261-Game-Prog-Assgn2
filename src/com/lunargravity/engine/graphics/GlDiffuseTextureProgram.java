@@ -29,8 +29,8 @@ public class GlDiffuseTextureProgram extends GlProgram {
     private Vector4f _diffuseColour;
 
     protected GlDiffuseTextureProgram() throws IOException {
-        super(Files.readString(Paths.get("shaders/DiffuseTexture.vert"), StandardCharsets.US_ASCII),
-              Files.readString(Paths.get("shaders/DiffuseTexture.frag"), StandardCharsets.US_ASCII));
+        super(Files.readString(Paths.get("shaders/DiffuseTexture.vert"), StandardCharsets.UTF_8),
+              Files.readString(Paths.get("shaders/DiffuseTexture.frag"), StandardCharsets.UTF_8));
 
         _mvpMatrixLocation = getUniformLocation("mvpMatrix");
         _diffuseTextureLocation = getUniformLocation("diffuseTexture");

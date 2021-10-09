@@ -16,6 +16,7 @@ package com.lunargravity.engine.core;
 
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
+import com.lunargravity.engine.animation.AnimationManager;
 import com.lunargravity.engine.desktopwindow.GlfwWindow;
 import com.lunargravity.engine.graphics.Renderer;
 import com.lunargravity.engine.timeouts.TimeoutManager;
@@ -31,6 +32,7 @@ public interface IEngine extends IManualFrameUpdater {
     long getNowMs();
 
     TimeoutManager getTimeoutManager();
+    AnimationManager getAnimationManager();
     PhysicsSpace getPhysicsSpace();
     Renderer getRenderer();
     GlfwWindow.CursorPosition getMouseCursorPosition();

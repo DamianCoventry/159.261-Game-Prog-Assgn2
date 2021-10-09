@@ -14,12 +14,19 @@
 
 package com.lunargravity.application;
 
+import com.google.gson.Gson;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class PlayerInputBindings {
+    private static final String INPUT_BINDINGS_FILE_NAME = "inputBindings.json";
+
     private static class InputBinding {
         public int _keyThrust;
         public int _keyRotateCcw;
@@ -27,7 +34,7 @@ public class PlayerInputBindings {
         public int _keyShoot;
         public int _keyKick;
     }
-    private final InputBinding[] _inputBindings;
+    private InputBinding[] _inputBindings;
 
     public PlayerInputBindings() {
         _inputBindings = new InputBinding[2];
@@ -49,12 +56,37 @@ public class PlayerInputBindings {
         _inputBindings[1]._keyKick = GLFW_KEY_K;
     }
 
-    public void load(File file) throws IOException {
-        // TODO
+    public boolean load() {
+        try {
+            File file = new File(INPUT_BINDINGS_FILE_NAME);
+            if (!file.exists() || !file.isFile()) {
+                return false;
+            }
+
+            String text = Files.readString(Paths.get(INPUT_BINDINGS_FILE_NAME), StandardCharsets.UTF_8);
+            if (text.isEmpty()) {
+                return false;
+            }
+            
+            Gson gson = new Gson();
+            _inputBindings = gson.fromJson(text, InputBinding[].class);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
-    public void save(String fileName) throws IOException {
-        // TODO
+    public void save() {
+        try {
+            Gson gson = new Gson();
+            String json = gson.toJson(_inputBindings);
+            Files.writeString(Paths.get(INPUT_BINDINGS_FILE_NAME), json, StandardCharsets.UTF_8);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setPlayerRotateLeftKey(int i, int key) {

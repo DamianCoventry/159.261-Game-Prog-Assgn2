@@ -15,11 +15,16 @@
 package com.lunargravity.campaign.statemachine;
 
 import com.lunargravity.application.IStateMachineContext;
+import com.lunargravity.application.PlayerInputBindings;
 import com.lunargravity.application.StateBase;
 import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.view.ICampaignView;
+import com.lunargravity.campaign.view.MissionBuilderObserver;
 import com.lunargravity.engine.timeouts.TimeoutManager;
+
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_6;
 
 public class MissionIntroState extends StateBase implements ICampaignControllerObserver {
     private int _timeoutId;
@@ -51,8 +56,34 @@ public class MissionIntroState extends StateBase implements ICampaignControllerO
     }
 
     @Override
-    public void startNextEpisode() {
-        // Nothing to do
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws Exception {
+        if (action == GLFW_PRESS) {
+            if (key == GLFW_KEY_1) {
+                getCampaignController().skipToMission(0);
+            } else if (key == GLFW_KEY_2) {
+                getCampaignController().skipToMission(1);
+            } else if (key == GLFW_KEY_3) {
+                getCampaignController().skipToMission(2);
+            } else if (key == GLFW_KEY_4) {
+                getCampaignController().skipToMission(3);
+            } else if (key == GLFW_KEY_5) {
+                getCampaignController().skipToMission(4);
+            } else if (key == GLFW_KEY_6) {
+                getCampaignController().skipToMission(5);
+            }
+        }
+    }
+
+    @Override
+    public void startNextEpisode() throws Exception {
+        // Only here for the cheat keys
+        MissionBuilderObserver missionBuilderObserver = new MissionBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
+
+        getContext().loadCampaignMission(missionBuilderObserver);
+
+        changeState(new MissionIntroState(getContext()));
+
+        missionBuilderObserver.freeResources();
     }
 
     @Override

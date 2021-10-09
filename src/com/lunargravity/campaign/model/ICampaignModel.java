@@ -6,6 +6,7 @@ public interface ICampaignModel extends IModel {
     int NUM_EPISODES = 5;
     int NUM_MISSIONS_PER_EPISODE = 6;
 
+    void setMission(int i);
     int getEpisode();
     int getMission();
     int getNumPlayers();

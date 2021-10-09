@@ -47,5 +47,6 @@
     <orderEntry type="library" name="lwjgl" level="project" />
     <orderEntry type="library" name="joml-1.10.1" level="project" />
     <orderEntry type="library" name="Libbulletjme-10.5.0" level="project" />
+    <orderEntry type="library" name="lib" level="project" />
   </component>
 </module>

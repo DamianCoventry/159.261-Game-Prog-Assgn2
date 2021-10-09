@@ -47,7 +47,7 @@ public class SceneBuilder {
             throw new IllegalArgumentException("The file system item [" + fileName + "] is not a file");
         }
 
-        String text = Files.readString(Paths.get(fileName), StandardCharsets.US_ASCII);
+        String text = Files.readString(Paths.get(fileName), StandardCharsets.UTF_8);
         if (text.isEmpty()) {
             throw new IllegalArgumentException("Scene file [" + fileName + "] is empty");
         }

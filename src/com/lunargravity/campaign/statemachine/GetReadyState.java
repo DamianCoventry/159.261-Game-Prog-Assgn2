@@ -2,10 +2,13 @@ package com.lunargravity.campaign.statemachine;
 
 import com.lunargravity.application.IStateMachineContext;
 import com.lunargravity.application.StateBase;
+import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
 import java.io.IOException;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public class GetReadyState extends StateBase {
     public static final int MIN_SECONDS = 1;

@@ -34,21 +34,21 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     public static final String BACKGROUND_IMAGE = "backgroundImage";
     public static final String BACKGROUND_ALPHA = "backgroundAlpha";
     public static final String HOVER_IMAGE = "hoverImage";
-    private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    protected static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     protected WidgetManager _widgetManager;
-    private final GlDiffuseTextureProgram _program;
+    protected final GlDiffuseTextureProgram _program;
     protected Widget _widget;
     protected GlTexture _backgroundTexture;
     protected GlTexture _hoverTexture;
     protected PolyhedraVxTc _polyhedra;
     protected Matrix4f _modelMatrix;
-    protected Vector4f _backGroundVector4f;
+    protected Vector4f _backgroundColour;
 
     protected WidgetObserver(WidgetManager widgetManager) {
         _widgetManager = widgetManager;
         _widget = null;
-        _backGroundVector4f = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+        _backgroundColour = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
         _program = _widgetManager.getRenderer().getDiffuseTextureProgram();
         _modelMatrix = new Matrix4f();
     }
@@ -75,7 +75,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
         if (stringValue != null) {
             alpha = Math.min(1.0f, Math.max(0.0f, Float.parseFloat(stringValue)));
         }
-        _backGroundVector4f.w = alpha;
+        _backgroundColour.w = alpha;
 
         stringValue = wci._properties.get(HOVER_IMAGE);
         if (stringValue != null) {
@@ -234,7 +234,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
         }
         else {
             glBindTexture(GL_TEXTURE_2D, _backgroundTexture.getId());
-            _program.setDiffuseColour(_backGroundVector4f);
+            _program.setDiffuseColour(_backgroundColour);
         }
 
         _program.activate(mvpMatrix);
@@ -247,7 +247,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     }
 
     @Override
-    public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws IOException {
         // TODO: Any standard behaviour?
     }
 

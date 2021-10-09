@@ -51,6 +51,10 @@ import com.lunargravity.world.model.*;
 import com.lunargravity.world.view.GameWorldView;
 import com.lunargravity.world.view.IWorldView;
 import com.lunargravity.world.view.MenuWorldView;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import org.joml.Matrix4f;
 
 import java.io.File;
@@ -65,7 +69,6 @@ public class Application implements
         IMenuWorldControllerObserver
 {
     static final private String WINDOW_TITLE = "Lunar Gravity v1.0";
-    static final private String PLAYER_INPUT_BINDINGS_FILE_NAME = "playerInputBindings.json";
     static final private String MENU_SCENE_FILE_NAME = "scenes/menuScene.json";
     static final private String MENU_WORLD_SCENE_FILE_NAME = "scenes/menuWorldScene.json";
 
@@ -78,9 +81,10 @@ public class Application implements
     private static final int FIRST_EPISODE = 0;
     private static final int FIRST_MISSION = 0;
     private static final int FIRST_LEVEL = 0;
+    private static final String MENU_BACKGROUND_MUSIC = "music/Art-Of-Silence_V2.mp3";
 
     private final IEngine _engine;
-    private PlayerInputBindings _playerInputBindings;
+    private final PlayerInputBindings _playerInputBindings;
 
     private long _frameNo;
     private long _nowMs;
@@ -115,10 +119,12 @@ public class Application implements
         _logicController = null;
 
         _engine = new Engine(this, this, this, createWindowConfig());
-
         _widgetManager = new WidgetManager(_engine);
 
-        initialisePlayerInputBindings();
+        _playerInputBindings = new PlayerInputBindings();
+        if (!_playerInputBindings.load()) {
+            _playerInputBindings.setDefaults();
+        }
 
         changeStateNow(new LoadingMenuState(this));
     }
@@ -186,7 +192,7 @@ public class Application implements
     }
 
     @Override
-    public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws Exception {
         _currentState.keyboardKeyEvent(key, scancode, action, mods); // TODO: consider adding a 'consumed' return code
         _widgetManager.keyboardKeyEvent(key, scancode, action, mods);
     }
@@ -302,6 +308,9 @@ public class Application implements
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
+
+        // JavaFX has been remarkably unreliable. Commenting it out for now.
+        //startBackgroundMusic(MENU_BACKGROUND_MUSIC);
     }
 
     @Override
@@ -321,6 +330,7 @@ public class Application implements
         _worldController = gameWorldController;
 
         ((ICampaignController) _logicController).addObserver(gameWorldController);
+        _playerInputBindings.save();
     }
 
     @Override
@@ -338,6 +348,7 @@ public class Application implements
         _worldController = gameWorldController;
 
         ((ICampaignController) _logicController).addObserver(gameWorldController);
+        _playerInputBindings.save();
     }
 
     @Override
@@ -455,6 +466,11 @@ public class Application implements
         _logicView.initialLoadCompleted();
     }
 
+    @Override
+    public void onMenuWorldControllerEvent() {
+        // TODO
+    }
+
     public void resetState() {
         if (_logicController instanceof CampaignController campaignController) {
             campaignController.removeObserver((ICampaignControllerObserver)_worldController);
@@ -472,6 +488,7 @@ public class Application implements
 
     public void run() throws Exception {
         _engine.run();
+        _playerInputBindings.save();
     }
 
     public void freeResources() {
@@ -516,23 +533,26 @@ public class Application implements
         return windowConfig;
     }
 
-    private void initialisePlayerInputBindings() {
-        _playerInputBindings = new PlayerInputBindings();
-
-        File file = new File(PLAYER_INPUT_BINDINGS_FILE_NAME);
-        if (file.exists() && file.isFile()) {
+    private void startBackgroundMusic(String fileName) {
+        // TODO: create signal the thread to stop at shutdown
+        new Thread(() -> {
             try {
-                _playerInputBindings.load(file);
+                String uri = new File(fileName).toURI().toString();
+                MediaPlayer mediaPlayer = new MediaPlayer(new Media(uri));
+                mediaPlayer.play();
             }
-            catch (IOException e) {
-                // TODO: Is there something useful we can do with the exception?
+            catch (Exception e) {
+                e.printStackTrace();
             }
-        }
+        }).start();
     }
 
     public static void main(String[] args) {
         Application app = null;
         try {
+            // JavaFX has been remarkably unreliable. Commenting it out for now.
+            //new JFXPanel(); // Start the JFX runtime so that we can stream an MP3
+
             app = new Application();
             app.run();
         }
@@ -544,10 +564,5 @@ public class Application implements
                 app.freeResources();
             }
         }
-    }
-
-    @Override
-    public void onMenuWorldControllerEvent() {
-        // TODO
     }
 }

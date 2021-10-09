@@ -17,12 +17,13 @@ package com.lunargravity.engine.widgetsystem;
 import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.engine.core.IInputObserver;
 import com.lunargravity.engine.desktopwindow.GlfwWindow;
-import com.lunargravity.engine.graphics.Renderer;
 import com.lunargravity.engine.graphics.GlViewport;
+import com.lunargravity.engine.graphics.Renderer;
 import com.lunargravity.engine.graphics.ViewportConfig;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
+import java.io.IOException;
 import java.util.LinkedList;
 
 import static org.lwjgl.opengl.GL11C.glDepthMask;
@@ -292,7 +293,7 @@ public class WidgetManager implements IInputObserver {
     }
 
     @Override
-    public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws IOException {
         if (_keyboardFocus != null) {
             _keyboardFocus.keyboardKeyEvent(key, scancode, action, mods);
         }

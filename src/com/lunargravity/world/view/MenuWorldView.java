@@ -30,7 +30,7 @@ import java.io.IOException;
 import static org.lwjgl.opengl.GL11C.glDepthMask;
 
 public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
-    private static final float MOON_ROTATION_DEGREES_PER_SEC = 0.5f;
+    private static final float MOON_ROTATION_DEGREES_PER_SEC = 1.5f;
     private static final float FRAME_RATE_SCALE = 0.016f;
     private static final float SPACE_BACKGROUND_WIDTH = 1280.0f;
     private static final float SPACE_BACKGROUND_HEIGHT = 960.0f;

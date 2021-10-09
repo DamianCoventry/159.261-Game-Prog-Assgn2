@@ -157,18 +157,18 @@ public class OptionsWidget extends WidgetObserver implements
     }
 
     @Override
-    public void keyBindingChanged(String widgetId, int key) {
+    public void keyBindingChanged(String widgetId, int oldKey, int newKey) {
         switch (widgetId) {
-            case P1_ROTATE_CW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.ROTATE_CW, key);
-            case P1_ROTATE_CCW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.ROTATE_CCW, key);
-            case P1_THRUST_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.THRUST, key);
-            case P1_KICK_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.KICK, key);
-            case P1_SHOOT_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.SHOOT, key);
-            case P2_ROTATE_CW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.ROTATE_CW, key);
-            case P2_ROTATE_CCW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.ROTATE_CCW, key);
-            case P2_THRUST_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.THRUST, key);
-            case P2_KICK_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.KICK, key);
-            case P2_SHOOT_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(2, IOptionsWidgetObserver.Binding.SHOOT, key);
+            case P1_ROTATE_CW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(0, IOptionsWidgetObserver.Binding.ROTATE_CW, newKey);
+            case P1_ROTATE_CCW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(0, IOptionsWidgetObserver.Binding.ROTATE_CCW, newKey);
+            case P1_THRUST_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(0, IOptionsWidgetObserver.Binding.THRUST, newKey);
+            case P1_KICK_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(0, IOptionsWidgetObserver.Binding.KICK, newKey);
+            case P1_SHOOT_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(0, IOptionsWidgetObserver.Binding.SHOOT, newKey);
+            case P2_ROTATE_CW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.ROTATE_CW, newKey);
+            case P2_ROTATE_CCW_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.ROTATE_CCW, newKey);
+            case P2_THRUST_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.THRUST, newKey);
+            case P2_KICK_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.KICK, newKey);
+            case P2_SHOOT_KEYBOARD_KEY -> _observer.playerKeyBindingChanged(1, IOptionsWidgetObserver.Binding.SHOOT, newKey);
         }
     }
 
