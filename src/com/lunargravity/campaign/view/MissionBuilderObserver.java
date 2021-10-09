@@ -84,19 +84,19 @@ public class MissionBuilderObserver implements ISceneBuilderObserver {
 
     @Override
     public void sceneBuildProgressed(int currentItem, int totalItems) {
-        _manualFrameUpdater.prepareNewFrame();
-
-        //Matrix4f perspectiveProjectionMatrix = _manualFrameUpdater.getPerspectiveProjectionMatrix();
-        // TODO: draw 3d items
-
-        Matrix4f projectionMatrix = _manualFrameUpdater.getOrthographicProjectionMatrix();
-
-        _widgetManager.draw(projectionMatrix);
-
-        if (totalItems > 0) {
-            _font.drawPercentage(projectionMatrix, currentItem * 100L / totalItems, LABEL_X_OFFSET, LABEL_Y_OFFSET, 1.0f, WHITE);
-        }
-
-        _manualFrameUpdater.submitFrame();
+//        _manualFrameUpdater.prepareNewFrame();
+//
+//        //Matrix4f perspectiveProjectionMatrix = _manualFrameUpdater.getPerspectiveProjectionMatrix();
+//        // TODO: draw 3d items
+//
+//        Matrix4f projectionMatrix = _manualFrameUpdater.getOrthographicProjectionMatrix();
+//
+//        _widgetManager.draw(projectionMatrix);
+//
+//        if (totalItems > 0) {
+//            _font.drawPercentage(projectionMatrix, currentItem * 100L / totalItems, LABEL_X_OFFSET, LABEL_Y_OFFSET, 1.0f, WHITE);
+//        }
+//
+//        _manualFrameUpdater.submitFrame();
     }
 }

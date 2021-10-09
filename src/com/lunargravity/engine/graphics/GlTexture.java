@@ -37,7 +37,7 @@ public class GlTexture {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, bitmapImage.getWidth(), bitmapImage.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmapImage.getByteBuffer());
         if (glGetError() != GL_NO_ERROR) {
             glDeleteTextures(_id);
-            throw new RuntimeException("Unable to copy the bitmapImage pixel data into an OpenGL texture object");
+            throw new RuntimeException("Unable to copy the bitmapImage pixel data into an OpenGL texture object [" + bitmapImage.getFileName() + "]");
         }
 
         _fileName = bitmapImage.getFileName();

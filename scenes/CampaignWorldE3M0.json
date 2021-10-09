@@ -1,3 +1,85 @@
 {
-    "DoStuff": 1
+    "_name": "Campaign World Episode 3, Mission 0",
+    "_displayMeshFileNames": [
+        "meshes/E3M0.Display.obj",
+        "meshes/LunarLander.Display.obj",
+        "meshes/Crate.Display.obj",
+        "meshes/LunarLanderDebris.Display.obj",
+        "meshes/Bullet.Display.obj",
+        "meshes/LunarLanderCube.Display.obj"
+    ],
+    "_collisionMeshFileNames": [
+        "meshes/E3M0.Collision.obj",
+        "meshes/LunarLander.Collision.obj",
+        "meshes/Crate.Collision.obj",
+        "meshes/LunarLanderDebris.Collision.obj",
+        "meshes/Bullet.Collision.obj",
+		"meshes/LunarLanderCube.Collision.obj"
+    ],
+    "_widgets": [
+        {
+            "_id": "episodeMissionStatusBar",
+            "_type": "ImageWidget",
+            "_position": {
+                "x": 415.0,
+                "y": 885.0
+            },
+            "_size": {
+                "x": 450.0,
+                "y": 75.0
+            },
+            "_properties": {
+                "backgroundImage": "images/EpisodeMissionStatusBar.png"
+            },
+            "_children": []
+        },
+        {
+            "_id": "fuelStatusBar",
+            "_type": "ImageWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 255.0
+            },
+            "_size": {
+                "x": 75.0,
+                "y": 450.0
+            },
+            "_properties": {
+                "backgroundImage": "images/FuelStatusBar.png"
+            },
+            "_children": []
+        },
+        {
+            "_id": "damageStatusBar",
+            "_type": "ImageWidget",
+            "_position": {
+                "x": 1205.0,
+                "y": 255.0
+            },
+            "_size": {
+                "x": 75.0,
+                "y": 450.0
+            },
+            "_properties": {
+                "backgroundImage": "images/DamageStatusBar.png"
+            },
+            "_children": []
+        },
+        {
+            "_id": "playerShipsCratesStatusBar",
+            "_type": "ImageWidget",
+            "_position": {
+                "x": 365.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 550.0,
+                "y": 100.0
+            },
+            "_properties": {
+                "backgroundImage": "images/PlayerShipsCratesStatusBar.png"
+            },
+            "_children": []
+        }
+    ]
 }

@@ -144,9 +144,15 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     }
 
     public void setBackgroundImage(String imageFileName) throws IOException {
+        if (_backgroundTexture != null) {
+            _backgroundTexture.freeResources();
+        }
         _backgroundTexture = new GlTexture(BitmapImage.fromFile(imageFileName));
     }
     public void setHoverImage(String imageFileName) throws IOException {
+        if (_hoverTexture != null) {
+            _hoverTexture.freeResources();
+        }
         _hoverTexture = new GlTexture(BitmapImage.fromFile(imageFileName));
     }
 

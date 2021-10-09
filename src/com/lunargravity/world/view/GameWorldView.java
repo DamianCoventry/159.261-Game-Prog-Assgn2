@@ -909,8 +909,10 @@ public class GameWorldView implements
 
     @Override
     public void resetState() {
+        // TODO: need to re-register these
         _playerExplosionAlpha.unregister();
         _playerExplosionWakeScale.unregister();
+
         resetRigidBodyObjects(_lunarLanders);
         resetRigidBodyObjects(_crates);
         resetRigidBodyObjects(_debris);

@@ -225,11 +225,11 @@ public class CampaignView implements
     public void showGetReady(int i) throws IOException {
         if (_widgetManager.isVisible(_getReady)) {
             int clamped = Math.min(GetReadyState.MAX_SECONDS, Math.max(GetReadyState.MIN_SECONDS, i));
-            _getReady.getObserver().setBackgroundImage(String.format("images/GetReady%d.png", clamped));
+            //_getReady.getObserver().setBackgroundImage(String.format("images/GetReady%d.png", clamped));
         }
         else {
             _widgetManager.hideAll();
-            _getReady.getObserver().setBackgroundImage("images/GetReady3.png");
+            //_getReady.getObserver().setBackgroundImage("images/GetReady3.png");
             _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
         }
     }
@@ -237,6 +237,7 @@ public class CampaignView implements
     @Override
     public void showPlayerDied(WhichPlayer whichPlayer) throws IOException {
         switch (whichPlayer) {
+            // TODO: this is broken
             case PLAYER_1 -> _playerDied.getObserver().setBackgroundImage("images/Player1Died.png");
             case PLAYER_2 -> _playerDied.getObserver().setBackgroundImage("images/Player2Died.png");
             case BOTH_PLAYERS -> _playerDied.getObserver().setBackgroundImage("images/BothPlayersDied.png");

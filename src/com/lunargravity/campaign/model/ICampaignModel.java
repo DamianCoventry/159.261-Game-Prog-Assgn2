@@ -3,8 +3,8 @@ package com.lunargravity.campaign.model;
 import com.lunargravity.mvc.IModel;
 
 public interface ICampaignModel extends IModel {
-    int NUM_EPISODES = 5;
-    int NUM_MISSIONS_PER_EPISODE = 6;
+    int NUM_EPISODES = 4;
+    int NUM_MISSIONS_PER_EPISODE = 3;
 
     void setMission(int i);
     int getEpisode();
