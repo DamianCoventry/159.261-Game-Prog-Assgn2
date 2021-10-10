@@ -147,9 +147,6 @@ public class MenuWorldView implements IView, ISceneAssetOwner {
         if (_textureCache != null) {
             _textureCache.freeNativeResources();
         }
-        if (_widgetManager != null) {
-            _widgetManager.freeNativeResources();
-        }
         if (_moonDisplayMesh != null) {
             _moonDisplayMesh.freeNativeResources();
         }

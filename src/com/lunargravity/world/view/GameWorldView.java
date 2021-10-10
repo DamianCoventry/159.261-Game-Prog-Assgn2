@@ -899,7 +899,6 @@ public class GameWorldView implements
     public void setupForNewLevel() {
         removeRigidBodiesFromPhysicsSpace();
         unloadAllDisplayMeshes();
-        unloadAllWidgets();
         unloadAllParticleSystems();
         unloadAllTextures();
         unloadAllSounds();
@@ -957,25 +956,6 @@ public class GameWorldView implements
         }
         if (_displayMeshCache != null) {
             _displayMeshCache.freeNativeResources();
-        }
-    }
-
-    private void unloadAllWidgets() {
-        if (_episodeMissionStatusBar != null) {
-            _episodeMissionStatusBar.getObserver().freeNativeResources();
-            _episodeMissionStatusBar = null;
-        }
-        if (_playerShipsCratesStatusBar != null) {
-            _playerShipsCratesStatusBar.getObserver().freeNativeResources();
-            _playerShipsCratesStatusBar = null;
-        }
-        if (_fuelStatusBar != null) {
-            _fuelStatusBar.getObserver().freeNativeResources();
-            _fuelStatusBar = null;
-        }
-        if (_damageStatusBar != null) {
-            _damageStatusBar.getObserver().freeNativeResources();
-            _damageStatusBar = null;
         }
     }
 
@@ -1122,13 +1102,9 @@ public class GameWorldView implements
     public void freeNativeResources() {
         removeRigidBodiesFromPhysicsSpace();
         unloadAllDisplayMeshes();
-        unloadAllWidgets();
         unloadAllParticleSystems();
         unloadAllTextures();
         unloadAllSounds();
-        if (_widgetManager != null) {
-            _widgetManager.freeNativeResources();
-        }
         if (_font != null) {
             _font.freeNativeResources();
         }

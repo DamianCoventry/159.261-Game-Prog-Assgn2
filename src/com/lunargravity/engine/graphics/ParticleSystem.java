@@ -64,7 +64,9 @@ public abstract class ParticleSystem {
         _displayMesh.freeNativeResources();
         _originalDiffuseTexture.freeNativeResources();
         for (var a : _particles) {
-            a._diffuseTexture.freeNativeResources();
+            if (a._diffuseTexture != null) {
+                a._diffuseTexture.freeNativeResources();
+            }
         }
     }
 

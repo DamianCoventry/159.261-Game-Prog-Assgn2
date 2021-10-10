@@ -134,9 +134,6 @@ public class CampaignView implements
 
     @Override
     public void freeNativeResources() {
-        if (_widgetManager != null) {
-            _widgetManager.freeNativeResources();
-        }
         if (_displayMeshCache != null) {
             _displayMeshCache.freeNativeResources();
         }
@@ -151,33 +148,6 @@ public class CampaignView implements
         }
         if (_naturalSatelliteRotation != null) {
             _naturalSatelliteRotation.unregister();
-        }
-        if (_episodeIntro != null) {
-            _episodeIntro.getObserver().freeNativeResources();
-        }
-        if (_episodeOutro != null) {
-            _episodeOutro.getObserver().freeNativeResources();
-        }
-        if (_gameOver != null) {
-            _gameOver.getObserver().freeNativeResources();
-        }
-        if (_gameWon != null) {
-            _gameWon.getObserver().freeNativeResources();
-        }
-        if (_missionIntro != null) {
-            _missionIntro.getObserver().freeNativeResources();
-        }
-        if (_missionPaused != null) {
-            _missionPaused.getObserver().freeNativeResources();
-        }
-        if (_missionCompleted != null) {
-            _missionCompleted.getObserver().freeNativeResources();
-        }
-        if (_getReady != null) {
-            _getReady.getObserver().freeNativeResources();
-        }
-        if (_playerDied != null) {
-            _playerDied.getObserver().freeNativeResources();
         }
     }
 
