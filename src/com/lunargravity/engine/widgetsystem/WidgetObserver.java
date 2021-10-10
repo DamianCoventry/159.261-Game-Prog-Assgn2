@@ -14,7 +14,7 @@
 
 package com.lunargravity.engine.widgetsystem;
 
-import com.lunargravity.engine.animation.LinearInterpolation;
+import com.lunargravity.engine.animation.FloatLinearInterp;
 import com.lunargravity.engine.core.IInputObserver;
 import com.lunargravity.engine.graphics.BitmapImage;
 import com.lunargravity.engine.graphics.GlDiffuseTextureProgram;
@@ -47,7 +47,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     protected Matrix4f _modelMatrix;
     protected Vector4f _backgroundColour;
     protected Vector4f _fadingColour;
-    protected LinearInterpolation _backgroundAlpha;
+    protected FloatLinearInterp _backgroundAlpha;
     private boolean _fadingOut;
 
     protected WidgetObserver(WidgetManager widgetManager) {
@@ -57,7 +57,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
         _fadingColour = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
         _program = _widgetManager.getRenderer().getDiffuseTextureProgram();
         _modelMatrix = new Matrix4f();
-        _backgroundAlpha = new LinearInterpolation(_widgetManager.getAnimationManager());
+        _backgroundAlpha = new FloatLinearInterp(_widgetManager.getAnimationManager());
         _fadingOut = false;
     }
 
@@ -294,7 +294,7 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
             _program.setDiffuseColour(_backgroundColour);
         }
         else {
-            _fadingColour.w = _backgroundAlpha.getValue();
+            _fadingColour.w = _backgroundAlpha.getCurrentValue();
             _program.setDiffuseColour(_fadingColour);
         }
 

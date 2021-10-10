@@ -29,6 +29,13 @@ public class CampaignModel implements ICampaignModel {
     }
 
     @Override
+    public void setEpisode(int i) {
+        if (i >= 0 && i < NUM_EPISODES) {
+            _episode = i;
+        }
+    }
+
+    @Override
     public void setMission(int i) {
         if (i >= 0 && i < NUM_MISSIONS_PER_EPISODE) {
             _mission = i;

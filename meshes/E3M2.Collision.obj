@@ -1,7 +1,7 @@
 # Blender v2.91.0 OBJ File: 'E3M2.Collision.blend'
 # www.blender.org
 mtllib E3M2.Collision.mtl
-o World.MeshDisplay
+o World.MeshShape
 v -1.000000 20.008806 5.000005
 v 1.000000 20.853899 5.000005
 v 1.000000 20.853899 -3.999995

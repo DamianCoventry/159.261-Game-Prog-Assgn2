@@ -2,7 +2,7 @@ package com.lunargravity.engine.animation;
 
 import java.util.function.LongConsumer;
 
-public abstract class FCurve {
+public class FloatFCurve implements IFCurve {
     private final AnimationManager _animationManager;
     protected int _registeredId;
     protected float _currentValue;
@@ -15,7 +15,7 @@ public abstract class FCurve {
     protected LongConsumer _completedFunction;
     protected boolean _completed;
 
-    protected FCurve(AnimationManager animationManager) {
+    protected FloatFCurve(AnimationManager animationManager) {
         _registeredId = animationManager.register(this);
         _animationManager = animationManager;
         _endBehaviour = EndBehaviour.STOP;
@@ -37,12 +37,10 @@ public abstract class FCurve {
         }
     }
 
-    public enum EndBehaviour { STOP, LOOP}
-
     public void setValue(float value) {
         _currentValue = value;
     }
-    public float getValue() {
+    public float getCurrentValue() {
         return _currentValue;
     }
     public float getEndValue() {
@@ -58,6 +56,13 @@ public abstract class FCurve {
     public EndBehaviour getEndBehaviour() {
         return _endBehaviour;
     }
+
+    @Override
+    public void update(long nowMs) {
+        // No default implementation
+    }
+
+    @Override
     public void setEndBehaviour(EndBehaviour endBehaviour) {
         _endBehaviour = endBehaviour;
     }
@@ -86,12 +91,12 @@ public abstract class FCurve {
         }
     }
 
+    @Override
     public void completed(long elapsedTime) {
+        _currentValue = _endValue;
         _completed = true;
         if (_completedFunction != null) {
             _completedFunction.accept(elapsedTime);
         }
     }
-
-    protected abstract void update(long nowMs);
 }

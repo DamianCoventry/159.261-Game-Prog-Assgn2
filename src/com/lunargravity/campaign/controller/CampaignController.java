@@ -61,10 +61,18 @@ public class CampaignController implements ICampaignController {
     }
 
     @Override
+    public void skipToEpisode(int i) throws Exception {
+        _model.setEpisode(i);
+        for (var observer : _observers) {
+            observer.startNextEpisode();
+        }
+    }
+
+    @Override
     public void skipToMission(int i) throws Exception {
         _model.setMission(i);
         for (var observer : _observers) {
-            observer.startNextEpisode();
+            observer.startNextMission();
         }
     }
 

@@ -15,6 +15,7 @@ public interface ICampaignController extends IController {
     void episodeIntroAborted() throws Exception;
     void episodeOutroAborted() throws Exception;
     void completeEpisode() throws Exception;
+    void skipToEpisode(int i) throws Exception;
     void skipToMission(int i) throws Exception;
 
     void missionIntroAborted();
@@ -25,3 +26,4 @@ public interface ICampaignController extends IController {
 
     void quitCampaign();
 }
+

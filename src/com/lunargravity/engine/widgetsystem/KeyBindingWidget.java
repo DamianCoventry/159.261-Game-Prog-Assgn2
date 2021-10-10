@@ -247,7 +247,7 @@ public class KeyBindingWidget extends WidgetObserver {
             _program.setDiffuseColour(_backgroundColour);
         }
         else {
-            _fadingColour.w = _backgroundAlpha.getValue();
+            _fadingColour.w = _backgroundAlpha.getCurrentValue();
             _program.setDiffuseColour(_fadingColour);
         }
 

@@ -4,7 +4,8 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.campaign.statemachine.GetReadyState;
-import com.lunargravity.engine.animation.LinearInterpolationLoop;
+import com.lunargravity.engine.animation.FloatLinearInterpLoop;
+import com.lunargravity.engine.animation.Vector3SineLinearInterp;
 import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
@@ -30,7 +31,8 @@ public class CampaignView implements
     private static final String GET_READY = "getReady";
     private static final String PLAYER_DIED = "playerDied";
 
-    private static final long MOON_ROTATION_TIME = 45000; // 45 seconds to rotate 360°
+    private static final long MOON_ROTATION_TIME = 36000; // 36 seconds to rotate 360°
+    private static final long CAMERA_TRANSLATE_TIME = 4000;
     private static final Vector3f Y_AXIS = new Vector3f(0.0f, 1.0f, 0.0f);
 
     private final WidgetManager _widgetManager;
@@ -40,11 +42,14 @@ public class CampaignView implements
     private final TextureCache _textureCache;
     private final IEngine _engine;
 
+    private DisplayMesh _spaceDisplayMesh;
     private DisplayMesh _naturalSatellite;
+    private final Matrix4f _vpMatrix;
     private final Matrix4f _mvMatrix;
     private final Matrix4f _naturalSatelliteModelMatrix;
     private final Transform _camera;
-    private LinearInterpolationLoop _naturalSatelliteRotation;
+    private final FloatLinearInterpLoop _naturalSatelliteRotation;
+    private final Vector3SineLinearInterp _cameraPosition;
 
     private Widget _episodeIntro;
     private Widget _episodeOutro;
@@ -64,12 +69,13 @@ public class CampaignView implements
         _materialCache = new MaterialCache();
         _textureCache = new TextureCache();
         _mvMatrix = new Matrix4f();
+        _vpMatrix = new Matrix4f();
         _naturalSatelliteModelMatrix = new Matrix4f();
 
-        _camera = new Transform();
-        _camera._position.z = 40.0f;
-        _camera.calculateViewMatrix();
+        _naturalSatelliteRotation = new FloatLinearInterpLoop(_engine.getAnimationManager());
+        _cameraPosition = new Vector3SineLinearInterp(_engine.getAnimationManager());
 
+        _camera = new Transform();
     }
 
     @Override
@@ -79,12 +85,9 @@ public class CampaignView implements
         for (var a : builder.getMeshes()) {
             _displayMeshCache.add(a);
         };
-        _naturalSatellite = _displayMeshCache.getByExactName("Moon.Display");
 
-        if (_naturalSatelliteRotation != null) {
-            _naturalSatelliteRotation.unregister();
-        }
-        _naturalSatelliteRotation = new LinearInterpolationLoop(_engine.getAnimationManager());
+        _spaceDisplayMesh = _displayMeshCache.getByExactName("OuterSpace.Display");
+        _naturalSatellite = _displayMeshCache.getByExactName("Moon.Display");
         _naturalSatelliteRotation.start(0.0f, 359.0f, MOON_ROTATION_TIME);
     }
 
@@ -95,11 +98,19 @@ public class CampaignView implements
 
     @Override
     public void drawView3d(int viewport, Matrix4f projectionMatrix) {
-        if (_widgetManager.isVisible(_episodeIntro)) {
-            _naturalSatelliteModelMatrix.identity().rotate((float)Math.toRadians(_naturalSatelliteRotation.getValue()), Y_AXIS);
-            _mvMatrix.set(_camera.getViewMatrix()).mul(_naturalSatelliteModelMatrix);
-            _naturalSatellite.draw(_widgetManager.getRenderer(), _widgetManager.getRenderer().getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+        if (!_widgetManager.isVisible(_episodeIntro)) {
+            return;
         }
+
+        _camera._position.set(_cameraPosition.getValue());
+        _camera.calculateViewMatrix();
+
+        _vpMatrix.set(projectionMatrix).mul(_camera.getViewMatrix());
+        _spaceDisplayMesh.draw(_widgetManager.getRenderer(), _widgetManager.getRenderer().getDiffuseTextureProgram(), _vpMatrix);
+
+        _naturalSatelliteModelMatrix.identity().rotate((float)Math.toRadians(_naturalSatelliteRotation.getCurrentValue()), Y_AXIS);
+        _mvMatrix.set(_camera.getViewMatrix()).mul(_naturalSatelliteModelMatrix);
+        _naturalSatellite.draw(_widgetManager.getRenderer(), _widgetManager.getRenderer().getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
     }
 
     @Override
@@ -149,10 +160,17 @@ public class CampaignView implements
         if (_naturalSatelliteRotation != null) {
             _naturalSatelliteRotation.unregister();
         }
+        if (_cameraPosition != null) {
+            _cameraPosition.unregister();
+        }
     }
 
     @Override
     public void showEpisodeIntro() throws IOException {
+        _cameraPosition.start(
+                new Vector3f(0.0f, 0.0f, 400.0f),
+                new Vector3f(0.0f, 0.0f, 45.0f),
+                CAMERA_TRANSLATE_TIME);
         _widgetManager.hideAll();
         _widgetManager.show(_episodeIntro, WidgetManager.ShowAs.FIRST);
     }
@@ -236,9 +254,7 @@ public class CampaignView implements
         if (wci._id.equals(MISSION_PAUSED) && wci._type.equals("MissionPausedWidget")) {
             _missionPaused = new Widget(viewportConfig, wci, new MissionPausedWidget(_widgetManager, this));
         }
-        else if (wci._id.equals("subTitleImage") && wci._type.equals("ImageWidget")) {
-        //else if (wci._id.equals(EPISODE_INTRO_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            //_episodeIntro = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
+        else if (wci._id.equals(EPISODE_INTRO_ANNOUNCEMENT) && wci._type.equals("ImageWidget")) {
             _episodeIntro = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
         else if (wci._id.equals(EPISODE_OUTRO_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
@@ -250,8 +266,8 @@ public class CampaignView implements
         else if (wci._id.equals(GAME_WON_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
             _gameWon = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
         }
-        else if (wci._id.equals(MISSION_INTRO_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            _missionIntro = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
+        else if (wci._id.equals(MISSION_INTRO_ANNOUNCEMENT) && wci._type.equals("ImageWidget")) {
+            _missionIntro = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
         else if (wci._id.equals(MISSION_COMPLETED) && wci._type.equals("ImageWidget")) {
             _missionCompleted = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));

@@ -2,18 +2,18 @@
     "_name": "Campaign E3 Intro",
     "_widgets": [
         {
-			"_id": "subTitleImage",
+			"_id": "episodeIntro",
 			"_type": "ImageWidget",
 			"_position": {
-				"x": 920.0,
-				"y": 16.0
+				"x": 20.0,
+				"y": 180.0
 			},
 			"_size": {
-				"x": 342.0,
-				"y": 168.0
+				"x": 450.0,
+				"y": 600.0
 			},
 			"_properties": {
-				"backgroundImage": "images/Episode3SubTitle.png"
+				"backgroundImage": "images/Episode3IntroPanel.png"
 			},
 			"_children": []
         }

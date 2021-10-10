@@ -1,13 +1,13 @@
 package com.lunargravity.engine.animation;
 
-public class LinearInterpolationLoop extends FCurve {
-    public LinearInterpolationLoop(AnimationManager animationManager) {
+public class FloatLinearInterpLoop extends FloatFCurve {
+    public FloatLinearInterpLoop(AnimationManager animationManager) {
         super(animationManager);
         _endBehaviour = EndBehaviour.LOOP;
     }
 
     @Override
-    protected void update(long nowMs) {
+    public void update(long nowMs) {
         float percentage = (float)(nowMs - _startTime) / (float)_durationMs;
         if (percentage > 1.0f) {
             percentage -= 1.0f;

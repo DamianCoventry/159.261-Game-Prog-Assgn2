@@ -55,27 +55,11 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
     public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws Exception {
         PlayerInputBindings inputBindings = getGameWorldModel().getPlayerInputBindings();
 
+        checkCheatKeys(key, action);
+
         if (action == GLFW_PRESS) {
             if (key == GLFW_KEY_ESCAPE) {
                 changeState(new MissionPausedState(getContext()));
-            }
-            else if (key == GLFW_KEY_1) {
-                getCampaignController().skipToMission(0);
-            }
-            else if (key == GLFW_KEY_2) {
-                getCampaignController().skipToMission(1);
-            }
-            else if (key == GLFW_KEY_3) {
-                getCampaignController().skipToMission(2);
-            }
-            else if (key == GLFW_KEY_4) {
-                getCampaignController().skipToMission(3);
-            }
-            else if (key == GLFW_KEY_5) {
-                getCampaignController().skipToMission(4);
-            }
-            else if (key == GLFW_KEY_6) {
-                getCampaignController().skipToMission(5);
             }
 
             if (inputBindings.getPlayerThrustKey(0) == key) {
@@ -149,6 +133,26 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
         }
     }
 
+    private void checkCheatKeys(int key, int action) throws Exception {
+        if (action == GLFW_PRESS) {
+            if (key == GLFW_KEY_1) {
+                getCampaignController().skipToEpisode(0);
+            } else if (key == GLFW_KEY_2) {
+                getCampaignController().skipToEpisode(1);
+            } else if (key == GLFW_KEY_3) {
+                getCampaignController().skipToEpisode(2);
+            } else if (key == GLFW_KEY_4) {
+                getCampaignController().skipToEpisode(3);
+            } else if (key == GLFW_KEY_7) {
+                getCampaignController().skipToMission(0);
+            } else if (key == GLFW_KEY_8) {
+                getCampaignController().skipToMission(1);
+            } else if (key == GLFW_KEY_9) {
+                getCampaignController().skipToMission(2);
+            }
+        }
+    }
+
     // temp
     private ICampaignModel getCampaignModel() {
         return (ICampaignModel)getContext().getLogicModel();
@@ -193,13 +197,8 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
     @Override
     public void startNextEpisode() throws Exception {
         // Only here for the cheat keys
-        MissionBuilderObserver missionBuilderObserver = new MissionBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
-
-        getContext().loadCampaignMission(missionBuilderObserver);
-
-        changeState(new MissionIntroState(getContext()));
-
-        missionBuilderObserver.freeNativeResources();
+        getContext().loadCampaignEpisode(new NullBuilderObserver());
+        changeState(new EpisodeIntroState(getContext()));
     }
 
     @Override
@@ -224,7 +223,14 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
 
     @Override
     public void startNextMission() throws Exception {
-        // Nothing to do
+        // Only here for the cheat keys
+        MissionBuilderObserver missionBuilderObserver = new MissionBuilderObserver(getContext().getEngine(), getManualFrameUpdater());
+
+        getContext().loadCampaignMission(missionBuilderObserver);
+
+        changeState(new MissionIntroState(getContext()));
+
+        missionBuilderObserver.freeNativeResources();
     }
 
     @Override

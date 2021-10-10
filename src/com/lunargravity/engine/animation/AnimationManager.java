@@ -23,7 +23,7 @@ import java.util.LinkedList;
 public class AnimationManager {
     private static int _nextId;
     private final IEngine _engine;
-    private final HashMap<Integer, FCurve> _fCurves;
+    private final HashMap<Integer, IFCurve> _fCurves;
     private final HashSet<Integer> _activeFCurves;
     private final LinkedList<Integer> _pendingStarts;
     private final LinkedList<Integer> _pendingStops;
@@ -41,7 +41,7 @@ public class AnimationManager {
         return _engine.getNowMs();
     }
 
-    public int register(FCurve fCurve) {
+    public int register(IFCurve fCurve) {
         int id = ++_nextId;
         _fCurves.put(id, fCurve);
         return id;
@@ -74,11 +74,10 @@ public class AnimationManager {
         _pendingStarts.clear();
 
         for (var id : _activeFCurves) {
-            FCurve fCurve = _fCurves.get(id);
+            IFCurve fCurve = _fCurves.get(id);
             fCurve.update(nowMs);
-            if (fCurve.getEndBehaviour() == FCurve.EndBehaviour.STOP && nowMs >= fCurve.getEndTime()) {
+            if (fCurve.getEndBehaviour() == IFCurve.EndBehaviour.STOP && nowMs >= fCurve.getEndTime()) {
                 _pendingStops.add(id);
-                fCurve.setValue(fCurve.getEndValue());
                 fCurve.completed(nowMs - fCurve.getEndTime());
             }
         }

@@ -19,8 +19,8 @@ import com.jme3.bullet.objects.PhysicsBody;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.lunargravity.application.LargeNumberFont;
 import com.lunargravity.campaign.model.CampaignModel;
-import com.lunargravity.engine.animation.FCurve;
-import com.lunargravity.engine.animation.LinearInterpolation;
+import com.lunargravity.engine.animation.FloatFCurve;
+import com.lunargravity.engine.animation.FloatLinearInterp;
 import com.lunargravity.engine.audio.SoundBuffer;
 import com.lunargravity.engine.audio.SoundBufferCache;
 import com.lunargravity.engine.audio.SoundSource;
@@ -206,8 +206,8 @@ public class GameWorldView implements
     private DisplayMesh _explosionWakeDisplayMesh;
     private boolean _playerExploding;
     private boolean _showSparks;
-    private final FCurve _playerExplosionAlpha;
-    private final FCurve _playerExplosionWakeScale;
+    private final FloatFCurve _playerExplosionAlpha;
+    private final FloatFCurve _playerExplosionWakeScale;
 
     private final ArrayList<RigidBodyObject> _lunarLanders;
     private final ArrayList<RigidBodyObject> _crates;
@@ -290,8 +290,8 @@ public class GameWorldView implements
         _explosionFlashModelMatrix = new Matrix4f();
         _explosionWakeModelMatrix = new Matrix4f();
         _lastCollisionTime = 0;
-        _playerExplosionWakeScale = new LinearInterpolation(_engine.getAnimationManager());
-        _playerExplosionAlpha = new LinearInterpolation(_engine.getAnimationManager());
+        _playerExplosionWakeScale = new FloatLinearInterp(_engine.getAnimationManager());
+        _playerExplosionAlpha = new FloatLinearInterp(_engine.getAnimationManager());
         _playerExplosionAlpha.setCompletedFunction(elapsedMs -> _playerExploding = false);
 
         _cameras = new Transform[2];
@@ -539,7 +539,7 @@ public class GameWorldView implements
     public void viewThink() {
         if (_playerExploding) {
             _explosionParticleSystem.think(_engine.getNowMs());
-            _playerExplosionColour.w = _playerExplosionAlpha.getValue();
+            _playerExplosionColour.w = _playerExplosionAlpha.getCurrentValue();
         }
 
         if (_showSparks) {
@@ -757,7 +757,7 @@ public class GameWorldView implements
 
             _mvpMatrix.set(_vpMatrix)
                     .mul(_explosionWakeModelMatrix)
-                    .scale(_playerExplosionWakeScale.getValue(), _playerExplosionWakeScale.getValue(), 1.0f);
+                    .scale(_playerExplosionWakeScale.getCurrentValue(), _playerExplosionWakeScale.getCurrentValue(), 1.0f);
             _explosionWakeDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
 
             _explosionParticleSystem.draw(_vpMatrix);

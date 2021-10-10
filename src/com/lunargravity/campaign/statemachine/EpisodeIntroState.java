@@ -6,6 +6,7 @@ import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.controller.ICampaignControllerObserver;
 import com.lunargravity.campaign.view.ICampaignView;
 import com.lunargravity.campaign.view.MissionBuilderObserver;
+import com.lunargravity.engine.timeouts.TimeoutManager;
 
 import java.io.IOException;
 
@@ -22,15 +23,15 @@ public class EpisodeIntroState extends StateBase implements ICampaignControllerO
         getCampaignController().addObserver(this);
         getCampaignView().showEpisodeIntro();
 
-//        _timeoutId = addTimeout(3000, (callCount) -> {
-//            try {
-//                loadCampaignMission();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            _timeoutId = 0;
-//            return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;
-//        });
+        _timeoutId = addTimeout(30000, (callCount) -> {
+            try {
+                loadCampaignMission();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            _timeoutId = 0;
+            return TimeoutManager.CallbackResult.REMOVE_THIS_CALLBACK;
+        });
     }
 
     @Override

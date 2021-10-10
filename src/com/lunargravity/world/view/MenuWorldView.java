@@ -15,7 +15,7 @@
 package com.lunargravity.world.view;
 
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.lunargravity.engine.animation.LinearInterpolationLoop;
+import com.lunargravity.engine.animation.FloatLinearInterpLoop;
 import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
@@ -28,8 +28,6 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.io.IOException;
-
-import static org.lwjgl.opengl.GL11C.glDepthMask;
 
 public class MenuWorldView implements IView, ISceneAssetOwner {
     private static final long MOON_ROTATION_TIME = 360000; // 360 seconds to rotate 360°
@@ -47,11 +45,11 @@ public class MenuWorldView implements IView, ISceneAssetOwner {
     private final IMenuWorldModel _model;
     private DisplayMesh _moonDisplayMesh;
     private DisplayMesh _spaceDisplayMesh;
-    private final Matrix4f _mvpMatrix;
+    private final Matrix4f _vpMatrix;
     private final Matrix4f _mvMatrix;
     private final Matrix4f _moonModelMatrix;
     private final Transform _camera;
-    private final LinearInterpolationLoop _moonRotation;
+    private final FloatLinearInterpLoop _moonRotation;
 
     public MenuWorldView(WidgetManager widgetManager, IEngine engine, IMenuWorldModel model) {
         _renderer = engine.getRenderer();
@@ -61,26 +59,19 @@ public class MenuWorldView implements IView, ISceneAssetOwner {
         _materialCache = new MaterialCache();
         _textureCache = new TextureCache();
         _mvMatrix = new Matrix4f();
+        _vpMatrix = new Matrix4f();
         _moonModelMatrix = new Matrix4f();
-
-        Matrix4f projectionMatrix = _renderer.getOrthographicViewport().getOrthographicMatrix();
-        _mvpMatrix = new Matrix4f();
-        _mvpMatrix.set(projectionMatrix)
-                  .translate(SPACE_BACKGROUND_WIDTH/2.0f, SPACE_BACKGROUND_HEIGHT/2.0f, 0.0f);
 
         _camera = new Transform();
         _camera._position.x = -9.5f;
         _camera._position.z = 75.0f;
         _camera.calculateViewMatrix();
 
-        _moonRotation = new LinearInterpolationLoop(engine.getAnimationManager());
+        _moonRotation = new FloatLinearInterpLoop(engine.getAnimationManager());
     }
 
     @Override
     public void initialLoadCompleted() throws IOException {
-        _spaceDisplayMesh = _renderer.createSpriteWithOriginAtCenter("spaceBackground",
-                SPACE_BACKGROUND_WIDTH, SPACE_BACKGROUND_HEIGHT, WHITE,
-                "images/StarsBackground.png", _materialCache, _textureCache);
         _moonRotation.start(0.0f, 359.0f, MOON_ROTATION_TIME);
     }
 
@@ -95,11 +86,10 @@ public class MenuWorldView implements IView, ISceneAssetOwner {
             return;
         }
 
-        glDepthMask(false);
-        _spaceDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix);
-        glDepthMask(true);
+        _vpMatrix.set(projectionMatrix).mul(_camera.getViewMatrix());
+        _spaceDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _vpMatrix);
 
-        _moonModelMatrix.identity().rotate((float)Math.toRadians(_moonRotation.getValue()), Y_AXIS);
+        _moonModelMatrix.identity().rotate((float)Math.toRadians(_moonRotation.getCurrentValue()), Y_AXIS);
         _mvMatrix.set(_camera.getViewMatrix()).mul(_moonModelMatrix);
         GLDirectionalLightProgram program = _renderer.getDirectionalLightProgram();
         program.setAmbientLight(MOON_AMBIENT_LIGHT);
@@ -162,6 +152,11 @@ public class MenuWorldView implements IView, ISceneAssetOwner {
     public void displayMeshLoaded(DisplayMesh displayMesh) {
         if (displayMesh.getName().equals("Moon.Display")) {
             _moonDisplayMesh = displayMesh;
+        }
+        _displayMeshCache.add(displayMesh);
+
+        if (displayMesh.getName().equals("OuterSpace.Display")) {
+            _spaceDisplayMesh = displayMesh;
         }
         _displayMeshCache.add(displayMesh);
     }
