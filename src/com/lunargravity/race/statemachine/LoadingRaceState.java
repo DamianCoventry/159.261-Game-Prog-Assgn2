@@ -28,7 +28,7 @@ public class LoadingRaceState extends StateBase {
             getContext().loadRaceLevel(raceBuilderObserver, _numPlayers);
         }
 
-        raceBuilderObserver.freeResources();
+        raceBuilderObserver.freeNativeResources();
     }
 
     @Override

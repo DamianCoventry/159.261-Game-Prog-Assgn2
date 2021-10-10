@@ -145,13 +145,13 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
 
     public void setBackgroundImage(String imageFileName) throws IOException {
         if (_backgroundTexture != null) {
-            _backgroundTexture.freeResources();
+            _backgroundTexture.freeNativeResources();
         }
         _backgroundTexture = new GlTexture(BitmapImage.fromFile(imageFileName));
     }
     public void setHoverImage(String imageFileName) throws IOException {
         if (_hoverTexture != null) {
-            _hoverTexture.freeResources();
+            _hoverTexture.freeNativeResources();
         }
         _hoverTexture = new GlTexture(BitmapImage.fromFile(imageFileName));
     }
@@ -181,15 +181,15 @@ public class WidgetObserver implements IWidgetObserver, IInputObserver {
     }
 
     @Override
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_polyhedra != null) {
-            _polyhedra.freeResources();
+            _polyhedra.freeNativeResources();
         }
         if (_backgroundTexture != null) {
-            _backgroundTexture.freeResources();
+            _backgroundTexture.freeNativeResources();
         }
         if (_hoverTexture != null) {
-            _hoverTexture.freeResources();
+            _hoverTexture.freeNativeResources();
         }
         _backgroundAlpha.unregister();
     }

@@ -29,7 +29,7 @@ public class LoadingMenuState extends StateBase {
 
         getContext().startMenu(menuBuilderObserver);
 
-        menuBuilderObserver.freeResources();
+        menuBuilderObserver.freeNativeResources();
     }
 
     @Override

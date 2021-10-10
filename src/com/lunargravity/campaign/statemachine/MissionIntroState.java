@@ -85,7 +85,7 @@ public class MissionIntroState extends StateBase implements ICampaignControllerO
 
         changeState(new MissionIntroState(getContext()));
 
-        missionBuilderObserver.freeResources();
+        missionBuilderObserver.freeNativeResources();
     }
 
     @Override

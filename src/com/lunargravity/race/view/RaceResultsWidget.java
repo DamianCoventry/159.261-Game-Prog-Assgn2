@@ -38,8 +38,8 @@ public class RaceResultsWidget extends WidgetObserver implements IButtonObserver
     }
 
     @Override
-    public void freeResources() {
-        super.freeResources();
+    public void freeNativeResources() {
+        super.freeNativeResources();
         // TODO
     }
 

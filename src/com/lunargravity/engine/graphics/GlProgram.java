@@ -50,7 +50,7 @@ public class GlProgram {
         link(vertexShader, fragmentShader, geometryShader);
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_id != 0) {
             glUseProgram(0);
             glDeleteProgram(_id);
@@ -115,10 +115,10 @@ public class GlProgram {
         String log = glGetProgramInfoLog(_id, 1024);
 
         glDetachShader(_id, vertexShader.getId());
-        vertexShader.freeResources();
+        vertexShader.freeNativeResources();
 
         glDetachShader(_id, fragmentShader.getId());
-        fragmentShader.freeResources();
+        fragmentShader.freeNativeResources();
 
         if (linkStatus == 0) {
             throw new RuntimeException("The program doesn't link.\n" + log);
@@ -140,13 +140,13 @@ public class GlProgram {
         String log = glGetProgramInfoLog(_id, 1024);
 
         glDetachShader(_id, vertexShader.getId());
-        vertexShader.freeResources();
+        vertexShader.freeNativeResources();
 
         glDetachShader(_id, fragmentShader.getId());
-        fragmentShader.freeResources();
+        fragmentShader.freeNativeResources();
 
         glDetachShader(_id, geometryShader.getId());
-        geometryShader.freeResources();
+        geometryShader.freeNativeResources();
 
         if (linkStatus == 0) {
             glDeleteProgram(_id);

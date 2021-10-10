@@ -79,8 +79,8 @@ public class CampaignWidget extends WidgetObserver implements IButtonObserver, I
     }
 
     @Override
-    public void freeResources() {
-        super.freeResources();
+    public void freeNativeResources() {
+        super.freeNativeResources();
         // anything to do?
     }
 }

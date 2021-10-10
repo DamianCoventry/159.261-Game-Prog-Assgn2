@@ -108,7 +108,7 @@ public class MissionCompletedState extends StateBase implements ICampaignControl
 
         changeState(new MissionIntroState(getContext()));
 
-        missionBuilderObserver.freeResources();
+        missionBuilderObserver.freeNativeResources();
     }
 
     @Override

@@ -177,8 +177,8 @@ public class GameWorldView implements
         public Crate _crate;
     }
 
-    public DisplayMesh _progressBuffRing;
-    public DisplayMesh _progressBuffText;
+    private DisplayMesh _progressBuffRingDisplayMesh;
+    private DisplayMesh _progressBuffTextDisplayMesh;
     private final ArrayList<ProgressBuff> _progressBuffs;
 
     private final IEngine _engine;
@@ -202,8 +202,8 @@ public class GameWorldView implements
     private DisplayMesh _worldDisplayMesh;
 
     private final Vector4f _playerExplosionColour;
-    private DisplayMesh _explosionFlash;
-    private DisplayMesh _explosionWake;
+    private DisplayMesh _explosionFlashDisplayMesh;
+    private DisplayMesh _explosionWakeDisplayMesh;
     private boolean _playerExploding;
     private boolean _showSparks;
     private final FCurve _playerExplosionAlpha;
@@ -234,11 +234,11 @@ public class GameWorldView implements
     private boolean _playerSmokeActive;
     private long _lastCollisionTime;
 
-    private SoundSource[] _playerShipDamage;
-    private SoundSource _playerShipShoot;
-    private SoundSource _playerShipExplode;
-    private SoundSource[] _playerShipHits;
-    private SoundSource _collectCrate;
+    private SoundSource[] _playerShipDamageSounds;
+    private SoundSource _playerShipShootSound;
+    private SoundSource _playerShipExplodeSound;
+    private SoundSource[] _playerShipHitSounds;
+    private SoundSource _collectCrateSound;
     private int _playerShipHitSoundIndex;
     private int _playerShipDamageSoundIndex;
     private GlTexture _blueSparkTexture;
@@ -327,6 +327,22 @@ public class GameWorldView implements
 
     @Override
     public void initialLoadCompleted() throws UnsupportedAudioFileException, IOException {
+        setupViewport();
+        createCrates();
+        createDeliveryZones();
+        createLunarLanders();
+        createDebris();
+        createPlayerShots();
+        createProgressBuffs();
+        createDustClouds();
+        createPlayerShipExplosion();
+        createSparkParticleSystem();
+        createSmokeParticleSystems();
+        createHud();
+        loadSounds();
+    }
+
+    private void setupViewport() {
         int width = (int) _engine.getDesktopWindowWidth();
         int height = (int) _engine.getDesktopWindowHeight();
         if (_model.getNumPlayers() == 1) {
@@ -339,85 +355,12 @@ public class GameWorldView implements
                     ViewportConfig.createDefault(width / 2, 0, width / 2, height)
             });
         }
+    }
 
-        _lunarLanders.clear();
-        _crates.clear();
-        _debris.clear();
-        _playerShots.clear();
-        _model.clearCrates();
-        _model.clearDeliveryZones();
-
-        createCrates();
-        createDeliveryZones();
-        createLunarLanders();
-        createDebris();
-        createPlayerShots();
-
-        if (_progressBuffRing != null) {
-            _progressBuffRing.freeResources();
-        }
-        if (_progressBuffText != null) {
-            _progressBuffText.freeResources();
-        }
-        createProgressBuffs();
-
-        if (_dustCloudDisplayMesh != null) {
-            _dustCloudDisplayMesh.freeResources();
-        }
-        _dustCloudDisplayMesh = createDustCloud();
-
-        if (_explosionFlash != null) {
-            _explosionFlash.freeResources();
-        }
-        _explosionFlash = createExplosionFlash();
-
-        if (_explosionWake != null) {
-            _explosionWake.freeResources();
-        }
-        _explosionWake = createExplosionWake();
-
-        if (_explosionParticleSystem != null) {
-            _explosionParticleSystem.freeResources();
-        }
-        _explosionParticleSystem = new ExplosionParticleSystem(_renderer, NUM_EXPLOSION_PARTICLES,
-                "explosionParticleSystem", EXPLOSION_SPARK_SIZE, EXPLOSION_SPARK_SIZE,
-                WHITE, "images/YellowSpark.png", _materialCache, _textureCache);
-        _explosionParticleSystem.setMinVelocity(EXPLOSION_SPARK_MIN_VELOCITY);
-        _explosionParticleSystem.setMaxVelocity(EXPLOSION_SPARK_MAX_VELOCITY);
-
-        if (_sparkParticleSystem != null) {
-            _sparkParticleSystem.freeResources();
-        }
-        _sparkParticleSystem = new ExplosionParticleSystem(_renderer, NUM_SCRAPE_PARTICLES,
-                "scrapeParticleSystem", SCRAPE_SPARK_SIZE, SCRAPE_SPARK_SIZE,
-                WHITE, "images/YellowSpark.png", _materialCache, _textureCache);
-        _sparkParticleSystem.setMinVelocity(SCRAPE_SPARK_MIN_VELOCITY);
-        _sparkParticleSystem.setMaxVelocity(SCRAPE_SPARK_MAX_VELOCITY);
-        _blueSparkTexture = _textureCache.add(new GlTexture(BitmapImage.fromFile("images/BlueSpark.png")));
-
-        if (_largeSmokeParticleSystem != null) {
-            _largeSmokeParticleSystem.freeResources();
-        }
-        _largeSmokeParticleSystem = new LargeSmokeParticleSystem(_renderer, NUM_LARGE_SMOKE_PARTICLES,
-                "largeSmokeParticleSystem", LARGE_SMOKE_PARTICLE_SIZE, LARGE_SMOKE_PARTICLE_SIZE,
-                WHITE, "images/Smoke0.png", _materialCache, _textureCache);;
-        _largeSmokeParticleSystem.setSmokeRadius(SMOKE_RADIUS);
-
-        if (_smallSmokeParticleSystem != null) {
-            _smallSmokeParticleSystem.freeResources();
-        }
-        _smallSmokeParticleSystem = new SmallSmokeParticleSystem(_renderer, NUM_SMALL_SMOKE_PARTICLES,
-                "smallSmokeParticleSystem", SMALL_SMOKE_PARTICLE_SIZE, SMALL_SMOKE_PARTICLE_SIZE,
-                WHITE, "images/Smoke0.png", _materialCache, _textureCache);;
-        
-        _nextDustCloudIndex = 0;
-        for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
-            _dustClouds[i]._active = false;
-        }
-
+    private void createHud() throws IOException {
         if (_hudPlayerShipIconTextures != null) {
             for (var a : _hudPlayerShipIconTextures) {
-                a.freeResources();
+                a.freeNativeResources();
             }
         }
         _hudPlayerShipIconTextures = new GlTexture[NUM_HUD_PLAYER_SHIP_ICONS];
@@ -426,7 +369,7 @@ public class GameWorldView implements
 
         if (_hudCrateTextures != null) {
             for (var a : _hudCrateTextures) {
-                a.freeResources();
+                a.freeNativeResources();
             }
         }
         _hudCrateTextures = new GlTexture[NUM_HUD_CRATE_ICONS];
@@ -435,7 +378,7 @@ public class GameWorldView implements
         _hudCrateTextures[2] = new GlTexture(BitmapImage.fromFile("images/CrateIconPanel_Delivered.png"));
 
         if (_hudIconDisplayMesh != null) {
-            _hudIconDisplayMesh.freeResources();
+            _hudIconDisplayMesh.freeNativeResources();
         }
         _hudIconDisplayMesh = _renderer.createSpriteWithOriginAtCenter("hudSprite",
                 HUD_ICON_SIZE, HUD_ICON_SIZE, WHITE, "images/CrateIconPanel_Idle.png",
@@ -443,7 +386,7 @@ public class GameWorldView implements
 
         if (_hudProgressBarTextures != null) {
             for (var a : _hudProgressBarTextures) {
-                a.freeResources();
+                a.freeNativeResources();
             }
         }
         _hudProgressBarTextures = new GlTexture[NUM_HUD_PROGRESS_BAR_TEXTURES];
@@ -453,28 +396,96 @@ public class GameWorldView implements
         _hudProgressBarTextures[3] = new GlTexture(BitmapImage.fromFile("images/00to19ProgressBar.png"));
 
         if (_hudProgressBarDisplayMesh != null) {
-            _hudProgressBarDisplayMesh.freeResources();
+            _hudProgressBarDisplayMesh.freeNativeResources();
         }
         _hudDamageBlinkOn = true;
         _lastHudDamageBlinkTime = 0;
         _hudProgressBarDisplayMesh = _renderer.createSpriteWithOriginAtYZero("hudProgressBar",
                 HUD_PROGRESS_BAR_WIDTH, HUD_PROGRESS_BAR_HEIGHT, WHITE, "images/60to100ProgressBar.png",
                 _materialCache, _textureCache);
-        
-        loadSounds();
+    }
+
+    private void createSmokeParticleSystems() throws IOException {
+        if (_largeSmokeParticleSystem != null) {
+            _largeSmokeParticleSystem.freeNativeResources();
+        }
+        _largeSmokeParticleSystem = new LargeSmokeParticleSystem(_renderer, NUM_LARGE_SMOKE_PARTICLES,
+                "largeSmokeParticleSystem", LARGE_SMOKE_PARTICLE_SIZE, LARGE_SMOKE_PARTICLE_SIZE,
+                WHITE, "images/Smoke0.png", _materialCache, _textureCache);;
+        _largeSmokeParticleSystem.setSmokeRadius(SMOKE_RADIUS);
+
+        if (_smallSmokeParticleSystem != null) {
+            _smallSmokeParticleSystem.freeNativeResources();
+        }
+        _smallSmokeParticleSystem = new SmallSmokeParticleSystem(_renderer, NUM_SMALL_SMOKE_PARTICLES,
+                "smallSmokeParticleSystem", SMALL_SMOKE_PARTICLE_SIZE, SMALL_SMOKE_PARTICLE_SIZE,
+                WHITE, "images/Smoke0.png", _materialCache, _textureCache);;
+    }
+
+    private void createSparkParticleSystem() throws IOException {
+        if (_sparkParticleSystem != null) {
+            _sparkParticleSystem.freeNativeResources();
+        }
+        _sparkParticleSystem = new ExplosionParticleSystem(_renderer, NUM_SCRAPE_PARTICLES,
+                "scrapeParticleSystem", SCRAPE_SPARK_SIZE, SCRAPE_SPARK_SIZE,
+                WHITE, "images/YellowSpark.png", _materialCache, _textureCache);
+        _sparkParticleSystem.setMinVelocity(SCRAPE_SPARK_MIN_VELOCITY);
+        _sparkParticleSystem.setMaxVelocity(SCRAPE_SPARK_MAX_VELOCITY);
+        _blueSparkTexture = _textureCache.add(new GlTexture(BitmapImage.fromFile("images/BlueSpark.png")));
+    }
+
+    private void createPlayerShipExplosion() throws IOException {
+        if (_explosionFlashDisplayMesh != null) {
+            _explosionFlashDisplayMesh.freeNativeResources();
+        }
+        _explosionFlashDisplayMesh = createExplosionFlash();
+
+        if (_explosionWakeDisplayMesh != null) {
+            _explosionWakeDisplayMesh.freeNativeResources();
+        }
+        _explosionWakeDisplayMesh = createExplosionWake();
+
+        if (_explosionParticleSystem != null) {
+            _explosionParticleSystem.freeNativeResources();
+        }
+        _explosionParticleSystem = new ExplosionParticleSystem(_renderer, NUM_EXPLOSION_PARTICLES,
+                "explosionParticleSystem", EXPLOSION_SPARK_SIZE, EXPLOSION_SPARK_SIZE,
+                WHITE, "images/YellowSpark.png", _materialCache, _textureCache);
+        _explosionParticleSystem.setMinVelocity(EXPLOSION_SPARK_MIN_VELOCITY);
+        _explosionParticleSystem.setMaxVelocity(EXPLOSION_SPARK_MAX_VELOCITY);
+    }
+
+    private void createDustClouds() throws IOException {
+        if (_dustCloudDisplayMesh != null) {
+            _dustCloudDisplayMesh.freeNativeResources();
+        }
+        _dustCloudDisplayMesh = createDustCloudDisplayMesh();
+
+        _nextDustCloudIndex = 0;
+        for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
+            _dustClouds[i]._active = false;
+        }
+    }
+
+    private DisplayMesh createDustCloudDisplayMesh() throws IOException {
+        return _renderer.createSpriteWithOriginAtCenter(
+                "DustCloud", DUST_CLOUD_SIZE, DUST_CLOUD_SIZE,
+                WHITE, "images/DustCloud.png",
+                _materialCache, _textureCache
+        );
     }
 
     private void createProgressBuffs() throws IOException {
-        _progressBuffRing = _renderer.createSpriteWithOriginAtCenter(
+        _progressBuffRingDisplayMesh = _renderer.createSpriteWithOriginAtCenter(
                 "progressBuffRing", PROGRESS_RING_SIZE, PROGRESS_RING_SIZE,
                 WHITE, "images/CollectingProgressRing.png", _materialCache, _textureCache);
-        _collectingProgressRingTexture = _progressBuffRing.getFirstDiffuseTexture();
+        _collectingProgressRingTexture = _progressBuffRingDisplayMesh.getFirstDiffuseTexture();
         _deliveringProgressRingTexture = new GlTexture(BitmapImage.fromFile("images/DeliveringProgressRing.png"));
         
-        _progressBuffText = _renderer.createSpriteWithOriginAtCenter(
+        _progressBuffTextDisplayMesh = _renderer.createSpriteWithOriginAtCenter(
                 "progressBuffText", PROGRESS_TEXT_WIDTH, PROGRESS_TEXT_HEIGHT,
                 WHITE, "images/Collecting.png", _materialCache, _textureCache);
-        _collectingProgressTextTexture = _progressBuffText.getFirstDiffuseTexture();
+        _collectingProgressTextTexture = _progressBuffTextDisplayMesh.getFirstDiffuseTexture();
         _deliveringProgressTextTexture = new GlTexture(BitmapImage.fromFile("images/Delivering.png"));
 
         _progressBuffs.clear();
@@ -494,57 +505,34 @@ public class GameWorldView implements
     private void loadSounds() throws UnsupportedAudioFileException, IOException {
         SoundBuffer soundBuffer = SoundBuffer.fromFile("sounds/PlayerShipShoot.wav");
         _soundBufferCache.add(soundBuffer);
-        _playerShipShoot = new SoundSource(false, false);
-        _playerShipShoot.setBuffer(soundBuffer);
+        _playerShipShootSound = new SoundSource(false, false);
+        _playerShipShootSound.setBuffer(soundBuffer);
 
         soundBuffer = SoundBuffer.fromFile("sounds/PlayerShipExploding.wav");
         _soundBufferCache.add(soundBuffer);
-        _playerShipExplode = new SoundSource(false, false);
-        _playerShipExplode.setBuffer(soundBuffer);
+        _playerShipExplodeSound = new SoundSource(false, false);
+        _playerShipExplodeSound.setBuffer(soundBuffer);
 
-        _playerShipHits = new SoundSource[NUM_PLAYER_SHIP_HIT_SOUNDS];
+        _playerShipHitSounds = new SoundSource[NUM_PLAYER_SHIP_HIT_SOUNDS];
         for (int i = 0; i < NUM_PLAYER_SHIP_HIT_SOUNDS; ++i) {
             soundBuffer = SoundBuffer.fromFile(String.format("sounds/Hit%d.wav", i));
             _soundBufferCache.add(soundBuffer);
-            _playerShipHits[i] = new SoundSource(false, false);
-            _playerShipHits[i].setBuffer(soundBuffer);
+            _playerShipHitSounds[i] = new SoundSource(false, false);
+            _playerShipHitSounds[i].setBuffer(soundBuffer);
         }
 
-        _playerShipDamage = new SoundSource[NUM_PLAYER_SHIP_DAMAGE_SOUNDS];
+        _playerShipDamageSounds = new SoundSource[NUM_PLAYER_SHIP_DAMAGE_SOUNDS];
         for (int i = 0; i < NUM_PLAYER_SHIP_DAMAGE_SOUNDS; ++i) {
             soundBuffer = SoundBuffer.fromFile(String.format("sounds/Damage%d.wav", i));
             _soundBufferCache.add(soundBuffer);
-            _playerShipDamage[i] = new SoundSource(false, false);
-            _playerShipDamage[i].setBuffer(soundBuffer);
+            _playerShipDamageSounds[i] = new SoundSource(false, false);
+            _playerShipDamageSounds[i].setBuffer(soundBuffer);
         }
 
         soundBuffer = SoundBuffer.fromFile("sounds/CollectCrate.wav");
         _soundBufferCache.add(soundBuffer);
-        _collectCrate = new SoundSource(false, false);
-        _collectCrate.setBuffer(soundBuffer);
-    }
-
-    private void unloadSounds() {
-        if (_playerShipShoot != null) {
-            _playerShipShoot.freeResources();
-        }
-        if (_playerShipExplode != null) {
-            _playerShipExplode.freeResources();
-        }
-        if (_playerShipHits != null) {
-            for (var a : _playerShipHits) {
-                a.freeResources();
-            }
-        }
-        if (_playerShipDamage != null) {
-            for (var a : _playerShipDamage) {
-                a.freeResources();
-            }
-        }
-        if (_collectCrate != null) {
-            _collectCrate.freeResources();
-        }
-        _soundBufferCache.freeResources();
+        _collectCrateSound = new SoundSource(false, false);
+        _collectCrateSound.setBuffer(soundBuffer);
     }
 
     @Override
@@ -677,7 +665,7 @@ public class GameWorldView implements
         _sparkParticleSystem.emitAll(nowMs, _jomlVector, SCRAPE_SPARK_MIN_LIFE_TIME, SCRAPE_SPARK_MAX_LIFE_TIME, _blueSparkTexture);
         _showSparks = true;
 
-        _playerShipDamage[_playerShipDamageSoundIndex].play();
+        _playerShipDamageSounds[_playerShipDamageSoundIndex].play();
         if (++_playerShipDamageSoundIndex >= NUM_PLAYER_SHIP_DAMAGE_SOUNDS) {
             _playerShipDamageSoundIndex = 0;
         }
@@ -765,12 +753,12 @@ public class GameWorldView implements
         
         if (_playerExploding) {
             _mvpMatrix.set(_vpMatrix).mul(_explosionFlashModelMatrix);
-            _explosionFlash.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
+            _explosionFlashDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
 
             _mvpMatrix.set(_vpMatrix)
                     .mul(_explosionWakeModelMatrix)
                     .scale(_playerExplosionWakeScale.getValue(), _playerExplosionWakeScale.getValue(), 1.0f);
-            _explosionWake.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
+            _explosionWakeDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
 
             _explosionParticleSystem.draw(_vpMatrix);
         }
@@ -804,14 +792,14 @@ public class GameWorldView implements
                         .translate(progressBuff._position)
                         .rotate((float)Math.toRadians(progressBuff._rotation), Z_AXIS);
                 _mvpMatrix.set(_vpMatrix).mul(progressBuff._modelMatrix);
-                _progressBuffRing.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, ring, WHITE);
+                _progressBuffRingDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, ring, WHITE);
 
                 if (progressBuff._showText) {
                     progressBuff._modelMatrix
                             .identity()
                             .translate(progressBuff._position);
                     _mvpMatrix.set(_vpMatrix).mul(progressBuff._modelMatrix);
-                    _progressBuffText.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, text, WHITE);
+                    _progressBuffTextDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, text, WHITE);
                 }
             }
         }
@@ -908,18 +896,210 @@ public class GameWorldView implements
     }
 
     @Override
-    public void resetState() {
-        // TODO: need to re-register these
-        _playerExplosionAlpha.unregister();
-        _playerExplosionWakeScale.unregister();
+    public void setupForNewLevel() {
+        removeRigidBodiesFromPhysicsSpace();
+        unloadAllDisplayMeshes();
+        unloadAllWidgets();
+        unloadAllParticleSystems();
+        unloadAllTextures();
+        unloadAllSounds();
 
-        resetRigidBodyObjects(_lunarLanders);
-        resetRigidBodyObjects(_crates);
-        resetRigidBodyObjects(_debris);
-        resetRigidBodyObjects(_playerShots);
-
+        _playerExploding = false;
         _showSparks = false;
         _playerSmokeActive = false;
+        _hudDamageBlinkOn = false;
+        _lastCollisionTime = 0;
+        _lastHudDamageBlinkTime = 0;
+        _lastSmokeTime = 0;
+        _playerShipHitSoundIndex = 0;
+        _playerShipDamageSoundIndex = 0;
+
+        _crateStartPoints.clear();
+        _deliveryZoneStartPoints.clear();
+        _lunarLanders.clear();
+        _crates.clear();
+        _debris.clear();
+        _playerShots.clear();
+
+        _physicsTransform = new com.jme3.math.Transform();
+        _physicsMatrix = new com.jme3.math.Matrix4f();
+
+        _model.resetPlayers();
+        _model.clearCrates();
+        _model.clearDeliveryZones();
+        _model.clearPlayerShots();
+    }
+
+    private void unloadAllDisplayMeshes() {
+        if (_dustCloudDisplayMesh != null) {
+            _dustCloudDisplayMesh.freeNativeResources();
+            _dustCloudDisplayMesh = null;
+        }
+        if (_progressBuffRingDisplayMesh != null) {
+            _progressBuffRingDisplayMesh.freeNativeResources();
+            _progressBuffRingDisplayMesh = null;
+        }
+        if (_progressBuffTextDisplayMesh != null) {
+            _progressBuffTextDisplayMesh.freeNativeResources();
+            _progressBuffTextDisplayMesh = null;
+        }
+        if (_worldDisplayMesh != null) {
+            _worldDisplayMesh.freeNativeResources();
+            _worldDisplayMesh = null;
+        }
+        if (_explosionFlashDisplayMesh != null) {
+            _explosionFlashDisplayMesh.freeNativeResources();
+            _explosionFlashDisplayMesh = null;
+        }
+        if (_explosionWakeDisplayMesh != null) {
+            _explosionWakeDisplayMesh.freeNativeResources();
+            _explosionWakeDisplayMesh = null;
+        }
+        if (_displayMeshCache != null) {
+            _displayMeshCache.freeNativeResources();
+        }
+    }
+
+    private void unloadAllWidgets() {
+        if (_episodeMissionStatusBar != null) {
+            _episodeMissionStatusBar.getObserver().freeNativeResources();
+            _episodeMissionStatusBar = null;
+        }
+        if (_playerShipsCratesStatusBar != null) {
+            _playerShipsCratesStatusBar.getObserver().freeNativeResources();
+            _playerShipsCratesStatusBar = null;
+        }
+        if (_fuelStatusBar != null) {
+            _fuelStatusBar.getObserver().freeNativeResources();
+            _fuelStatusBar = null;
+        }
+        if (_damageStatusBar != null) {
+            _damageStatusBar.getObserver().freeNativeResources();
+            _damageStatusBar = null;
+        }
+    }
+
+    private void unloadAllParticleSystems() {
+        if (_explosionParticleSystem != null) {
+            _explosionParticleSystem.freeNativeResources();
+            _explosionParticleSystem = null;
+        }
+        if (_sparkParticleSystem != null) {
+            _sparkParticleSystem.freeNativeResources();
+            _sparkParticleSystem = null;
+        }
+        if (_largeSmokeParticleSystem != null) {
+            _largeSmokeParticleSystem.freeNativeResources();
+            _largeSmokeParticleSystem = null;
+        }
+        if (_smallSmokeParticleSystem != null) {
+            _smallSmokeParticleSystem.freeNativeResources();
+            _smallSmokeParticleSystem = null;
+        }
+    }
+
+    private void unloadAllTextures() {
+        if (_hudProgressBarTextures != null) {
+            for (var a : _hudProgressBarTextures) {
+                a.freeNativeResources();
+            }
+            _hudProgressBarTextures = null;
+        }
+        if (_hudCrateTextures != null) {
+            for (var a : _hudCrateTextures) {
+                a.freeNativeResources();
+            }
+            _hudCrateTextures = null;
+        }
+        if (_hudPlayerShipIconTextures != null) {
+            for (var a : _hudPlayerShipIconTextures) {
+                a.freeNativeResources();
+            }
+            _hudPlayerShipIconTextures = null;
+        }
+        if (_blueSparkTexture != null) {
+            _blueSparkTexture.freeNativeResources();
+            _blueSparkTexture = null;
+        }
+        if (_crateCollectingTexture != null) {
+            _crateCollectingTexture.freeNativeResources();
+            _crateCollectingTexture = null;
+        }
+        if (_crateDroppedForDeliveryTexture != null) {
+            _crateDroppedForDeliveryTexture.freeNativeResources();
+            _crateDroppedForDeliveryTexture = null;
+        }
+        if (_crateDeliveringTexture != null) {
+            _crateDeliveringTexture.freeNativeResources();
+            _crateDeliveringTexture = null;
+        }
+        if (_collectingProgressRingTexture != null) {
+            _collectingProgressRingTexture.freeNativeResources();
+            _collectingProgressRingTexture = null;
+        }
+        if (_deliveringProgressRingTexture != null) {
+            _deliveringProgressRingTexture.freeNativeResources();
+            _deliveringProgressRingTexture = null;
+        }
+        if (_collectingProgressTextTexture != null) {
+            _collectingProgressTextTexture.freeNativeResources();
+            _collectingProgressTextTexture = null;
+        }
+        if (_deliveringProgressTextTexture != null) {
+            _deliveringProgressTextTexture.freeNativeResources();
+            _deliveringProgressTextTexture = null;
+        }
+        if (_hudIconDisplayMesh != null) {
+            _hudIconDisplayMesh.freeNativeResources();
+            _hudIconDisplayMesh = null;
+        }
+        if (_hudProgressBarDisplayMesh != null) {
+            _hudProgressBarDisplayMesh.freeNativeResources();
+            _hudProgressBarDisplayMesh = null;
+        }
+        if (_materialCache != null) {
+            _materialCache.clear();
+        }
+        if (_textureCache != null) {
+            _textureCache.freeNativeResources();
+        }
+    }
+
+    private void unloadAllSounds() {
+        if (_playerShipDamageSounds != null) {
+            for (var a : _playerShipDamageSounds) {
+                a.freeNativeResources();
+            }
+            _playerShipDamageSounds = null;
+        }
+        if (_playerShipShootSound != null) {
+            _playerShipShootSound.freeNativeResources();
+            _playerShipShootSound = null;
+        }
+        if (_playerShipExplodeSound != null) {
+            _playerShipExplodeSound.freeNativeResources();
+            _playerShipExplodeSound = null;
+        }
+        if (_playerShipHitSounds != null) {
+            for (var a : _playerShipHitSounds) {
+                a.freeNativeResources();
+            }
+            _playerShipHitSounds = null;
+        }
+        if (_collectCrateSound != null) {
+            _collectCrateSound.freeNativeResources();
+            _collectCrateSound = null;
+        }
+        if (_soundBufferCache != null) {
+            _soundBufferCache.freeNativeResources();
+        }
+    }
+
+    private void removeRigidBodiesFromPhysicsSpace() {
+        removeRigidBodiesFromPhysicsSpace(_lunarLanders);
+        removeRigidBodiesFromPhysicsSpace(_crates);
+        removeRigidBodiesFromPhysicsSpace(_debris);
+        removeRigidBodiesFromPhysicsSpace(_playerShots);
 
         for (int i = 0; i < _model.getNumPlayers(); ++i){
             _model.getPlayerState(i).setRigidBody(null);
@@ -933,98 +1113,31 @@ public class GameWorldView implements
         _engine.getPhysicsSpace().remove(_worldRigidBody);
         _worldRigidBody = null;
 
-        _worldDisplayMesh = null;
-        _displayMeshCache.freeResources();
-        _collisionMeshCache.clear();
-        _materialCache.clear();
-        _textureCache.freeResources();
-        _blueSparkTexture = null;
-        _crateCollectingTexture = null;
-        _crateDeliveringTexture = null;
-        _crateDroppedForDeliveryTexture = null;
-        _crateStartPoints.clear();
-        _deliveryZoneStartPoints.clear();
-        _soundBufferCache.freeResources();
-        _physicsTransform = new com.jme3.math.Transform();
-        _physicsMatrix = new com.jme3.math.Matrix4f();
-
-        if (_explosionFlash != null) {
-            _explosionFlash.freeResources();
-            _explosionFlash = null;
+        if (_collisionMeshCache != null) {
+            _collisionMeshCache.clear();
         }
-        if (_explosionWake != null) {
-            _explosionWake.freeResources();
-            _explosionWake = null;
-        }
-        if (_explosionParticleSystem != null) {
-            _explosionParticleSystem.freeResources();
-            _explosionParticleSystem = null;
-        }
-        if (_dustCloudDisplayMesh != null) {
-            _dustCloudDisplayMesh.freeResources();
-            _dustCloudDisplayMesh = null;
-        }
-        if (_sparkParticleSystem != null) {
-            _sparkParticleSystem.freeResources();
-            _sparkParticleSystem = null;
-        }
-        if (_largeSmokeParticleSystem != null) {
-            _largeSmokeParticleSystem.freeResources();
-            _largeSmokeParticleSystem = null;
-        }
-        if (_smallSmokeParticleSystem != null) {
-            _smallSmokeParticleSystem.freeResources();
-            _smallSmokeParticleSystem = null;
-        }
-
-        if (_progressBuffRing != null) {
-            _progressBuffRing.freeResources();
-            _progressBuffRing = null;
-        }
-        if (_progressBuffText != null) {
-            _progressBuffText.freeResources();
-            _progressBuffText = null;
-        }
-
-        if (_hudPlayerShipIconTextures != null) {
-            for (var a : _hudPlayerShipIconTextures) {
-                a.freeResources();
-            }
-            _hudPlayerShipIconTextures = null;
-        }
-        if (_hudCrateTextures != null) {
-            for (var a : _hudCrateTextures) {
-                a.freeResources();
-            }
-            _hudCrateTextures = null;
-        }
-        if (_hudIconDisplayMesh != null) {
-            _hudIconDisplayMesh.freeResources();
-            _hudIconDisplayMesh = null;
-        }
-
-        if (_hudProgressBarTextures != null) {
-            for (var a : _hudProgressBarTextures) {
-                a.freeResources();
-            }
-        }
-        if (_hudProgressBarDisplayMesh != null) {
-            _hudProgressBarDisplayMesh.freeResources();
-            _hudProgressBarDisplayMesh = null;
-        }
-
-        _model.resetPlayers();
-        _model.clearCrates();
-        _model.clearDeliveryZones();
-        _model.clearPlayerShots();
-
-        unloadSounds();
     }
 
     @Override
-    public void freeResources() {
-        _collisionMeshCache.clear();
-        _font.freeResources();
+    public void freeNativeResources() {
+        removeRigidBodiesFromPhysicsSpace();
+        unloadAllDisplayMeshes();
+        unloadAllWidgets();
+        unloadAllParticleSystems();
+        unloadAllTextures();
+        unloadAllSounds();
+        if (_widgetManager != null) {
+            _widgetManager.freeNativeResources();
+        }
+        if (_font != null) {
+            _font.freeNativeResources();
+        }
+        if (_playerExplosionAlpha != null) {
+            _playerExplosionAlpha.unregister();
+        }
+        if (_playerExplosionWakeScale != null) {
+            _playerExplosionWakeScale.unregister();
+        }
     }
 
     @Override
@@ -1039,11 +1152,6 @@ public class GameWorldView implements
     @Override
     public void hideMissionStatusBar() {
         _widgetManager.hideAll();
-    }
-
-    @Override
-    public void objectLoaded(String name, String type, Transform transform) {
-        // TODO
     }
 
     @Override
@@ -1091,16 +1199,6 @@ public class GameWorldView implements
     }
 
     @Override
-    public void materialLoaded(Material material) {
-        // TODO
-    }
-
-    @Override
-    public void textureLoaded(GlTexture texture) {
-        // TODO
-    }
-
-    @Override
     public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException {
         if (wci == null) {
             System.out.print("GameWorldView.widgetLoaded() was passed a null WidgetCreateInfo object");
@@ -1128,7 +1226,7 @@ public class GameWorldView implements
     @Override
     public void crateCollectionCompleted(Crate crate) {
         removeCrate(crate);
-        _collectCrate.play();
+        _collectCrateSound.play();
     }
 
     @Override
@@ -1173,7 +1271,7 @@ public class GameWorldView implements
         }
         _lastCollisionTime = _engine.getNowMs();
 
-        _playerShipHits[_playerShipHitSoundIndex].play();
+        _playerShipHitSounds[_playerShipHitSoundIndex].play();
         if (++_playerShipHitSoundIndex >= NUM_PLAYER_SHIP_HIT_SOUNDS) {
             _playerShipHitSoundIndex = 0;
         }
@@ -1236,7 +1334,7 @@ public class GameWorldView implements
                 SMOKE_MIN_LIFE_TIME, SMOKE_MAX_LIFE_TIME);
         _playerSmokeActive = true;
 
-        _playerShipExplode.play();
+        _playerShipExplodeSound.play();
     }
 
     @Override
@@ -1358,7 +1456,7 @@ public class GameWorldView implements
         _engine.getPhysicsSpace().addCollisionObject(rbo._rigidBody);
         rbo._rigidBody.setGravity(new com.jme3.math.Vector3f(0.0f, 0.0f, 0.0f)); // Overwrite the physics space gravity
 
-        _playerShipShoot.play();
+        _playerShipShootSound.play();
     }
 
     private RigidBodyObject getUnusedPlayerShot() {
@@ -1375,7 +1473,7 @@ public class GameWorldView implements
         // TODO: what to draw?
     }
 
-    private void resetRigidBodyObjects(ArrayList<RigidBodyObject> rigidBodyObjects) {
+    private void removeRigidBodiesFromPhysicsSpace(ArrayList<RigidBodyObject> rigidBodyObjects) {
         for (var rbo : rigidBodyObjects) {
             if (_engine.getPhysicsSpace().contains(rbo._rigidBody)) { // because debris always exists, but might not be in the physics space
                 _engine.getPhysicsSpace().remove(rbo._rigidBody);
@@ -1419,12 +1517,25 @@ public class GameWorldView implements
     }
 
     private void createCrates() throws IOException {
+        _model.clearCrates();
         _model.setCrateLimit(_crateStartPoints.size());
         for (var point : _crateStartPoints) {
             createCrateRigidBody(point, null);
         }
+
+        if (_crateCollectingTexture != null) {
+            _crateCollectingTexture.freeNativeResources();
+        }
         _crateCollectingTexture = _textureCache.add(new GlTexture(BitmapImage.fromFile("images/CrateCollecting.png")));
+
+        if (_crateDeliveringTexture != null) {
+            _crateDeliveringTexture.freeNativeResources();
+        }
         _crateDeliveringTexture = _textureCache.add(new GlTexture(BitmapImage.fromFile("images/CrateDelivering.png")));
+
+        if (_crateDroppedForDeliveryTexture != null) {
+            _crateDroppedForDeliveryTexture.freeNativeResources();
+        }
         _crateDroppedForDeliveryTexture = _textureCache.add(new GlTexture(BitmapImage.fromFile("images/CrateDroppedForDelivery.png")));
     }
 
@@ -1454,6 +1565,7 @@ public class GameWorldView implements
     }
 
     private void createDeliveryZones() {
+        _model.clearDeliveryZones();
         CollisionShape collisionMesh = _collisionMeshCache.getByExactName("DeliveryZone.BoxShape");
         if (collisionMesh != null) {
             for (var point : _deliveryZoneStartPoints) {
@@ -1562,14 +1674,6 @@ public class GameWorldView implements
         return _renderer.createSpriteWithOriginAtCenter(
                 "ExplosionWake", EXPLOSION_WAKE_SIZE, EXPLOSION_WAKE_SIZE,
                 WHITE, "images/ExplosionWake.png",
-                _materialCache, _textureCache
-        );
-    }
-
-    private DisplayMesh createDustCloud() throws IOException {
-        return _renderer.createSpriteWithOriginAtCenter(
-                "DustCloud", DUST_CLOUD_SIZE, DUST_CLOUD_SIZE,
-                WHITE, "images/DustCloud.png",
                 _materialCache, _textureCache
         );
     }

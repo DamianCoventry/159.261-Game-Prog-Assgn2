@@ -60,8 +60,12 @@ public abstract class ParticleSystem {
         return !_dead;
     }
 
-    public void freeResources() {
-        _displayMesh.freeResources();
+    public void freeNativeResources() {
+        _displayMesh.freeNativeResources();
+        _originalDiffuseTexture.freeNativeResources();
+        for (var a : _particles) {
+            a._diffuseTexture.freeNativeResources();
+        }
     }
 
     public void emitAll(long nowMs, Vector3f startPosition, int minLifeTimeMs, int maxLifeTimeMs) {

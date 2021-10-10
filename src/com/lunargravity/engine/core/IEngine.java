@@ -22,7 +22,7 @@ import com.lunargravity.engine.graphics.Renderer;
 import com.lunargravity.engine.timeouts.TimeoutManager;
 
 public interface IEngine extends IManualFrameUpdater {
-    void freeResources();
+    void freeNativeResources();
     void run() throws Exception;
     void exit();
 

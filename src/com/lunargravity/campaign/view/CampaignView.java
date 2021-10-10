@@ -128,54 +128,56 @@ public class CampaignView implements
     }
 
     @Override
-    public void resetState() {
-        _displayMeshCache.freeResources();
-        _materialCache.clear();
-        _textureCache.freeResources();
+    public void setupForNewLevel() {
+        // TODO
+    }
 
-        if (_naturalSatelliteRotation != null) {
-            _naturalSatelliteRotation.unregister();
-            _naturalSatelliteRotation = null;
+    @Override
+    public void freeNativeResources() {
+        if (_widgetManager != null) {
+            _widgetManager.freeNativeResources();
+        }
+        if (_displayMeshCache != null) {
+            _displayMeshCache.freeNativeResources();
+        }
+        if (_materialCache != null) {
+            _materialCache.clear();
+        }
+        if (_textureCache != null) {
+            _textureCache.freeNativeResources();
         }
         if (_naturalSatellite != null) {
-            _naturalSatellite.freeResources();
-            _naturalSatellite = null;
+            _naturalSatellite.freeNativeResources();
+        }
+        if (_naturalSatelliteRotation != null) {
+            _naturalSatelliteRotation.unregister();
         }
         if (_episodeIntro != null) {
-            _episodeIntro.getObserver().freeResources();
-            _episodeIntro = null;
+            _episodeIntro.getObserver().freeNativeResources();
         }
         if (_episodeOutro != null) {
-            _episodeOutro.getObserver().freeResources();
-            _episodeOutro = null;
+            _episodeOutro.getObserver().freeNativeResources();
         }
         if (_gameOver != null) {
-            _gameOver.getObserver().freeResources();
-            _gameOver = null;
+            _gameOver.getObserver().freeNativeResources();
         }
         if (_gameWon != null) {
-            _gameWon.getObserver().freeResources();
-            _gameWon = null;
+            _gameWon.getObserver().freeNativeResources();
         }
         if (_missionIntro != null) {
-            _missionIntro.getObserver().freeResources();
-            _missionIntro = null;
+            _missionIntro.getObserver().freeNativeResources();
         }
         if (_missionPaused != null) {
-            _missionPaused.getObserver().freeResources();
-            _missionPaused = null;
+            _missionPaused.getObserver().freeNativeResources();
         }
         if (_missionCompleted != null) {
-            _missionCompleted.getObserver().freeResources();
-            _missionCompleted = null;
+            _missionCompleted.getObserver().freeNativeResources();
         }
         if (_getReady != null) {
-            _getReady.getObserver().freeResources();
-            _getReady = null;
+            _getReady.getObserver().freeNativeResources();
         }
         if (_playerDied != null) {
-            _playerDied.getObserver().freeResources();
-            _playerDied = null;
+            _playerDied.getObserver().freeNativeResources();
         }
     }
 
@@ -225,11 +227,11 @@ public class CampaignView implements
     public void showGetReady(int i) throws IOException {
         if (_widgetManager.isVisible(_getReady)) {
             int clamped = Math.min(GetReadyState.MAX_SECONDS, Math.max(GetReadyState.MIN_SECONDS, i));
-            //_getReady.getObserver().setBackgroundImage(String.format("images/GetReady%d.png", clamped));
+            _getReady.getObserver().setBackgroundImage(String.format("images/GetReady%d.png", clamped));
         }
         else {
             _widgetManager.hideAll();
-            //_getReady.getObserver().setBackgroundImage("images/GetReady3.png");
+            _getReady.getObserver().setBackgroundImage("images/GetReady3.png");
             _widgetManager.show(_getReady, WidgetManager.ShowAs.FIRST);
         }
     }
@@ -237,7 +239,6 @@ public class CampaignView implements
     @Override
     public void showPlayerDied(WhichPlayer whichPlayer) throws IOException {
         switch (whichPlayer) {
-            // TODO: this is broken
             case PLAYER_1 -> _playerDied.getObserver().setBackgroundImage("images/Player1Died.png");
             case PLAYER_2 -> _playerDied.getObserver().setBackgroundImage("images/Player2Died.png");
             case BOTH_PLAYERS -> _playerDied.getObserver().setBackgroundImage("images/BothPlayersDied.png");
@@ -247,27 +248,12 @@ public class CampaignView implements
     }
 
     @Override
-    public void objectLoaded(String name, String type, Transform transform) {
-        // TODO
-    }
-
-    @Override
     public void displayMeshLoaded(DisplayMesh displayMesh) {
         // TODO
     }
 
     @Override
     public void collisionMeshLoaded(String name, CollisionShape collisionMesh) {
-        // TODO
-    }
-
-    @Override
-    public void materialLoaded(Material material) {
-        // TODO
-    }
-
-    @Override
-    public void textureLoaded(GlTexture texture) {
         // TODO
     }
 

@@ -184,10 +184,10 @@ public class KeyBindingWidget extends WidgetObserver {
     }
 
     @Override
-    public void freeResources() {
-        super.freeResources();
+    public void freeNativeResources() {
+        super.freeNativeResources();
         if (_pressAnyKeyTexture != null) {
-            _pressAnyKeyTexture.freeResources();
+            _pressAnyKeyTexture.freeNativeResources();
         }
     }
 
@@ -264,7 +264,7 @@ public class KeyBindingWidget extends WidgetObserver {
 
     private void loadTextureForCurrentKey() throws IOException {
         if (_currentKeyTexture != null) {
-            _currentKeyTexture.freeResources();
+            _currentKeyTexture.freeNativeResources();
             _currentKeyTexture = null;
         }
         if (SUPPORTED_KEYS.containsKey(_key)) {

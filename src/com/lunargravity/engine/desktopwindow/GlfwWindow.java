@@ -134,7 +134,7 @@ public class GlfwWindow {
         glfwPollEvents();
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_mouseCursors != null) {
             for (var mouseCursor : _mouseCursors.values()) {
                 glfwDestroyCursor(mouseCursor);

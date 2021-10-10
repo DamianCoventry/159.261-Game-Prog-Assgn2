@@ -18,7 +18,7 @@ import com.lunargravity.engine.scene.ISceneBuilderObserver;
 
 public class NullBuilderObserver implements ISceneBuilderObserver {
     @Override
-    public void freeResources() {
+    public void freeNativeResources() {
         // Nothing to do
     }
 

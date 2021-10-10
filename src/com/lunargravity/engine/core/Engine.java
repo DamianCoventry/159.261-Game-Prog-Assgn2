@@ -99,12 +99,12 @@ public class Engine implements IEngine {
     }
 
     @Override
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_audioDevice != null) {
-            _audioDevice.freeResources();
+            _audioDevice.freeNativeResources();
         }
-        _renderer.freeResources();
-        _window.freeResources();
+        _renderer.freeNativeResources();
+        _window.freeNativeResources();
     }
 
     @Override

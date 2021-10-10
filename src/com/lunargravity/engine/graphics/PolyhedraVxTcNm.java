@@ -51,11 +51,11 @@ public class PolyhedraVxTcNm {
         return _midPoint;
     }
 
-    public void freeResources() {
-        _vertices.freeResources();
-        _texCoordinates.freeResources();
-        _normals.freeResources();
-        _vertexArray.freeResources();
+    public void freeNativeResources() {
+        _vertices.freeNativeResources();
+        _texCoordinates.freeNativeResources();
+        _normals.freeNativeResources();
+        _vertexArray.freeNativeResources();
     }
 
     public void draw() {

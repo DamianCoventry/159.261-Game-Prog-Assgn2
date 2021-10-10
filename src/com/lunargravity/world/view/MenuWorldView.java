@@ -21,6 +21,7 @@ import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
 import com.lunargravity.engine.widgetsystem.WidgetManager;
+import com.lunargravity.mvc.IView;
 import com.lunargravity.world.model.IMenuWorldModel;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -30,7 +31,7 @@ import java.io.IOException;
 
 import static org.lwjgl.opengl.GL11C.glDepthMask;
 
-public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
+public class MenuWorldView implements IView, ISceneAssetOwner {
     private static final long MOON_ROTATION_TIME = 360000; // 360 seconds to rotate 360°
     private static final float SPACE_BACKGROUND_WIDTH = 1280.0f;
     private static final float SPACE_BACKGROUND_HEIGHT = 960.0f;
@@ -131,40 +132,33 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     }
 
     @Override
-    public void resetState() {
-        _moonRotation.unregister();
+    public void setupForNewLevel() {
+        // Nothing to do
+    }
+
+    @Override
+    public void freeNativeResources() {
+        if (_displayMeshCache != null) {
+            _displayMeshCache.freeNativeResources();
+        }
+        if (_materialCache != null) {
+            _materialCache.clear();
+        }
+        if (_textureCache != null) {
+            _textureCache.freeNativeResources();
+        }
+        if (_widgetManager != null) {
+            _widgetManager.freeNativeResources();
+        }
         if (_moonDisplayMesh != null) {
-            _moonDisplayMesh.freeResources();
-            _moonDisplayMesh = null;
+            _moonDisplayMesh.freeNativeResources();
         }
         if (_spaceDisplayMesh != null) {
-            _spaceDisplayMesh.freeResources();
-            _spaceDisplayMesh = null;
+            _spaceDisplayMesh.freeNativeResources();
         }
-        _displayMeshCache.freeResources();
-    }
-
-    @Override
-    public void freeResources() {
-        if (_moonDisplayMesh != null) {
-            _moonDisplayMesh.freeResources();
-            _moonDisplayMesh = null;
+        if (_moonRotation != null) {
+            _moonRotation.unregister();
         }
-        if (_spaceDisplayMesh != null) {
-            _spaceDisplayMesh.freeResources();
-            _spaceDisplayMesh = null;
-        }
-        _displayMeshCache.freeResources();
-    }
-
-    @Override
-    public void drawMenuWorldViewStuff() {
-        // TODO
-    }
-
-    @Override
-    public void objectLoaded(String name, String type, Transform transform) {
-        // TODO
     }
 
     @Override
@@ -178,16 +172,6 @@ public class MenuWorldView implements IMenuWorldView, ISceneAssetOwner {
     @Override
     public void collisionMeshLoaded(String name, CollisionShape collisionMesh) {
         // TODO
-    }
-
-    @Override
-    public void materialLoaded(Material material) {
-        _materialCache.add(material);
-    }
-
-    @Override
-    public void textureLoaded(GlTexture texture) {
-        _textureCache.add(texture);
     }
 
     @Override

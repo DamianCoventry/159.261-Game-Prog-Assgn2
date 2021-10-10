@@ -28,7 +28,7 @@ public class GlVertexArray {
         _numVertexAttributes = 0;
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_id != 0) {
             glBindVertexArray(0);
             glDeleteVertexArrays(_id);

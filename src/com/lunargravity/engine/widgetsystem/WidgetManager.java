@@ -56,12 +56,12 @@ public class WidgetManager implements IInputObserver {
         return _renderer;
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         for (var widget : _allWidgets) {
-            widget.getObserver().freeResources();
+            widget.getObserver().freeNativeResources();
         }
         for (var widget : _visibleWidgets) {
-            widget.getObserver().freeResources();
+            widget.getObserver().freeNativeResources();
         }
         _allWidgets.clear();
         _visibleWidgets.clear();

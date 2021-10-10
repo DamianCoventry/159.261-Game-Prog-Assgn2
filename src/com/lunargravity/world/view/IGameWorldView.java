@@ -14,9 +14,11 @@
 
 package com.lunargravity.world.view;
 
+import com.lunargravity.mvc.IView;
+
 import java.io.IOException;
 
-public interface IGameWorldView extends IWorldView {
+public interface IGameWorldView extends IView {
     void showMissionStatusBar() throws IOException;
     void hideMissionStatusBar();
 }

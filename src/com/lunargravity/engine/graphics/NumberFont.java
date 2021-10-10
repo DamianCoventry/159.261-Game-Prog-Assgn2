@@ -48,10 +48,10 @@ public class NumberFont {
         buildPolyhedra(frameWidth, frameHeight);
     }
 
-    public void freeResources() {
-        _texture.freeResources();
+    public void freeNativeResources() {
+        _texture.freeNativeResources();
         for (var c : _characterPolyhedra) {
-            c.freeResources();
+            c.freeNativeResources();
         }
     }
 

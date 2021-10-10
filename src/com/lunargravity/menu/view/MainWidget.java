@@ -68,8 +68,8 @@ public class MainWidget extends WidgetObserver implements IButtonObserver {
     }
 
     @Override
-    public void freeResources() {
-        super.freeResources();
+    public void freeNativeResources() {
+        super.freeNativeResources();
         // anything to do?
     }
 }

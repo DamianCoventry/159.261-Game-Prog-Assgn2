@@ -51,10 +51,10 @@ public class DogfightBuilderObserver implements ISceneBuilderObserver {
     }
 
     @Override
-    public void freeResources() {
-        _widgetManager.freeResources();
-        _backgroundImage.getObserver().freeResources();
-        _font.freeResources();
+    public void freeNativeResources() {
+        _widgetManager.freeNativeResources();
+        _backgroundImage.getObserver().freeNativeResources();
+        _font.freeNativeResources();
     }
 
     @Override

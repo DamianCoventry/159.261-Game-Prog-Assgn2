@@ -14,8 +14,8 @@ public class HighScoreWidget extends WidgetObserver {
     }
 
     @Override
-    public void freeResources() {
-        super.freeResources();
+    public void freeNativeResources() {
+        super.freeNativeResources();
         // TODO
     }
 

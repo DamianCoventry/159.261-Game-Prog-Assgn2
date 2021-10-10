@@ -16,8 +16,8 @@ public class ImageWidget extends WidgetObserver {
     }
 
     @Override
-    public void freeResources() {
-        super.freeResources();
+    public void freeNativeResources() {
+        super.freeNativeResources();
         // anything to do?
     }
 

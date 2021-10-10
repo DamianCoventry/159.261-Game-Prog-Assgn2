@@ -52,8 +52,8 @@ public class DogfightResultsWidget extends WidgetObserver implements IButtonObse
     }
 
     @Override
-    public void freeResources() {
-        super.freeResources();
+    public void freeNativeResources() {
+        super.freeNativeResources();
         // TODO
     }
 

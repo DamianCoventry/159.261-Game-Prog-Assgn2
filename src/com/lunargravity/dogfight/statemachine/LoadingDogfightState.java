@@ -42,7 +42,7 @@ public class LoadingDogfightState extends StateBase {
             getContext().loadDogfightLevel(dogfightBuilderObserver, _numPlayers);
         }
 
-        dogfightBuilderObserver.freeResources();
+        dogfightBuilderObserver.freeNativeResources();
     }
 
     @Override

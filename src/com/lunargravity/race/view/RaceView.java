@@ -101,12 +101,12 @@ public class RaceView implements
     }
 
     @Override
-    public void resetState() {
+    public void setupForNewLevel() {
         // TODO
     }
 
     @Override
-    public void objectLoaded(String name, String type, Transform transform) {
+    public void freeNativeResources() {
         // TODO
     }
 
@@ -117,16 +117,6 @@ public class RaceView implements
 
     @Override
     public void collisionMeshLoaded(String name, CollisionShape collisionMesh) {
-        // TODO
-    }
-
-    @Override
-    public void materialLoaded(Material material) {
-        // TODO
-    }
-
-    @Override
-    public void textureLoaded(GlTexture texture) {
         // TODO
     }
 

@@ -27,9 +27,9 @@ public class TextureCache {
         return texture;
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         for (var t : _textures) {
-            t.freeResources();
+            t.freeNativeResources();
         }
         _textures.clear();
     }

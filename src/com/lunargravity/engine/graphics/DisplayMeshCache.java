@@ -40,9 +40,9 @@ public class DisplayMeshCache {
         return displayMesh;
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         for (var mesh : _displayMeshes) {
-            mesh.freeResources();
+            mesh.freeNativeResources();
         }
         _displayMeshes.clear();
     }

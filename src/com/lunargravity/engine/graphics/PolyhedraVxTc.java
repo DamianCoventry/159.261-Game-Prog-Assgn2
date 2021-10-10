@@ -34,10 +34,10 @@ public class PolyhedraVxTc {
         _texCoordinates.setVertices(1, 2, texCoordinates);
     }
 
-    public void freeResources() {
-        _vertices.freeResources();
-        _texCoordinates.freeResources();
-        _vertexArray.freeResources();
+    public void freeNativeResources() {
+        _vertices.freeNativeResources();
+        _texCoordinates.freeNativeResources();
+        _vertexArray.freeNativeResources();
     }
 
     public void draw() {

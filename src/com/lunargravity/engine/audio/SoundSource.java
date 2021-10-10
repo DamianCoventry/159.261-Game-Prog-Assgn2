@@ -16,7 +16,7 @@ public class SoundSource {
         }
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_sourceId != 0) {
             stop();
             alDeleteSources(_sourceId);

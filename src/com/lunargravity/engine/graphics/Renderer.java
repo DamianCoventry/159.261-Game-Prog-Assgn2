@@ -60,8 +60,8 @@ public class Renderer {
         return _specularDirectionalLightProgram;
     }
 
-    public void freeResources() {
-        _diffuseTextureProgram.freeResources();
+    public void freeNativeResources() {
+        _diffuseTextureProgram.freeNativeResources();
     }
 
     public void clearBuffers() {

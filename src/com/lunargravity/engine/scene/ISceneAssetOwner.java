@@ -15,20 +15,14 @@
 package com.lunargravity.engine.scene;
 
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.lunargravity.engine.graphics.*;
+import com.lunargravity.engine.graphics.DisplayMesh;
+import com.lunargravity.engine.graphics.ViewportConfig;
 import com.lunargravity.engine.widgetsystem.WidgetCreateInfo;
 
 import java.io.IOException;
 
 public interface ISceneAssetOwner {
-    void objectLoaded(String name, String type, Transform transform);
     void displayMeshLoaded(DisplayMesh displayMesh);
     void collisionMeshLoaded(String name, CollisionShape collisionMesh);
-    void materialLoaded(Material material);
-    void textureLoaded(GlTexture texture);
     void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException;
-    // TODO: handle sounds
-    // TODO: handle music
-    // TODO: handle sprites
-    // TODO: handle particle systems
 }

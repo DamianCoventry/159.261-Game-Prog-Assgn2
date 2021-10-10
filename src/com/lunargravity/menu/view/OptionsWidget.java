@@ -182,8 +182,8 @@ public class OptionsWidget extends WidgetObserver implements
     }
 
     @Override
-    public void freeResources() {
-        super.freeResources();
+    public void freeNativeResources() {
+        super.freeNativeResources();
         // anything to do?
     }
 

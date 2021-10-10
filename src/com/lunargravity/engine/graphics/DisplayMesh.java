@@ -31,9 +31,9 @@ public class DisplayMesh {
         _midPoint = new Vector3f();
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         for (var p : _pieces) {
-            p.freeResources();
+            p.freeNativeResources();
         }
     }
 

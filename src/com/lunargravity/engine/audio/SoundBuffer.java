@@ -62,7 +62,7 @@ public class SoundBuffer {
         _fileName = fileName;
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_bufferId != 0) {
             alDeleteBuffers(_bufferId);
             _bufferId = 0;

@@ -36,8 +36,8 @@ public class GlStaticMeshPiece {
         return _polyhedra.getMidPoint();
     }
 
-    public void freeResources() {
-        _polyhedra.freeResources();
+    public void freeNativeResources() {
+        _polyhedra.freeNativeResources();
     }
 
     public void bindMaterial(MaterialCache materialCache, TextureCache textureCache) {

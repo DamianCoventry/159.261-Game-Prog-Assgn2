@@ -30,7 +30,7 @@ public class AudioDevice {
         AL.createCapabilities(deviceCaps);
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_context != 0) {
             alcDestroyContext(_context);
             _context = 0;

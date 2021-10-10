@@ -34,7 +34,7 @@ public class GlShader {
         }
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_id != 0) {
             glDeleteShader(_id);
             _id = 0;

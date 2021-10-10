@@ -34,7 +34,7 @@ public class GlVertexBuffer {
         }
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_id != 0) {
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glDeleteBuffers(_id);

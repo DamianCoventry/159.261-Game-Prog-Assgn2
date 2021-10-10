@@ -199,7 +199,7 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
 
         changeState(new MissionIntroState(getContext()));
 
-        missionBuilderObserver.freeResources();
+        missionBuilderObserver.freeNativeResources();
     }
 
     @Override

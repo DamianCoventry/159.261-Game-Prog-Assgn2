@@ -49,15 +49,9 @@ import com.lunargravity.race.view.RaceView;
 import com.lunargravity.world.controller.*;
 import com.lunargravity.world.model.*;
 import com.lunargravity.world.view.GameWorldView;
-import com.lunargravity.world.view.IWorldView;
 import com.lunargravity.world.view.MenuWorldView;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import org.joml.Matrix4f;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -81,7 +75,6 @@ public class Application implements
     private static final int FIRST_EPISODE = 0;
     private static final int FIRST_MISSION = 0;
     private static final int FIRST_LEVEL = 0;
-    private static final String MENU_BACKGROUND_MUSIC = "music/Art-Of-Silence_V2.mp3";
 
     private final IEngine _engine;
     private final PlayerInputBindings _playerInputBindings;
@@ -94,7 +87,7 @@ public class Application implements
     private IState _pendingState;
 
     private IWorldModel _worldModel;
-    private IWorldView _worldView;
+    private IView _worldView;
     private IWorldController _worldController;
 
     private IModel _logicModel;
@@ -286,7 +279,7 @@ public class Application implements
 
     @Override
     public void startMenu(ISceneBuilderObserver sceneBuilderObserver) throws Exception {
-        resetState();
+        setupForNewGame();
 
         _worldModel = new MenuWorldModel();
         _worldController = new MenuWorldController(this, (IMenuWorldModel)_worldModel);
@@ -308,14 +301,11 @@ public class Application implements
 
         _worldView.initialLoadCompleted();
         _logicView.initialLoadCompleted();
-
-        // JavaFX has been remarkably unreliable. Commenting it out for now.
-        //startBackgroundMusic(MENU_BACKGROUND_MUSIC);
     }
 
     @Override
     public void createCampaignMvc(String savedGameFileName) throws IOException {
-        resetState();
+        setupForNewGame();
 
         SavedGameFile savedGameFile = new SavedGameFile(savedGameFileName); // throws
 
@@ -335,7 +325,7 @@ public class Application implements
 
     @Override
     public void createCampaignMvc(int numPlayers) throws IOException {
-        resetState();
+        setupForNewGame();
 
         _logicModel = new CampaignModel(FIRST_EPISODE, FIRST_MISSION, numPlayers);
         _logicController = new CampaignController(_engine, (ICampaignModel)_logicModel);
@@ -356,8 +346,8 @@ public class Application implements
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
-        _worldView.resetState();
-        _logicView.resetState();
+        _worldView.setupForNewLevel();
+        _logicView.setupForNewLevel();
 
         ICampaignModel model = (ICampaignModel)_logicModel;
         ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
@@ -374,8 +364,8 @@ public class Application implements
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
-        _worldView.resetState();
-        _logicView.resetState();
+        _worldView.setupForNewLevel();
+        _logicView.setupForNewLevel();
 
         ICampaignModel model = (ICampaignModel)_logicModel;
         ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
@@ -392,7 +382,7 @@ public class Application implements
 
     @Override
     public void startRaceGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws Exception {
-        resetState();
+        setupForNewGame();
 
         _logicModel = new RaceModel(FIRST_LEVEL, numPlayers);
         _logicController = new RaceController((IRaceModel)_logicModel);
@@ -412,8 +402,8 @@ public class Application implements
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
-        _worldView.resetState();
-        _logicView.resetState();
+        _worldView.setupForNewLevel();
+        _logicView.setupForNewLevel();
 
         IRaceModel model = (IRaceModel)_logicModel;
         ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
@@ -430,7 +420,7 @@ public class Application implements
 
     @Override
     public void startDogfightGame(ISceneBuilderObserver sceneBuilderObserver, int numPlayers) throws Exception {
-        resetState();
+        setupForNewGame();
 
         _logicModel = new DogfightModel(FIRST_LEVEL, numPlayers);
         _logicController = new DogfightController((IDogfightModel)_logicModel);
@@ -450,8 +440,8 @@ public class Application implements
         _engine.setDefaultViewport();
         _widgetManager.closeAll();
 
-        _worldView.resetState();
-        _logicView.resetState();
+        _worldView.setupForNewLevel();
+        _logicView.setupForNewLevel();
 
         IDogfightModel model = (IDogfightModel)_logicModel;
         ViewportConfig viewportConfig = _engine.getRenderer().getOrthographicViewport().getConfig();
@@ -471,10 +461,11 @@ public class Application implements
         // TODO
     }
 
-    public void resetState() {
+    public void setupForNewGame() {
         if (_logicController instanceof CampaignController campaignController) {
             campaignController.removeObserver((ICampaignControllerObserver)_worldController);
         }
+
         if (_worldController != null) {
             _worldController.clearPhysicsCollisionListener();
         }
@@ -482,7 +473,10 @@ public class Application implements
             _worldModel.removeTimeouts(_engine.getTimeoutManager());
         }
         if (_worldView != null) {
-            _worldView.freeResources();
+            _worldView.freeNativeResources();
+        }
+        if (_logicView != null) {
+            _logicView.freeNativeResources();
         }
     }
 
@@ -491,9 +485,16 @@ public class Application implements
         _playerInputBindings.save();
     }
 
-    public void freeResources() {
-        _widgetManager.freeResources();
-        _engine.freeResources();
+    public void freeNativeResources() {
+        if (_worldView != null) {
+            _worldView.freeNativeResources();
+        }
+        if (_widgetManager != null) {
+            _widgetManager.freeNativeResources();
+        }
+        if (_engine != null) {
+            _engine.freeNativeResources();
+        }
     }
 
     public void changeStateNow(IState state) throws Exception {
@@ -533,26 +534,9 @@ public class Application implements
         return windowConfig;
     }
 
-    private void startBackgroundMusic(String fileName) {
-        // TODO: create signal the thread to stop at shutdown
-        new Thread(() -> {
-            try {
-                String uri = new File(fileName).toURI().toString();
-                MediaPlayer mediaPlayer = new MediaPlayer(new Media(uri));
-                mediaPlayer.play();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
     public static void main(String[] args) {
         Application app = null;
         try {
-            // JavaFX has been remarkably unreliable. Commenting it out for now.
-            //new JFXPanel(); // Start the JFX runtime so that we can stream an MP3
-
             app = new Application();
             app.run();
         }
@@ -561,7 +545,7 @@ public class Application implements
         }
         finally {
             if (app != null) {
-                app.freeResources();
+                app.freeNativeResources();
             }
         }
     }

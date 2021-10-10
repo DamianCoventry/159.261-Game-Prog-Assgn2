@@ -32,5 +32,6 @@ public interface IView extends ISceneAssetOwner {
     MaterialCache getMaterialCache();
     TextureCache getTextureCache();
     void onFrameEnd();
-    void resetState();
+    void setupForNewLevel();
+    void freeNativeResources();
 }

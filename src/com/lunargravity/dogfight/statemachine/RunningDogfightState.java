@@ -43,7 +43,7 @@ public class RunningDogfightState extends StateBase {
 
     @Override
     public void end() {
-        _font.freeResources(); // temp
+        _font.freeNativeResources(); // temp
     }
 
     @Override

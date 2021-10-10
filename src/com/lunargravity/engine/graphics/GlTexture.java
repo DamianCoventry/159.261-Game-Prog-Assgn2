@@ -45,7 +45,7 @@ public class GlTexture {
         _height = bitmapImage.getHeight();
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         if (_id != 0) {
             glDeleteTextures(_id);
             _id = 0;

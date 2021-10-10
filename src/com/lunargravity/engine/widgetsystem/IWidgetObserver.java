@@ -19,7 +19,7 @@ import org.joml.Matrix4f;
 import java.io.IOException;
 
 public interface IWidgetObserver {
-    void freeResources();
+    void freeNativeResources();
     void widgetOpening();
     void widgetOpened();
 

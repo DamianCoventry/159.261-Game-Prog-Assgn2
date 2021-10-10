@@ -40,9 +40,9 @@ public class SoundBufferCache {
         return material;
     }
 
-    public void freeResources() {
+    public void freeNativeResources() {
         for (var s : _soundBuffers) {
-            s.freeResources();
+            s.freeNativeResources();
         }
         _soundBuffers.clear();
     }

@@ -17,7 +17,7 @@ package com.lunargravity.engine.scene;
 import java.io.IOException;
 
 public interface ISceneBuilderObserver {
-    void freeResources();
+    void freeNativeResources();
     void sceneBuildBeginning() throws IOException;
     void sceneBuildEnded();
     void sceneBuildProgressed(int currentItem, int totalItems);
