@@ -6,6 +6,7 @@ DONE        Mission completed screen
             Make sure all delivery zones are rendered and lined up correctly
             Re-align each collision mesh more closely to the display mesh
             Spaceship exhaust plume
+            enemy ships
             Remove or "do" all TODOs
             Change interfaces to abstract classes where most implementations just leave the methods empty
             Play an animation and sound when a crate is delivered
