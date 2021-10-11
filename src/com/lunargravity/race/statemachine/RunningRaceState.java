@@ -47,7 +47,9 @@ public class RunningRaceState extends StateBase {
     }
 
     @Override
-    public void keyboardKeyEvent(int key, int scancode, int action, int mods) {
+    public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws Exception {
+        super.keyboardKeyEvent(key, scancode, action, mods);
+
         if (action != GLFW_PRESS) {
             return;
         }

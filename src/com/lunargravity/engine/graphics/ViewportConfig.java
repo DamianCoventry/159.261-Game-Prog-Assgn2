@@ -14,14 +14,12 @@
 
 package com.lunargravity.engine.graphics;
 
-import org.jetbrains.annotations.NotNull;
-
 public class ViewportConfig {
-    public static @NotNull ViewportConfig createFullWindow(int width, int height) {
+    public static ViewportConfig createFullWindow(int width, int height) {
         return createDefault(0, 0, width, height);
     }
 
-    public static @NotNull ViewportConfig createDefault(int x, int y, int width, int height) {
+    public static ViewportConfig createDefault(int x, int y, int width, int height) {
         ViewportConfig config = new ViewportConfig();
         config._viewportIndex = 0;
         config._positionX = x;

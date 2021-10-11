@@ -58,31 +58,6 @@ public class MissionIntroState extends StateBase implements ICampaignControllerO
     }
 
     @Override
-    public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws Exception {
-        checkCheatKeys(key, action);
-    }
-
-    private void checkCheatKeys(int key, int action) throws Exception {
-        if (action == GLFW_PRESS) {
-            if (key == GLFW_KEY_1) {
-                getCampaignController().skipToEpisode(0);
-            } else if (key == GLFW_KEY_2) {
-                getCampaignController().skipToEpisode(1);
-            } else if (key == GLFW_KEY_3) {
-                getCampaignController().skipToEpisode(2);
-            } else if (key == GLFW_KEY_4) {
-                getCampaignController().skipToEpisode(3);
-            } else if (key == GLFW_KEY_7) {
-                getCampaignController().skipToMission(0);
-            } else if (key == GLFW_KEY_8) {
-                getCampaignController().skipToMission(1);
-            } else if (key == GLFW_KEY_9) {
-                getCampaignController().skipToMission(2);
-            }
-        }
-    }
-
-    @Override
     public void startNextEpisode() throws Exception {
         // Only here for the cheat keys
         getContext().loadCampaignEpisode(new NullBuilderObserver());

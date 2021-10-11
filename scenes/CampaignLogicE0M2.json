@@ -279,8 +279,8 @@
                 "y": 0.0
             },
             "_size": {
-                "x": 450.0,
-                "y": 100.0
+                "x": 350.0,
+                "y": 150.0
             },
             "_properties": {
                 "backgroundImage": "images/MissionCompleted.png",

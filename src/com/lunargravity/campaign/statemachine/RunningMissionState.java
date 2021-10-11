@@ -53,10 +53,9 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
 
     @Override
     public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws Exception {
+        super.keyboardKeyEvent(key, scancode, action, mods);
+
         PlayerInputBindings inputBindings = getGameWorldModel().getPlayerInputBindings();
-
-        checkCheatKeys(key, action);
-
         if (action == GLFW_PRESS) {
             if (key == GLFW_KEY_ESCAPE) {
                 changeState(new MissionPausedState(getContext()));
@@ -129,26 +128,6 @@ public class RunningMissionState extends StateBase implements ICampaignControlle
                 if (inputBindings.getPlayerKickKey(1) == key) {
                     getGameWorldController().playerKick(1);
                 }
-            }
-        }
-    }
-
-    private void checkCheatKeys(int key, int action) throws Exception {
-        if (action == GLFW_PRESS) {
-            if (key == GLFW_KEY_1) {
-                getCampaignController().skipToEpisode(0);
-            } else if (key == GLFW_KEY_2) {
-                getCampaignController().skipToEpisode(1);
-            } else if (key == GLFW_KEY_3) {
-                getCampaignController().skipToEpisode(2);
-            } else if (key == GLFW_KEY_4) {
-                getCampaignController().skipToEpisode(3);
-            } else if (key == GLFW_KEY_7) {
-                getCampaignController().skipToMission(0);
-            } else if (key == GLFW_KEY_8) {
-                getCampaignController().skipToMission(1);
-            } else if (key == GLFW_KEY_9) {
-                getCampaignController().skipToMission(2);
             }
         }
     }
