@@ -22,7 +22,7 @@ public class EpisodeOutroState extends StateBase implements ICampaignControllerO
         getCampaignController().addObserver(this);
         getCampaignView().showEpisodeOutro();
 
-        _timeoutId = addTimeout(3000, (callCount) -> {
+        _timeoutId = addTimeout(30000, (callCount) -> {
             try {
                 getCampaignController().completeEpisode();
             } catch (Exception e) {
@@ -51,6 +51,11 @@ public class EpisodeOutroState extends StateBase implements ICampaignControllerO
     @Override
     public void episodeIntroAborted() {
         // Nothing to do
+    }
+
+    @Override
+    public void mouseButtonEvent(int button, int action, int mods) throws Exception {
+        getCampaignController().completeEpisode();
     }
 
     @Override

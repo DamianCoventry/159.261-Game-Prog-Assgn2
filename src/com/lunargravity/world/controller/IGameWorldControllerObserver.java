@@ -35,4 +35,5 @@ public interface IGameWorldControllerObserver {
     void playerFiredWeapon(int id);
     void playerWeaponCooledDown(int id);
     void playerShotExploded(PlayerShot playerShot);
+    void episodeCompleted();
 }

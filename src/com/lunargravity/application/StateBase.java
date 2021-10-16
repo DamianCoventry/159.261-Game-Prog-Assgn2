@@ -14,6 +14,11 @@
 
 package com.lunargravity.application;
 
+import com.lunargravity.campaign.controller.ICampaignController;
+import com.lunargravity.campaign.statemachine.EpisodeOutroState;
+import com.lunargravity.campaign.statemachine.MissionCompletedState;
+import com.lunargravity.campaign.statemachine.MissionIntroState;
+import com.lunargravity.campaign.view.MissionBuilderObserver;
 import com.lunargravity.engine.core.IManualFrameUpdater;
 import com.lunargravity.engine.graphics.Renderer;
 import com.lunargravity.engine.graphics.ViewportConfig;
@@ -21,6 +26,9 @@ import com.lunargravity.engine.timeouts.TimeoutManager;
 import org.joml.Matrix4f;
 
 import java.util.function.Function;
+
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_9;
 
 public class StateBase implements IState {
     private final IStateMachineContext _context;
@@ -106,7 +114,7 @@ public class StateBase implements IState {
 
     @Override
     public void keyboardKeyEvent(int key, int scancode, int action, int mods) throws Exception {
-        // TODO
+        checkCheatKeys(key, action);
     }
 
     @Override
@@ -122,5 +130,32 @@ public class StateBase implements IState {
     @Override
     public void mouseWheelScrolledEvent(double xOffset, double yOffset) {
         // TODO
+    }
+
+    private void checkCheatKeys(int key, int action) throws Exception {
+        if (action != GLFW_PRESS) {
+            return;
+        }
+        if (getContext().getLogicController() instanceof ICampaignController controller) {
+            if (key == GLFW_KEY_1) {
+                controller.skipToEpisode(0);
+            } else if (key == GLFW_KEY_2) {
+                controller.skipToEpisode(1);
+            } else if (key == GLFW_KEY_3) {
+                controller.skipToEpisode(2);
+            } else if (key == GLFW_KEY_4) {
+                controller.skipToEpisode(3);
+            } else if (key == GLFW_KEY_7) {
+                controller.skipToMission(0);
+            } else if (key == GLFW_KEY_8) {
+                controller.skipToMission(1);
+            } else if (key == GLFW_KEY_9) {
+                controller.skipToMission(2);
+            } else if (key == GLFW_KEY_F5) {
+                changeState(new MissionCompletedState(getContext()));
+            } else if (key == GLFW_KEY_F6) {
+                changeState(new EpisodeOutroState(getContext()));
+            }
+        }
     }
 }

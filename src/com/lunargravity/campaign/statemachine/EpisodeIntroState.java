@@ -50,7 +50,6 @@ public class EpisodeIntroState extends StateBase implements ICampaignControllerO
 
     @Override
     public void mouseButtonEvent(int button, int action, int mods) throws Exception {
-        // temp
         loadCampaignMission();
     }
 

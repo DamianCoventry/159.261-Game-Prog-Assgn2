@@ -150,7 +150,7 @@ public class MenuWorldView implements IView, ISceneAssetOwner {
 
     @Override
     public void displayMeshLoaded(DisplayMesh displayMesh) {
-        if (displayMesh.getName().equals("Moon.Display")) {
+        if (displayMesh.getName().equals("EarthMoon.Display")) {
             _moonDisplayMesh = displayMesh;
         }
         _displayMeshCache.add(displayMesh);

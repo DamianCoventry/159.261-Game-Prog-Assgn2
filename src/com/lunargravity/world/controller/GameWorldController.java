@@ -360,7 +360,9 @@ public class GameWorldController implements
 
     @Override
     public void episodeCompleted() {
-        // Nothing to do
+        for (var observer : _observers) {
+            observer.episodeCompleted();
+        }
     }
 
     @Override

@@ -255,6 +255,7 @@ public class GameWorldView implements
     private DisplayMesh _hudProgressBarDisplayMesh;
     private GlTexture[] _hudProgressBarTextures;
 
+    private boolean _episodeEnded;
     private boolean _hudDamageBlinkOn;
     private long _lastHudDamageBlinkTime;
     private long _lastSmokeTime;
@@ -303,8 +304,10 @@ public class GameWorldView implements
         _lunarLanderStartPoints[1] = new Vector3f(0.0f, 0.0f, 0.0f);
         _playerExplosionColour = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
+        _lastSmokeTime = 0;
         _playerShipHitSoundIndex = 0;
         _playerShipDamageSoundIndex = 0;
+        _episodeEnded = false;
         _crateStartPoints = new ArrayList<>();
         _deliveryZoneStartPoints = new ArrayList<>();
 
@@ -321,8 +324,6 @@ public class GameWorldView implements
                 _dustClouds[i]._modelMatrices[j] = new Matrix4f();
             }
         }
-
-        _lastSmokeTime = 0;
     }
 
     @Override
@@ -340,6 +341,608 @@ public class GameWorldView implements
         createSmokeParticleSystems();
         createHud();
         loadSounds();
+    }
+
+    @Override
+    public void viewThink() {
+        if (_playerExploding) {
+            _explosionParticleSystem.think(_engine.getNowMs());
+            _playerExplosionColour.w = _playerExplosionAlpha.getCurrentValue();
+        }
+
+        if (_showSparks) {
+            _sparkParticleSystem.think(_engine.getNowMs());
+            _showSparks = _sparkParticleSystem.isAlive();
+        }
+
+        if (_playerSmokeActive) {
+            _largeSmokeParticleSystem.think(_engine.getNowMs());
+            _playerSmokeActive = _largeSmokeParticleSystem.isAlive();
+        }
+
+        if (_smallSmokeParticleSystem != null) {
+            _smallSmokeParticleSystem.think(_engine.getNowMs());
+            emitPeriodicSmokeIfRequired(_engine.getNowMs());
+        }
+
+        for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
+            if (!_dustClouds[i]._active) {
+                continue;
+            }
+            _dustClouds[i]._rotations[0] += DUST_CLOUD_ROTATE_INCREMENT;
+            _dustClouds[i]._rotations[1] -= DUST_CLOUD_ROTATE_INCREMENT;
+            _dustClouds[i]._rotations[2] += DUST_CLOUD_ROTATE_INCREMENT;
+
+            _dustClouds[i]._modelMatrices[0]
+                    .identity()
+                    .translate(_dustClouds[i]._position)
+                    .rotate(_dustClouds[i]._rotations[0], Z_AXIS);
+            _dustClouds[i]._modelMatrices[1]
+                    .identity()
+                    .translate(_dustClouds[i]._position)
+                    .rotate(_dustClouds[i]._rotations[1], Z_AXIS);
+            _dustClouds[i]._modelMatrices[2]
+                    .identity()
+                    .translate(_dustClouds[i]._position)
+                    .rotate(_dustClouds[i]._rotations[2], Z_AXIS);
+
+            _dustClouds[i]._diffuseColour.w -= DUST_CLOUD_FADE_INCREMENT;
+            if (_dustClouds[i]._diffuseColour.w < 0.0f) {
+                _dustClouds[i]._diffuseColour.w = 0.0f;
+                _dustClouds[i]._active = false;
+            }
+        }
+
+        if (_model.getPlayerState(0).getHitPoints() < HUD_HIT_POINT_SCALE[2]) {
+            if (_engine.getNowMs() >= _lastHudDamageBlinkTime + HUD_DAMAGE_BLINK_SPEED) {
+                _lastHudDamageBlinkTime = _engine.getNowMs();
+                _hudDamageBlinkOn = !_hudDamageBlinkOn;
+            }
+        }
+
+        progressBuffsThink(_engine.getNowMs());
+    }
+
+    @Override
+    public void drawView3d(int viewport, Matrix4f projectionMatrix) {
+        if (viewport < 0 || viewport > 1 || _episodeEnded) {
+            return;
+        }
+
+        // Synchronise first so that we can attach a camera to each player's lunar lander
+        for (var rbo : _lunarLanders) {
+            synchroniseDisplayMeshWithCollisionMesh(rbo);
+        }
+        for (var rbo : _crates) {
+            synchroniseDisplayMeshWithCollisionMesh(rbo);
+        }
+
+        for (var rbo : _debris) {
+            if (rbo._active) {
+                synchroniseDisplayMeshWithCollisionMesh(rbo);
+            }
+        }
+
+        for (var rbo : _playerShots) {
+            if (rbo._active) {
+                synchroniseDisplayMeshWithCollisionMesh(rbo);
+            }
+        }
+
+        attachCamerasToLunarLanders();
+
+        if (_worldDisplayMesh != null) {
+            _mvMatrix.set(_cameras[viewport].getViewMatrix());
+            _worldDisplayMesh.draw(_renderer, _renderer.getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+        }
+
+        for (var rbo : _lunarLanders) {
+            _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
+            rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+        }
+
+        for (var rbo : _crates) {
+            _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
+            Crate crate = (Crate)rbo._rigidBody.getUserObject();
+            if (crate.isDroppedForDelivery()) {
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _crateDroppedForDeliveryTexture, _mvMatrix, projectionMatrix);
+            }
+            else if (crate.isDelivering()) {
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _crateDeliveringTexture, _mvMatrix, projectionMatrix);
+            }
+            else if (_model.getPlayerState(1).getCollectingCrate() == crate || _model.getPlayerState(0).getCollectingCrate() == crate) {
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _crateCollectingTexture, _mvMatrix, projectionMatrix);
+            }
+            else {
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+            }
+        }
+
+        for (var rbo : _debris) {
+            if (rbo._active) {
+                _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+            }
+        }
+
+        for (var rbo : _playerShots) {
+            if (rbo._active) {
+                _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
+                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+            }
+        }
+
+        glDepthMask(false);
+        _vpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix());
+
+        if (_playerSmokeActive) {
+            _largeSmokeParticleSystem.draw(_vpMatrix);
+        }
+
+        if (_smallSmokeParticleSystem != null) {
+            _smallSmokeParticleSystem.draw(_vpMatrix);
+        }
+
+        if (_playerExploding) {
+            _mvpMatrix.set(_vpMatrix).mul(_explosionFlashModelMatrix);
+            _explosionFlashDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
+
+            _mvpMatrix.set(_vpMatrix)
+                    .mul(_explosionWakeModelMatrix)
+                    .scale(_playerExplosionWakeScale.getCurrentValue(), _playerExplosionWakeScale.getCurrentValue(), 1.0f);
+            _explosionWakeDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
+
+            _explosionParticleSystem.draw(_vpMatrix);
+        }
+
+        for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
+            if (!_dustClouds[i]._active) {
+                continue;
+            }
+            for (int j = 0; j < NUM_DUST_PARTICLES_PER_CLOUD; ++j) {
+                _mvpMatrix.set(_vpMatrix).mul(_dustClouds[i]._modelMatrices[j]);
+                _dustCloudDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _dustClouds[i]._diffuseColour);
+            }
+        }
+
+        if (_showSparks) {
+            _sparkParticleSystem.draw(_vpMatrix);
+        }
+
+        for (var progressBuff : _progressBuffs) {
+            if (!progressBuff._active) {
+                continue;
+            }
+            GlTexture ring, text;
+            if (progressBuff._type == ProgressBuff.Type.COLLECTING) {
+                ring = _collectingProgressRingTexture; text = _collectingProgressTextTexture;
+            }
+            else {
+                ring = _deliveringProgressRingTexture; text = _deliveringProgressTextTexture;
+            }
+
+            progressBuff._modelMatrix
+                    .identity()
+                    .translate(progressBuff._position)
+                    .rotate((float)Math.toRadians(progressBuff._rotation), Z_AXIS);
+            _mvpMatrix.set(_vpMatrix).mul(progressBuff._modelMatrix);
+            _progressBuffRingDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, ring, WHITE);
+
+            if (progressBuff._showText) {
+                progressBuff._modelMatrix
+                        .identity()
+                        .translate(progressBuff._position);
+                _mvpMatrix.set(_vpMatrix).mul(progressBuff._modelMatrix);
+                _progressBuffTextDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, text, WHITE);
+            }
+        }
+
+        glDepthMask(true);
+    }
+
+    @Override
+    public void drawView2d(Matrix4f projectionMatrix) {
+        if (!_widgetManager.isVisible(_episodeMissionStatusBar)) {
+            return;
+        }
+
+        // Draw HUD:
+        //   1. Episode and Mission
+        //   2. Fuel
+        //   3. Damage
+        //   4. Player and Crates
+        final int shipsRemaining = (int) (_model.getShipsRemaining(0) + 1);
+        float x = HUD_PLAYER_SHIP_ICON_OFFSET.x;
+        for (int i = 0; i < shipsRemaining; ++i) {
+            _mvpMatrix.set(projectionMatrix).translate(x, HUD_PLAYER_SHIP_ICON_OFFSET.y, 0.0f);
+            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudPlayerShipIconTextures[0], WHITE);
+            x += HUD_ICON_SPACING;
+        }
+        for (int i = 0; i < CampaignModel.INITIAL_SHIP_COUNT - shipsRemaining; ++i) {
+            _mvpMatrix.set(projectionMatrix).translate(x, HUD_PLAYER_SHIP_ICON_OFFSET.y, 0.0f);
+            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudPlayerShipIconTextures[1], WHITE);
+            x += HUD_ICON_SPACING;
+        }
+
+        x = HUD_CRATE_ICON_OFFSET.x;
+        int numCrates = _model.getTotalCrates() - (_model.getNumCratesCollected() + _model.getNumCratesDelivered());
+        for (int i = 0; i < numCrates; ++i) {
+            _mvpMatrix.set(projectionMatrix).translate(x, HUD_CRATE_ICON_OFFSET.y, 0.0f);
+            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudCrateTextures[0], WHITE);
+            x += HUD_ICON_SPACING;
+        }
+        for (int i = 0; i < _model.getNumCratesCollected(); ++i) {
+            _mvpMatrix.set(projectionMatrix).translate(x, HUD_CRATE_ICON_OFFSET.y, 0.0f);
+            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudCrateTextures[1], WHITE);
+            x += HUD_ICON_SPACING;
+        }
+        for (int i = 0; i < _model.getNumCratesDelivered(); ++i) {
+            _mvpMatrix.set(projectionMatrix).translate(x, HUD_CRATE_ICON_OFFSET.y, 0.0f);
+            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudCrateTextures[2], WHITE);
+            x += HUD_ICON_SPACING;
+        }
+
+        if (_hudProgressBarDisplayMesh != null) {
+            _mvpMatrix.set(projectionMatrix)
+                    .translate(HUD_FUEL_PROGRESS_BAR_OFFSET.x, HUD_FUEL_PROGRESS_BAR_OFFSET.y, 0.0f);
+            _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[0], WHITE);
+
+            float yScale = _model.getPlayerState(0).getHitPointsPercentage();
+            _mvpMatrix.set(projectionMatrix)
+                    .translate(HUD_DAMAGE_PROGRESS_BAR_OFFSET.x, HUD_DAMAGE_PROGRESS_BAR_OFFSET.y, 0.0f)
+                    .scale(1.0f, yScale, 1.0f);
+            if (_model.getPlayerState(0).getHitPoints() > HUD_HIT_POINT_SCALE[0]) {
+                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[0], WHITE);
+            }
+            else if (_model.getPlayerState(0).getHitPoints() > HUD_HIT_POINT_SCALE[1]) {
+                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[1], WHITE);
+            }
+            else if (_model.getPlayerState(0).getHitPoints() > HUD_HIT_POINT_SCALE[2]) {
+                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[2], WHITE);
+            }
+            else if (_hudDamageBlinkOn){
+                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[3], WHITE);
+            }
+        }
+
+        // TODO: what to do about player two?
+    }
+
+    @Override
+    public DisplayMeshCache getDisplayMeshCache() {
+        return _displayMeshCache;
+    }
+
+    @Override
+    public MaterialCache getMaterialCache() {
+        return _materialCache;
+    }
+
+    @Override
+    public TextureCache getTextureCache() {
+        return _textureCache;
+    }
+
+    @Override
+    public void onFrameEnd() {
+        // Nothing to do
+    }
+
+    @Override
+    public void setupForNewLevel() {
+        removeRigidBodiesFromPhysicsSpace();
+        unloadAllDisplayMeshes();
+        unloadAllParticleSystems();
+        unloadAllTextures();
+        unloadAllSounds();
+
+        _episodeEnded = false;
+        _playerExploding = false;
+        _showSparks = false;
+        _playerSmokeActive = false;
+        _hudDamageBlinkOn = false;
+        _lastCollisionTime = 0;
+        _lastHudDamageBlinkTime = 0;
+        _lastSmokeTime = 0;
+        _playerShipHitSoundIndex = 0;
+        _playerShipDamageSoundIndex = 0;
+
+        _crateStartPoints.clear();
+        _deliveryZoneStartPoints.clear();
+        _lunarLanders.clear();
+        _crates.clear();
+        _debris.clear();
+        _playerShots.clear();
+
+        _physicsTransform = new com.jme3.math.Transform();
+        _physicsMatrix = new com.jme3.math.Matrix4f();
+
+        _model.resetPlayers();
+        _model.clearCrates();
+        _model.clearDeliveryZones();
+        _model.clearPlayerShots();
+    }
+
+    @Override
+    public void freeNativeResources() {
+        removeRigidBodiesFromPhysicsSpace();
+        unloadAllDisplayMeshes();
+        unloadAllParticleSystems();
+        unloadAllTextures();
+        unloadAllSounds();
+        if (_font != null) {
+            _font.freeNativeResources();
+        }
+        if (_playerExplosionAlpha != null) {
+            _playerExplosionAlpha.unregister();
+        }
+        if (_playerExplosionWakeScale != null) {
+            _playerExplosionWakeScale.unregister();
+        }
+    }
+
+    @Override
+    public void showMissionStatusBar() throws IOException {
+        _widgetManager.hideAll();
+        _widgetManager.show(_episodeMissionStatusBar, WidgetManager.ShowAs.FIRST);
+        _widgetManager.show(_fuelStatusBar, WidgetManager.ShowAs.LAST);
+        _widgetManager.show(_damageStatusBar, WidgetManager.ShowAs.LAST);
+        _widgetManager.show(_playerShipsCratesStatusBar, WidgetManager.ShowAs.LAST);
+    }
+
+    @Override
+    public void hideMissionStatusBar() {
+        _widgetManager.hideAll();
+    }
+
+    @Override
+    public void displayMeshLoaded(DisplayMesh displayMesh) {
+        if (_model.getNumPlayers() == 1 && displayMesh.getName().equals("SinglePlayerStart")) {
+            _cameras[0]._position = new Vector3f(displayMesh.getMidPoint()).add(new Vector3f(0.0f, 0.0f, CAMERA_Z_DISTANCE));
+            _cameras[0].calculateViewMatrix();
+            _lunarLanderStartPoints[0] = new Vector3f(displayMesh.getMidPoint());
+        }
+        else if (_model.getNumPlayers() == 2 && displayMesh.getName().startsWith("TwoPlayersStart")) {
+            if (displayMesh.getName().endsWith("001")) {
+                _cameras[0]._position = new Vector3f(displayMesh.getMidPoint()).add(new Vector3f(0.0f, 0.0f, CAMERA_Z_DISTANCE));
+                _cameras[0].calculateViewMatrix();
+                _lunarLanderStartPoints[0] = new Vector3f(displayMesh.getMidPoint());
+            }
+            else if (displayMesh.getName().endsWith("002")) {
+                _cameras[1]._position = new Vector3f(displayMesh.getMidPoint()).add(new Vector3f(0.0f, 0.0f, CAMERA_Z_DISTANCE));
+                _cameras[1].calculateViewMatrix();
+                _lunarLanderStartPoints[1] = new Vector3f(displayMesh.getMidPoint());
+            }
+        }
+        else if(displayMesh.getName().contains(".Display")) {
+            if (_displayMeshCache.getByExactName(displayMesh.getName()) == null) {
+                if (displayMesh.getName().equals("World.Display")) {
+                    _worldDisplayMesh = displayMesh;
+                }
+                _displayMeshCache.add(displayMesh);
+            }
+        }
+        else if (displayMesh.getName().startsWith("CrateStart.")) {
+            _crateStartPoints.add(displayMesh.getMidPoint());
+        }
+        else if (displayMesh.getName().startsWith("DeliveryZoneStart.")) {
+            _deliveryZoneStartPoints.add(displayMesh.getMidPoint());
+        }
+    }
+
+    @Override
+    public void collisionMeshLoaded(String name, CollisionShape collisionShape) {
+        _collisionMeshCache.add(name, collisionShape);
+        if (name.equals("World.MeshShape")) {
+            _worldRigidBody = new PhysicsRigidBody(collisionShape, PhysicsBody.massForStatic);
+            _engine.getPhysicsSpace().addCollisionObject(_worldRigidBody);
+        }
+    }
+
+    @Override
+    public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException {
+        if (wci == null) {
+            System.out.print("GameWorldView.widgetLoaded() was passed a null WidgetCreateInfo object");
+            return;
+        }
+        if (wci._id.equals(EPISODE_MISSION_STATUS_BAR) && wci._type.equals("ImageWidget")) {
+            _episodeMissionStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
+        }
+        else if (wci._id.equals(FUEL_STATUS_BAR) && wci._type.equals("ImageWidget")) {
+            _fuelStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
+        }
+        else if (wci._id.equals(DAMAGE_STATUS_BAR) && wci._type.equals("ImageWidget")) {
+            _damageStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
+        }
+        else if (wci._id.equals(PLAYER_SHIPS_CRATES_STATUS_BAR) && wci._type.equals("ImageWidget")) {
+            _playerShipsCratesStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
+        }
+    }
+
+    @Override
+    public void crateCollectingStarted(Player player, Crate crate) {
+        startProgressBuff(player, ProgressBuff.Type.COLLECTING, Player.CRATE_COLLECTION_TIME);
+    }
+
+    @Override
+    public void crateCollectionCompleted(Crate crate) {
+        removeCrate(crate);
+        _collectCrateSound.play();
+    }
+
+    @Override
+    public void crateCollectionAborted(Player player) {
+        for (var progressBuff : _progressBuffs) {
+            if (progressBuff._active && progressBuff._player == player) {
+                progressBuff._active = false;
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void crateDroppedForDelivery(Crate crate, com.jme3.math.Vector3f playerPosition) {
+        _jomlVector.x = playerPosition.x;
+        _jomlVector.y = playerPosition.y;
+        _jomlVector.z = playerPosition.z;
+        createCrateRigidBody(_jomlVector, crate);
+        startProgressBuff(crate, ProgressBuff.Type.DELIVERING, DeliveryZone.CRATE_DELIVERY_TIME);
+    }
+
+    @Override
+    public void crateDeliveryCompleted(Crate crate) {
+        // TODO: play an animation?
+        removeCrate(crate);
+    }
+
+    @Override
+    public void respawnCrateAtStartPosition(Crate crate) {
+        // TODO: play an animation?
+        crate.respawnAtStartPosition();
+    }
+
+    @Override
+    public void allCratesDelivered() {
+        // TODO
+    }
+
+    @Override
+    public void playerShipCollided(Player player, float appliedImpulse, com.jme3.math.Vector3f impactPoint) {
+        if (appliedImpulse < MIN_IMPULSE_TO_PLAY_SOUND || _engine.getNowMs() - _lastCollisionTime < COLLISION_SOUND_GAP) {
+            return;
+        }
+        _lastCollisionTime = _engine.getNowMs();
+
+        _playerShipHitSounds[_playerShipHitSoundIndex].play();
+        if (++_playerShipHitSoundIndex >= NUM_PLAYER_SHIP_HIT_SOUNDS) {
+            _playerShipHitSoundIndex = 0;
+        }
+
+        _jomlVector.x = impactPoint.x;
+        _jomlVector.y = impactPoint.y;
+        _jomlVector.z = impactPoint.z;
+
+        _showSparks = true;
+        _sparkParticleSystem.emitAll(_engine.getNowMs(), _jomlVector, SCRAPE_SPARK_MIN_LIFE_TIME, SCRAPE_SPARK_MAX_LIFE_TIME);
+
+        _dustClouds[_nextDustCloudIndex]._active = true;
+        _dustClouds[_nextDustCloudIndex]._position.set(_jomlVector);
+        _dustClouds[_nextDustCloudIndex]._diffuseColour.w = 1.0f;
+        float angleDegrees = randomInteger(0, 359);
+        for (int j = 0; j < NUM_DUST_PARTICLES_PER_CLOUD; ++j) {
+            float r = (float)Math.toRadians(angleDegrees);
+            _dustClouds[_nextDustCloudIndex]._rotations[j] = r;
+            _dustClouds[_nextDustCloudIndex]._modelMatrices[j].identity().translate(_jomlVector).rotate(r, Z_AXIS);
+            angleDegrees += 120.0f; // <-- 360/3
+        }
+
+        if (++_nextDustCloudIndex >= MAX_DUST_CLOUDS) {
+            _nextDustCloudIndex = 0;
+        }
+    }
+
+    @Override
+    public void playerShipTookDamage(int player, int hitPointsDamage, int hitPointsRemaining) {
+        // TODO: draw sparks?
+    }
+
+    @Override
+    public void playerShipExploding(int i) {
+        Player player = _model.getPlayerState(i);
+        if (player.getRigidBody() == null) {
+            return;
+        }
+        player.getRigidBody().getPhysicsLocation(_jmeVector);
+        _jomlVector.x = _jmeVector.x;
+        _jomlVector.y = _jmeVector.y;
+        _jomlVector.z = _jmeVector.z;
+
+        dropCollectedCrates(player);
+        spawnPlayerShipDebris(player);
+        removePlayerShip(player);
+
+        _explosionParticleSystem.emitAll(_engine.getNowMs(), _jomlVector,
+                EXPLOSION_SPARK_MIN_LIFE_TIME, EXPLOSION_SPARK_MAX_LIFE_TIME);
+        _playerExploding = true;
+        _playerExplosionAlpha.start(1.0f, 0.0f, PLAYER_EXPLOSION_FADE_TIME);
+        _playerExplosionWakeScale.start(0.1f, EXPLOSION_WAKE_SIZE, EXPLOSION_WAKE_SCALE_TIME);
+
+        _explosionFlashModelMatrix.identity().translate(_jomlVector);
+        _explosionWakeModelMatrix.identity().translate(_jomlVector);
+
+        _playerExplosionColour.w = 1.0f;
+
+        _largeSmokeParticleSystem.emitAll(_engine.getNowMs(), _jomlVector,
+                SMOKE_MIN_LIFE_TIME, SMOKE_MAX_LIFE_TIME);
+        _playerSmokeActive = true;
+
+        _playerShipExplodeSound.play();
+    }
+
+    @Override
+    public void playerShipDead(int player) {
+        // Nothing to do
+    }
+
+    @Override
+    public void playerShotExploded(PlayerShot playerShot) {
+        for (var a : _playerShots) {
+            if (a._rigidBody.getUserObject() == playerShot) {
+                a._active = false;
+                a._rigidBody.setUserObject(null);
+                if (_engine.getPhysicsSpace().contains(a._rigidBody)) {
+                    _engine.getPhysicsSpace().removeCollisionObject(a._rigidBody);
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void episodeCompleted() {
+        // This prevents the 3d view from being drawn. We know this object
+        // will no longer used in a few seconds.
+        _episodeEnded = true;
+    }
+
+    @Override
+    public void playerShipSpawned(int player) {
+        createLunarLanderRigidBody(player);
+    }
+
+    @Override
+    public void playerFiredWeapon(int id) {
+        RigidBodyObject rbo = getUnusedPlayerShot();
+        if (rbo == null) {
+            return;
+        }
+
+        rbo._rigidBody.clearForces();
+        rbo._rigidBody.setLinearVelocity(ZERO_VELOCITY);
+        rbo._rigidBody.setAngularVelocity(ZERO_VELOCITY);
+
+        Player player = _model.getPlayerState(id);
+        var direction = player.calculateAndGetUpVector();
+        var position = player.getRigidBody().getPhysicsLocation(null);
+
+        _jmeVector.set(direction).multLocal(PLAYER_SHOT_OFFSET).addLocal(position);
+        rbo._rigidBody.setPhysicsLocation(_jmeVector);
+
+        _jmeVector.set(direction).multLocal(PLAYER_SHOT_FORCE);
+        rbo._rigidBody.applyCentralForce(_jmeVector);
+
+        rbo._active = true;
+        _model.addPlayerShot(player, rbo._rigidBody);
+
+        _engine.getPhysicsSpace().addCollisionObject(rbo._rigidBody);
+        rbo._rigidBody.setGravity(new com.jme3.math.Vector3f(0.0f, 0.0f, 0.0f)); // Overwrite the physics space gravity
+
+        _playerShipShootSound.play();
+    }
+
+    @Override
+    public void playerWeaponCooledDown(int id) {
+        // TODO: what to draw?
     }
 
     private void setupViewport() {
@@ -411,7 +1014,7 @@ public class GameWorldView implements
         }
         _largeSmokeParticleSystem = new LargeSmokeParticleSystem(_renderer, NUM_LARGE_SMOKE_PARTICLES,
                 "largeSmokeParticleSystem", LARGE_SMOKE_PARTICLE_SIZE, LARGE_SMOKE_PARTICLE_SIZE,
-                WHITE, "images/Smoke0.png", _materialCache, _textureCache);;
+                WHITE, "images/Smoke0.png", _materialCache, _textureCache);
         _largeSmokeParticleSystem.setSmokeRadius(SMOKE_RADIUS);
 
         if (_smallSmokeParticleSystem != null) {
@@ -419,7 +1022,7 @@ public class GameWorldView implements
         }
         _smallSmokeParticleSystem = new SmallSmokeParticleSystem(_renderer, NUM_SMALL_SMOKE_PARTICLES,
                 "smallSmokeParticleSystem", SMALL_SMOKE_PARTICLE_SIZE, SMALL_SMOKE_PARTICLE_SIZE,
-                WHITE, "images/Smoke0.png", _materialCache, _textureCache);;
+                WHITE, "images/Smoke0.png", _materialCache, _textureCache);
     }
 
     private void createSparkParticleSystem() throws IOException {
@@ -535,66 +1138,6 @@ public class GameWorldView implements
         _collectCrateSound.setBuffer(soundBuffer);
     }
 
-    @Override
-    public void viewThink() {
-        if (_playerExploding) {
-            _explosionParticleSystem.think(_engine.getNowMs());
-            _playerExplosionColour.w = _playerExplosionAlpha.getCurrentValue();
-        }
-
-        if (_showSparks) {
-            _sparkParticleSystem.think(_engine.getNowMs());
-            _showSparks = _sparkParticleSystem.isAlive();
-        }
-
-        if (_playerSmokeActive) {
-            _largeSmokeParticleSystem.think(_engine.getNowMs());
-            _playerSmokeActive = _largeSmokeParticleSystem.isAlive();
-        }
-
-        if (_smallSmokeParticleSystem != null) {
-            _smallSmokeParticleSystem.think(_engine.getNowMs());
-            emitPeriodicSmokeIfRequired(_engine.getNowMs());
-        }
-
-        for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
-            if (!_dustClouds[i]._active) {
-                continue;
-            }
-            _dustClouds[i]._rotations[0] += DUST_CLOUD_ROTATE_INCREMENT;
-            _dustClouds[i]._rotations[1] -= DUST_CLOUD_ROTATE_INCREMENT;
-            _dustClouds[i]._rotations[2] += DUST_CLOUD_ROTATE_INCREMENT;
-
-            _dustClouds[i]._modelMatrices[0]
-                    .identity()
-                    .translate(_dustClouds[i]._position)
-                    .rotate(_dustClouds[i]._rotations[0], Z_AXIS);
-            _dustClouds[i]._modelMatrices[1]
-                    .identity()
-                    .translate(_dustClouds[i]._position)
-                    .rotate(_dustClouds[i]._rotations[1], Z_AXIS);
-            _dustClouds[i]._modelMatrices[2]
-                    .identity()
-                    .translate(_dustClouds[i]._position)
-                    .rotate(_dustClouds[i]._rotations[2], Z_AXIS);
-
-            _dustClouds[i]._diffuseColour.w -= DUST_CLOUD_FADE_INCREMENT;
-            if (_dustClouds[i]._diffuseColour.w < 0.0f) {
-                _dustClouds[i]._diffuseColour.w = 0.0f;
-                _dustClouds[i]._active = false;
-            }
-        }
-
-        if (_model.getPlayerState(0).getHitPoints() < HUD_HIT_POINT_SCALE[2]) {
-            if (_engine.getNowMs() >= _lastHudDamageBlinkTime + HUD_DAMAGE_BLINK_SPEED) {
-                _lastHudDamageBlinkTime = _engine.getNowMs();
-                _hudDamageBlinkOn = !_hudDamageBlinkOn;
-            }
-        }
-
-        progressBuffsThink(_engine.getNowMs());
-    }
-
     private void progressBuffsThink(long nowMs) {
         for (var a : _progressBuffs) {
             if (a._active) {
@@ -669,264 +1212,6 @@ public class GameWorldView implements
         if (++_playerShipDamageSoundIndex >= NUM_PLAYER_SHIP_DAMAGE_SOUNDS) {
             _playerShipDamageSoundIndex = 0;
         }
-    }
-
-    @Override
-    public void drawView3d(int viewport, Matrix4f projectionMatrix) {
-        if (viewport < 0 || viewport > 1) {
-            return;
-        }
-
-        // Synchronise first so that we can attach a camera to each player's lunar lander
-        for (var rbo : _lunarLanders) {
-            synchroniseDisplayMeshWithCollisionMesh(rbo);
-        }
-        for (var rbo : _crates) {
-            synchroniseDisplayMeshWithCollisionMesh(rbo);
-        }
-
-        for (var rbo : _debris) {
-            if (rbo._active) {
-                synchroniseDisplayMeshWithCollisionMesh(rbo);
-            }
-        }
-
-        for (var rbo : _playerShots) {
-            if (rbo._active) {
-                synchroniseDisplayMeshWithCollisionMesh(rbo);
-            }
-        }
-
-        attachCamerasToLunarLanders();
-
-        if (_worldDisplayMesh != null) {
-            _mvMatrix.set(_cameras[viewport].getViewMatrix());
-            _worldDisplayMesh.draw(_renderer, _renderer.getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
-        }
-
-        for (var rbo : _lunarLanders) {
-            _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
-            rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
-        }
-
-        for (var rbo : _crates) {
-            _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
-            Crate crate = (Crate)rbo._rigidBody.getUserObject();
-            if (crate.isDroppedForDelivery()) {
-                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _crateDroppedForDeliveryTexture, _mvMatrix, projectionMatrix);
-            }
-            else if (crate.isDelivering()) {
-                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _crateDeliveringTexture, _mvMatrix, projectionMatrix);
-            }
-            else if (_model.getPlayerState(1).getCollectingCrate() == crate || _model.getPlayerState(0).getCollectingCrate() == crate) {
-                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _crateCollectingTexture, _mvMatrix, projectionMatrix);
-            }
-            else {
-                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
-            }
-        }
-
-        for (var rbo : _debris) {
-            if (rbo._active) {
-                _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
-                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
-            }
-        }
-
-        for (var rbo : _playerShots) {
-            if (rbo._active) {
-                _mvMatrix.set(_cameras[viewport].getViewMatrix()).mul(rbo._modelMatrix);
-                rbo._displayMesh.draw(_renderer, _renderer.getSpecularDirectionalLightProgram(), _mvMatrix, projectionMatrix);
-            }
-        }
-
-        glDepthMask(false);
-        _vpMatrix.set(projectionMatrix).mul(_cameras[viewport].getViewMatrix());
-
-        if (_playerSmokeActive) {
-            _largeSmokeParticleSystem.draw(_vpMatrix);
-        }
-
-        if (_smallSmokeParticleSystem != null) {
-            _smallSmokeParticleSystem.draw(_vpMatrix);
-        }
-        
-        if (_playerExploding) {
-            _mvpMatrix.set(_vpMatrix).mul(_explosionFlashModelMatrix);
-            _explosionFlashDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
-
-            _mvpMatrix.set(_vpMatrix)
-                    .mul(_explosionWakeModelMatrix)
-                    .scale(_playerExplosionWakeScale.getCurrentValue(), _playerExplosionWakeScale.getCurrentValue(), 1.0f);
-            _explosionWakeDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _playerExplosionColour);
-
-            _explosionParticleSystem.draw(_vpMatrix);
-        }
-
-        for (int i = 0; i < MAX_DUST_CLOUDS; ++i) {
-            if (!_dustClouds[i]._active) {
-                continue;
-            }
-            for (int j = 0; j < NUM_DUST_PARTICLES_PER_CLOUD; ++j) {
-                _mvpMatrix.set(_vpMatrix).mul(_dustClouds[i]._modelMatrices[j]);
-                _dustCloudDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _dustClouds[i]._diffuseColour);
-            }
-        }
-
-        if (_showSparks) {
-            _sparkParticleSystem.draw(_vpMatrix);
-        }
-
-        for (var progressBuff : _progressBuffs) {
-            if (progressBuff._active) {
-                GlTexture ring, text;
-                if (progressBuff._type == ProgressBuff.Type.COLLECTING) {
-                    ring = _collectingProgressRingTexture; text = _collectingProgressTextTexture;
-                }
-                else {
-                    ring = _deliveringProgressRingTexture; text = _deliveringProgressTextTexture;
-                }
-
-                progressBuff._modelMatrix
-                        .identity()
-                        .translate(progressBuff._position)
-                        .rotate((float)Math.toRadians(progressBuff._rotation), Z_AXIS);
-                _mvpMatrix.set(_vpMatrix).mul(progressBuff._modelMatrix);
-                _progressBuffRingDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, ring, WHITE);
-
-                if (progressBuff._showText) {
-                    progressBuff._modelMatrix
-                            .identity()
-                            .translate(progressBuff._position);
-                    _mvpMatrix.set(_vpMatrix).mul(progressBuff._modelMatrix);
-                    _progressBuffTextDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, text, WHITE);
-                }
-            }
-        }
-        
-        glDepthMask(true);
-    }
-
-    @Override
-    public void drawView2d(Matrix4f projectionMatrix) {
-        if (!_widgetManager.isVisible(_episodeMissionStatusBar)) {
-            return;
-        }
-
-        // Draw HUD:
-        //   1. Episode and Mission
-        //   2. Fuel
-        //   3. Damage
-        //   4. Player and Crates
-        final int shipsRemaining = (int) (_model.getShipsRemaining(0) + 1);
-        float x = HUD_PLAYER_SHIP_ICON_OFFSET.x;
-        for (int i = 0; i < shipsRemaining; ++i) {
-            _mvpMatrix.set(projectionMatrix).translate(x, HUD_PLAYER_SHIP_ICON_OFFSET.y, 0.0f);
-            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudPlayerShipIconTextures[0], WHITE);
-            x += HUD_ICON_SPACING;
-        }
-        for (int i = 0; i < CampaignModel.INITIAL_SHIP_COUNT - shipsRemaining; ++i) {
-            _mvpMatrix.set(projectionMatrix).translate(x, HUD_PLAYER_SHIP_ICON_OFFSET.y, 0.0f);
-            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudPlayerShipIconTextures[1], WHITE);
-            x += HUD_ICON_SPACING;
-        }
-
-        x = HUD_CRATE_ICON_OFFSET.x;
-        int numCrates = _model.getTotalCrates() - (_model.getNumCratesCollected() + _model.getNumCratesDelivered());
-        for (int i = 0; i < numCrates; ++i) {
-            _mvpMatrix.set(projectionMatrix).translate(x, HUD_CRATE_ICON_OFFSET.y, 0.0f);
-            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudCrateTextures[0], WHITE);
-            x += HUD_ICON_SPACING;
-        }
-        for (int i = 0; i < _model.getNumCratesCollected(); ++i) {
-            _mvpMatrix.set(projectionMatrix).translate(x, HUD_CRATE_ICON_OFFSET.y, 0.0f);
-            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudCrateTextures[1], WHITE);
-            x += HUD_ICON_SPACING;
-        }
-        for (int i = 0; i < _model.getNumCratesDelivered(); ++i) {
-            _mvpMatrix.set(projectionMatrix).translate(x, HUD_CRATE_ICON_OFFSET.y, 0.0f);
-            _hudIconDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudCrateTextures[2], WHITE);
-            x += HUD_ICON_SPACING;
-        }
-
-        if (_hudProgressBarDisplayMesh != null) {
-            _mvpMatrix.set(projectionMatrix)
-                    .translate(HUD_FUEL_PROGRESS_BAR_OFFSET.x, HUD_FUEL_PROGRESS_BAR_OFFSET.y, 0.0f);
-            _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[0], WHITE);
-
-            float yScale = _model.getPlayerState(0).getHitPointsPercentage();
-            _mvpMatrix.set(projectionMatrix)
-                    .translate(HUD_DAMAGE_PROGRESS_BAR_OFFSET.x, HUD_DAMAGE_PROGRESS_BAR_OFFSET.y, 0.0f)
-                    .scale(1.0f, yScale, 1.0f);
-            if (_model.getPlayerState(0).getHitPoints() > HUD_HIT_POINT_SCALE[0]) {
-                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[0], WHITE);
-            }
-            else if (_model.getPlayerState(0).getHitPoints() > HUD_HIT_POINT_SCALE[1]) {
-                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[1], WHITE);
-            }
-            else if (_model.getPlayerState(0).getHitPoints() > HUD_HIT_POINT_SCALE[2]) {
-                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[2], WHITE);
-            }
-            else if (_hudDamageBlinkOn){
-                _hudProgressBarDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _mvpMatrix, _hudProgressBarTextures[3], WHITE);
-            }
-        }
-
-        // TODO: what to do about player two?
-    }
-
-    @Override
-    public DisplayMeshCache getDisplayMeshCache() {
-        return _displayMeshCache;
-    }
-
-    @Override
-    public MaterialCache getMaterialCache() {
-        return _materialCache;
-    }
-
-    @Override
-    public TextureCache getTextureCache() {
-        return _textureCache;
-    }
-
-    @Override
-    public void onFrameEnd() {
-        // Nothing to do
-    }
-
-    @Override
-    public void setupForNewLevel() {
-        removeRigidBodiesFromPhysicsSpace();
-        unloadAllDisplayMeshes();
-        unloadAllParticleSystems();
-        unloadAllTextures();
-        unloadAllSounds();
-
-        _playerExploding = false;
-        _showSparks = false;
-        _playerSmokeActive = false;
-        _hudDamageBlinkOn = false;
-        _lastCollisionTime = 0;
-        _lastHudDamageBlinkTime = 0;
-        _lastSmokeTime = 0;
-        _playerShipHitSoundIndex = 0;
-        _playerShipDamageSoundIndex = 0;
-
-        _crateStartPoints.clear();
-        _deliveryZoneStartPoints.clear();
-        _lunarLanders.clear();
-        _crates.clear();
-        _debris.clear();
-        _playerShots.clear();
-
-        _physicsTransform = new com.jme3.math.Transform();
-        _physicsMatrix = new com.jme3.math.Matrix4f();
-
-        _model.resetPlayers();
-        _model.clearCrates();
-        _model.clearDeliveryZones();
-        _model.clearPlayerShots();
     }
 
     private void unloadAllDisplayMeshes() {
@@ -1098,240 +1383,6 @@ public class GameWorldView implements
         }
     }
 
-    @Override
-    public void freeNativeResources() {
-        removeRigidBodiesFromPhysicsSpace();
-        unloadAllDisplayMeshes();
-        unloadAllParticleSystems();
-        unloadAllTextures();
-        unloadAllSounds();
-        if (_font != null) {
-            _font.freeNativeResources();
-        }
-        if (_playerExplosionAlpha != null) {
-            _playerExplosionAlpha.unregister();
-        }
-        if (_playerExplosionWakeScale != null) {
-            _playerExplosionWakeScale.unregister();
-        }
-    }
-
-    @Override
-    public void showMissionStatusBar() throws IOException {
-        _widgetManager.hideAll();
-        _widgetManager.show(_episodeMissionStatusBar, WidgetManager.ShowAs.FIRST);
-        _widgetManager.show(_fuelStatusBar, WidgetManager.ShowAs.LAST);
-        _widgetManager.show(_damageStatusBar, WidgetManager.ShowAs.LAST);
-        _widgetManager.show(_playerShipsCratesStatusBar, WidgetManager.ShowAs.LAST);
-    }
-
-    @Override
-    public void hideMissionStatusBar() {
-        _widgetManager.hideAll();
-    }
-
-    @Override
-    public void displayMeshLoaded(DisplayMesh displayMesh) {
-        if (_model.getNumPlayers() == 1 && displayMesh.getName().equals("SinglePlayerStart")) {
-            _cameras[0]._position = new Vector3f(displayMesh.getMidPoint()).add(new Vector3f(0.0f, 0.0f, CAMERA_Z_DISTANCE));
-            _cameras[0].calculateViewMatrix();
-            _lunarLanderStartPoints[0] = new Vector3f(displayMesh.getMidPoint());
-        }
-        else if (_model.getNumPlayers() == 2 && displayMesh.getName().startsWith("TwoPlayersStart")) {
-            if (displayMesh.getName().endsWith("001")) {
-                _cameras[0]._position = new Vector3f(displayMesh.getMidPoint()).add(new Vector3f(0.0f, 0.0f, CAMERA_Z_DISTANCE));
-                _cameras[0].calculateViewMatrix();
-                _lunarLanderStartPoints[0] = new Vector3f(displayMesh.getMidPoint());
-            }
-            else if (displayMesh.getName().endsWith("002")) {
-                _cameras[1]._position = new Vector3f(displayMesh.getMidPoint()).add(new Vector3f(0.0f, 0.0f, CAMERA_Z_DISTANCE));
-                _cameras[1].calculateViewMatrix();
-                _lunarLanderStartPoints[1] = new Vector3f(displayMesh.getMidPoint());
-            }
-        }
-        else if(displayMesh.getName().contains(".Display")) {
-            if (_displayMeshCache.getByExactName(displayMesh.getName()) == null) {
-                if (displayMesh.getName().equals("World.Display")) {
-                    _worldDisplayMesh = displayMesh;
-                }
-                _displayMeshCache.add(displayMesh);
-            }
-        }
-        else if (displayMesh.getName().startsWith("CrateStart.")) {
-            _crateStartPoints.add(displayMesh.getMidPoint());
-        }
-        else if (displayMesh.getName().startsWith("DeliveryZoneStart.")) {
-            _deliveryZoneStartPoints.add(displayMesh.getMidPoint());
-        }
-    }
-
-    @Override
-    public void collisionMeshLoaded(String name, CollisionShape collisionShape) {
-        _collisionMeshCache.add(name, collisionShape);
-        if (name.equals("World.MeshShape")) {
-            _worldRigidBody = new PhysicsRigidBody(collisionShape, PhysicsBody.massForStatic);
-            _engine.getPhysicsSpace().addCollisionObject(_worldRigidBody);
-        }
-    }
-
-    @Override
-    public void widgetLoaded(ViewportConfig viewportConfig, WidgetCreateInfo wci) throws IOException {
-        if (wci == null) {
-            System.out.print("GameWorldView.widgetLoaded() was passed a null WidgetCreateInfo object");
-            return;
-        }
-        if (wci._id.equals(EPISODE_MISSION_STATUS_BAR) && wci._type.equals("ImageWidget")) {
-            _episodeMissionStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
-        }
-        else if (wci._id.equals(FUEL_STATUS_BAR) && wci._type.equals("ImageWidget")) {
-            _fuelStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
-        }
-        else if (wci._id.equals(DAMAGE_STATUS_BAR) && wci._type.equals("ImageWidget")) {
-            _damageStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
-        }
-        else if (wci._id.equals(PLAYER_SHIPS_CRATES_STATUS_BAR) && wci._type.equals("ImageWidget")) {
-            _playerShipsCratesStatusBar = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
-        }
-    }
-
-    @Override
-    public void crateCollectingStarted(Player player, Crate crate) {
-        startProgressBuff(player, ProgressBuff.Type.COLLECTING, Player.CRATE_COLLECTION_TIME);
-    }
-
-    @Override
-    public void crateCollectionCompleted(Crate crate) {
-        removeCrate(crate);
-        _collectCrateSound.play();
-    }
-
-    @Override
-    public void crateCollectionAborted(Player player) {
-        for (var progressBuff : _progressBuffs) {
-            if (progressBuff._active && progressBuff._player == player) {
-                progressBuff._active = false;
-                break;
-            }
-        }
-    }
-
-    @Override
-    public void crateDroppedForDelivery(Crate crate, com.jme3.math.Vector3f playerPosition) {
-        _jomlVector.x = playerPosition.x;
-        _jomlVector.y = playerPosition.y;
-        _jomlVector.z = playerPosition.z;
-        createCrateRigidBody(_jomlVector, crate);
-        startProgressBuff(crate, ProgressBuff.Type.DELIVERING, DeliveryZone.CRATE_DELIVERY_TIME);
-    }
-
-    @Override
-    public void crateDeliveryCompleted(Crate crate) {
-        removeCrate(crate);
-    }
-
-    @Override
-    public void respawnCrateAtStartPosition(Crate crate) {
-        // TODO: play an animation?
-        crate.respawnAtStartPosition();
-    }
-
-    @Override
-    public void allCratesDelivered() {
-        // TODO
-    }
-
-    @Override
-    public void playerShipCollided(Player player, float appliedImpulse, com.jme3.math.Vector3f impactPoint) {
-        if (appliedImpulse < MIN_IMPULSE_TO_PLAY_SOUND || _engine.getNowMs() - _lastCollisionTime < COLLISION_SOUND_GAP) {
-            return;
-        }
-        _lastCollisionTime = _engine.getNowMs();
-
-        _playerShipHitSounds[_playerShipHitSoundIndex].play();
-        if (++_playerShipHitSoundIndex >= NUM_PLAYER_SHIP_HIT_SOUNDS) {
-            _playerShipHitSoundIndex = 0;
-        }
-
-        _jomlVector.x = impactPoint.x;
-        _jomlVector.y = impactPoint.y;
-        _jomlVector.z = impactPoint.z;
-
-        _showSparks = true;
-        _sparkParticleSystem.emitAll(_engine.getNowMs(), _jomlVector, SCRAPE_SPARK_MIN_LIFE_TIME, SCRAPE_SPARK_MAX_LIFE_TIME);
-
-        _dustClouds[_nextDustCloudIndex]._active = true;
-        _dustClouds[_nextDustCloudIndex]._position.set(_jomlVector);
-        _dustClouds[_nextDustCloudIndex]._diffuseColour.w = 1.0f;
-        float angleDegrees = randomInteger(0, 359);
-        for (int j = 0; j < NUM_DUST_PARTICLES_PER_CLOUD; ++j) {
-            float r = (float)Math.toRadians(angleDegrees);
-            _dustClouds[_nextDustCloudIndex]._rotations[j] = r;
-            _dustClouds[_nextDustCloudIndex]._modelMatrices[j].identity().translate(_jomlVector).rotate(r, Z_AXIS);
-            angleDegrees += 120.0f; // <-- 360/3
-        }
-
-        if (++_nextDustCloudIndex >= MAX_DUST_CLOUDS) {
-            _nextDustCloudIndex = 0;
-        }
-    }
-
-    @Override
-    public void playerShipTookDamage(int player, int hitPointsDamage, int hitPointsRemaining) {
-        // TODO: draw sparks?
-    }
-
-    @Override
-    public void playerShipExploding(int i) {
-        Player player = _model.getPlayerState(i);
-        if (player.getRigidBody() == null) {
-            return;
-        }
-        player.getRigidBody().getPhysicsLocation(_jmeVector);
-        _jomlVector.x = _jmeVector.x;
-        _jomlVector.y = _jmeVector.y;
-        _jomlVector.z = _jmeVector.z;
-
-        dropCollectedCrates(player);
-        spawnPlayerShipDebris(player);
-        removePlayerShip(player);
-
-        _explosionParticleSystem.emitAll(_engine.getNowMs(), _jomlVector,
-                EXPLOSION_SPARK_MIN_LIFE_TIME, EXPLOSION_SPARK_MAX_LIFE_TIME);
-        _playerExploding = true;
-        _playerExplosionAlpha.start(1.0f, 0.0f, PLAYER_EXPLOSION_FADE_TIME);
-        _playerExplosionWakeScale.start(0.1f, EXPLOSION_WAKE_SIZE, EXPLOSION_WAKE_SCALE_TIME);
-
-        _explosionFlashModelMatrix.identity().translate(_jomlVector);
-        _explosionWakeModelMatrix.identity().translate(_jomlVector);
-
-        _playerExplosionColour.w = 1.0f;
-
-        _largeSmokeParticleSystem.emitAll(_engine.getNowMs(), _jomlVector,
-                SMOKE_MIN_LIFE_TIME, SMOKE_MAX_LIFE_TIME);
-        _playerSmokeActive = true;
-
-        _playerShipExplodeSound.play();
-    }
-
-    @Override
-    public void playerShipDead(int player) {
-        // Nothing to do
-    }
-
-    @Override
-    public void playerShotExploded(PlayerShot playerShot) {
-        for (var a : _playerShots) {
-            if (a._rigidBody.getUserObject() == playerShot) {
-                a._active = false;
-                a._rigidBody.setUserObject(null);
-                if (_engine.getPhysicsSpace().contains(a._rigidBody)) {
-                    _engine.getPhysicsSpace().removeCollisionObject(a._rigidBody);
-                }
-                break;
-            }
-        }
-    }
-
     private void dropCollectedCrates(Player player) {
         for (var crate : player.getCollectedCrates()) {
             crate.removeTimeouts(_engine.getTimeoutManager());
@@ -1372,6 +1423,7 @@ public class GameWorldView implements
     }
 
     private void spawnPlayerShipDebris(Player player) {
+        player.getRigidBody().getPhysicsLocation(_jmeVector);
         for (var rbo : _debris) {
             rbo._active = true;
             rbo._rigidBody.setPhysicsLocation(_jmeVector);
@@ -1400,41 +1452,6 @@ public class GameWorldView implements
         return min + (int)(Math.random() * ((max - min) + 1));
     }
 
-    @Override
-    public void playerShipSpawned(int player) {
-        createLunarLanderRigidBody(player);
-    }
-
-    @Override
-    public void playerFiredWeapon(int id) {
-        RigidBodyObject rbo = getUnusedPlayerShot();
-        if (rbo == null) {
-            return;
-        }
-
-        rbo._rigidBody.clearForces();
-        rbo._rigidBody.setLinearVelocity(ZERO_VELOCITY);
-        rbo._rigidBody.setAngularVelocity(ZERO_VELOCITY);
-
-        Player player = _model.getPlayerState(id);
-        var direction = player.calculateAndGetUpVector();
-        var position = player.getRigidBody().getPhysicsLocation(null);
-
-        _jmeVector.set(direction).multLocal(PLAYER_SHOT_OFFSET).addLocal(position);
-        rbo._rigidBody.setPhysicsLocation(_jmeVector);
-
-        _jmeVector.set(direction).multLocal(PLAYER_SHOT_FORCE);
-        rbo._rigidBody.applyCentralForce(_jmeVector);
-
-        rbo._active = true;
-        _model.addPlayerShot(player, rbo._rigidBody);
-
-        _engine.getPhysicsSpace().addCollisionObject(rbo._rigidBody);
-        rbo._rigidBody.setGravity(new com.jme3.math.Vector3f(0.0f, 0.0f, 0.0f)); // Overwrite the physics space gravity
-
-        _playerShipShootSound.play();
-    }
-
     private RigidBodyObject getUnusedPlayerShot() {
         for (var a : _playerShots) {
             if (!a._active) {
@@ -1442,11 +1459,6 @@ public class GameWorldView implements
             }
         }
         return null;
-    }
-
-    @Override
-    public void playerWeaponCooledDown(int id) {
-        // TODO: what to draw?
     }
 
     private void removeRigidBodiesFromPhysicsSpace(ArrayList<RigidBodyObject> rigidBodyObjects) {

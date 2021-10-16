@@ -1,6 +1,6 @@
 Episodes:
     1) Planet: Earth
-       Natual Satellite: Moon
+       Natual Satellite: Moon           1737.4 km
        Missions:
             1) Vallis Capella
             2) Mare Nubium
@@ -9,7 +9,7 @@ Episodes:
             5) Mons Usov
             6) Montes Spitzbergen
     2) Planet: Mars
-       Natual Satellite: Phobos
+       Natual Satellite: Phobos         11.2667 km
        Missions:
             1) Laputa Regio
             2) Reldresal Crater
@@ -18,7 +18,7 @@ Episodes:
             5) Wendell Crater
             6) Kepler Dorsum
     3) Planet: Jupiter
-       Natual Satellite: Ganymede
+       Natual Satellite: Ganymede       2634.1 km
        Missions:
             1) Nineveh Sulcus
             2) Heliopolis Facula
@@ -27,7 +27,7 @@ Episodes:
             5) Natrun Patera
             6) Marius Regio
     4) Planet: Saturn
-       Natual Satellite: Titan
+       Natual Satellite: Titan          2574.73
        Missions:
             1) Irensaga Montes
             2) Lampadas Labyrinthus

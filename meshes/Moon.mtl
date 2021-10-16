@@ -1,7 +1,7 @@
 # Blender MTL File: 'Moon.blend'
-# Material Count: 2
+# Material Count: 5
 
-newmtl Moon
+newmtl Ganymede
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -10,6 +10,17 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\GanymedeSphericalMap.png
+
+newmtl Moon
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
 map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\MoonSphericalMap.png
 
 newmtl OuterSpace
@@ -22,3 +33,25 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\StarsBackground.png
+
+newmtl Phobos
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\PhobosSphericalMap.png
+
+newmtl Titan
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\TitanSphericalMap.png

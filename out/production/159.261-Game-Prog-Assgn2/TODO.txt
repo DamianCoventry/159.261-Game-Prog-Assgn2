@@ -1,0 +1,28 @@
+DONE        Mission completed screen
+DONE        Episode outro
+            Create a different 'natural satellite' for each episode intro/outro
+            Game over screen
+            Game won screen
+            Fade in/out the progress buff animations
+            Make sure all delivery zones are rendered and lined up correctly
+            Re-align each collision mesh more closely to the display mesh
+            Spaceship exhaust plume
+            Remove or "do" all TODOs
+            Change interfaces to abstract classes where most implementations just leave the methods empty
+            Play an animation and sound when a crate is delivered
+            Implement all mission titles for the HUD
+            Refactor all code to use FCurves
+            Remove the player ship during 'mission complete'
+            Implement repairing stations
+            Implement the use of fuel
+            Implement refuelling stations
+            Check the 'moving for 10 seconds logic'
+
+            Possible features:
+                Loading progress screens
+                Stream music
+                Make the player ship rotate around Y axis
+
+            Stretch features:
+                positional lighting
+                omnidirectional shadows

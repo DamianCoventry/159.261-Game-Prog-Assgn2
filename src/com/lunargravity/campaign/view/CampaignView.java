@@ -5,12 +5,14 @@ import com.lunargravity.campaign.controller.ICampaignController;
 import com.lunargravity.campaign.model.ICampaignModel;
 import com.lunargravity.campaign.statemachine.GetReadyState;
 import com.lunargravity.engine.animation.FloatLinearInterpLoop;
+import com.lunargravity.engine.animation.FloatSineLinearInterp;
 import com.lunargravity.engine.animation.Vector3SineLinearInterp;
 import com.lunargravity.engine.core.IEngine;
 import com.lunargravity.engine.graphics.*;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import com.lunargravity.engine.widgetsystem.*;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.io.IOException;
@@ -33,7 +35,13 @@ public class CampaignView implements
 
     private static final long MOON_ROTATION_TIME = 36000; // 36 seconds to rotate 360°
     private static final long CAMERA_TRANSLATE_TIME = 4000;
+    private static final float CAMERA_Z_COORDINATE_FAR = 400.0f;
+    private static final float CAMERA_Z_COORDINATE_NEAR = 44.0f;
+
     private static final Vector3f Y_AXIS = new Vector3f(0.0f, 1.0f, 0.0f);
+    private static final float OUTRO_Y_COORDINATE_TOP = 400.0f;
+    private static final float OUTRO_Y_COORDINATE_BOTTOM = 16.0f;
+    private static final long OUTRO_ANIMATE_TIME = 3000;
 
     private final WidgetManager _widgetManager;
     private final ICampaignController _controller;
@@ -43,13 +51,14 @@ public class CampaignView implements
     private final IEngine _engine;
 
     private DisplayMesh _spaceDisplayMesh;
-    private DisplayMesh _naturalSatellite;
+    private DisplayMesh[] _naturalSatellites;
     private final Matrix4f _vpMatrix;
     private final Matrix4f _mvMatrix;
     private final Matrix4f _naturalSatelliteModelMatrix;
     private final Transform _camera;
     private final FloatLinearInterpLoop _naturalSatelliteRotation;
     private final Vector3SineLinearInterp _cameraPosition;
+    private final FloatSineLinearInterp _episodeOutroYCoordinate;
 
     private Widget _episodeIntro;
     private Widget _episodeOutro;
@@ -74,6 +83,7 @@ public class CampaignView implements
 
         _naturalSatelliteRotation = new FloatLinearInterpLoop(_engine.getAnimationManager());
         _cameraPosition = new Vector3SineLinearInterp(_engine.getAnimationManager());
+        _episodeOutroYCoordinate = new FloatSineLinearInterp(_engine.getAnimationManager());
 
         _camera = new Transform();
     }
@@ -86,8 +96,13 @@ public class CampaignView implements
             _displayMeshCache.add(a);
         };
 
+        _naturalSatellites = new DisplayMesh[4];
+
         _spaceDisplayMesh = _displayMeshCache.getByExactName("OuterSpace.Display");
-        _naturalSatellite = _displayMeshCache.getByExactName("Moon.Display");
+        _naturalSatellites[0] = _displayMeshCache.getByExactName("EarthMoon.Display");
+        _naturalSatellites[1] = _displayMeshCache.getByExactName("SaturnTitan.Display");
+        _naturalSatellites[2] = _displayMeshCache.getByExactName("MarsPhobos.Display");
+        _naturalSatellites[3] = _displayMeshCache.getByExactName("JupiterGanymede.Display");
         _naturalSatelliteRotation.start(0.0f, 359.0f, MOON_ROTATION_TIME);
     }
 
@@ -98,8 +113,14 @@ public class CampaignView implements
 
     @Override
     public void drawView3d(int viewport, Matrix4f projectionMatrix) {
-        if (!_widgetManager.isVisible(_episodeIntro)) {
+        if (!_widgetManager.isVisible(_episodeIntro) && !_widgetManager.isVisible(_episodeOutro)) {
             return;
+        }
+
+        if (_episodeOutro != null) {
+            Vector2f position = _episodeOutro.getPosition();
+            position.y = _episodeOutroYCoordinate.getCurrentValue();
+            _episodeOutro.setPosition(position);
         }
 
         _camera._position.set(_cameraPosition.getValue());
@@ -108,9 +129,16 @@ public class CampaignView implements
         _vpMatrix.set(projectionMatrix).mul(_camera.getViewMatrix());
         _spaceDisplayMesh.draw(_widgetManager.getRenderer(), _widgetManager.getRenderer().getDiffuseTextureProgram(), _vpMatrix);
 
-        _naturalSatelliteModelMatrix.identity().rotate((float)Math.toRadians(_naturalSatelliteRotation.getCurrentValue()), Y_AXIS);
-        _mvMatrix.set(_camera.getViewMatrix()).mul(_naturalSatelliteModelMatrix);
-        _naturalSatellite.draw(_widgetManager.getRenderer(), _widgetManager.getRenderer().getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+        float x = -30.0f;
+        for (int i = 0; i < 4; ++i) {
+            _naturalSatelliteModelMatrix
+                    .identity()
+                    .translate(x, 0.0f, 0.0f)
+                    .rotate((float) Math.toRadians(_naturalSatelliteRotation.getCurrentValue()), Y_AXIS);
+            _mvMatrix.set(_camera.getViewMatrix()).mul(_naturalSatelliteModelMatrix);
+            _naturalSatellites[i].draw(_widgetManager.getRenderer(), _widgetManager.getRenderer().getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+            x += 20.0f;
+        }
     }
 
     @Override
@@ -154,8 +182,10 @@ public class CampaignView implements
         if (_textureCache != null) {
             _textureCache.freeNativeResources();
         }
-        if (_naturalSatellite != null) {
-            _naturalSatellite.freeNativeResources();
+        if (_naturalSatellites != null) {
+            for (var a : _naturalSatellites) {
+                a.freeNativeResources();
+            }
         }
         if (_naturalSatelliteRotation != null) {
             _naturalSatelliteRotation.unregister();
@@ -168,8 +198,8 @@ public class CampaignView implements
     @Override
     public void showEpisodeIntro() throws IOException {
         _cameraPosition.start(
-                new Vector3f(0.0f, 0.0f, 400.0f),
-                new Vector3f(0.0f, 0.0f, 45.0f),
+                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATE_FAR),
+                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATE_NEAR),
                 CAMERA_TRANSLATE_TIME);
         _widgetManager.hideAll();
         _widgetManager.show(_episodeIntro, WidgetManager.ShowAs.FIRST);
@@ -177,6 +207,13 @@ public class CampaignView implements
 
     @Override
     public void showEpisodeOutro() throws IOException {
+        _cameraPosition.start(
+                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATE_NEAR),
+                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATE_FAR),
+                CAMERA_TRANSLATE_TIME);
+
+        _episodeOutroYCoordinate.start(OUTRO_Y_COORDINATE_TOP, OUTRO_Y_COORDINATE_BOTTOM, OUTRO_ANIMATE_TIME);
+
         _widgetManager.hideAll();
         _widgetManager.show(_episodeOutro, WidgetManager.ShowAs.FIRST);
     }
@@ -257,8 +294,8 @@ public class CampaignView implements
         else if (wci._id.equals(EPISODE_INTRO_ANNOUNCEMENT) && wci._type.equals("ImageWidget")) {
             _episodeIntro = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
-        else if (wci._id.equals(EPISODE_OUTRO_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            _episodeOutro = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
+        else if (wci._id.equals(EPISODE_OUTRO_ANNOUNCEMENT) && wci._type.equals("ImageWidget")) {
+            _episodeOutro = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
         else if (wci._id.equals(GAME_OVER_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
             _gameOver = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
