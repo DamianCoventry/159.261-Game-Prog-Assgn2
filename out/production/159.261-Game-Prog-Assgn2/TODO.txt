@@ -1,8 +1,11 @@
 DONE        Mission completed screen
 DONE        Episode outro
-            Create a different 'natural satellite' for each episode intro/outro
-            Game over screen
-            Game won screen
+DONE        Create a different 'natural satellite' for each episode intro/outro
+            Update the menu background to move around the natural satellites
+            Update the episode intro screen to move towards the correct natural satellite
+            Update the episode outro screen to move away from the correct natural satellite
+            Update the game over screen to view the correct natural satellite
+            Update game won screen to do something with the natural satellites
             Fade in/out the progress buff animations
             Make sure all delivery zones are rendered and lined up correctly
             Re-align each collision mesh more closely to the display mesh
@@ -24,5 +27,6 @@ DONE        Episode outro
                 Make the player ship rotate around Y axis
 
             Stretch features:
+                enemy ships
                 positional lighting
                 omnidirectional shadows

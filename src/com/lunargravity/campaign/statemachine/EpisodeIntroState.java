@@ -10,6 +10,8 @@ import com.lunargravity.engine.timeouts.TimeoutManager;
 
 import java.io.IOException;
 
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
+
 public class EpisodeIntroState extends StateBase implements ICampaignControllerObserver {
     private int _timeoutId;
 
@@ -50,7 +52,9 @@ public class EpisodeIntroState extends StateBase implements ICampaignControllerO
 
     @Override
     public void mouseButtonEvent(int button, int action, int mods) throws Exception {
-        loadCampaignMission();
+        if (action == GLFW_PRESS) {
+            loadCampaignMission();
+        }
     }
 
     @Override
