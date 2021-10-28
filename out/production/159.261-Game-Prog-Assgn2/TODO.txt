@@ -1,19 +1,19 @@
 DONE        Mission completed screen
 DONE        Episode outro
 DONE        Create a different 'natural satellite' for each episode intro/outro
-            Update the menu background to move around the natural satellites
+DONE        Update the menu world scene
             Update the episode intro screen to move towards the correct natural satellite
             Update the episode outro screen to move away from the correct natural satellite
             Update the game over screen to view the correct natural satellite
             Update game won screen to do something with the natural satellites
             Fade in/out the progress buff animations
-            Make sure all delivery zones are rendered and lined up correctly
-            Re-align each collision mesh more closely to the display mesh
+DONE        Make sure all delivery zones are rendered and lined up correctly
+DONE        Re-align each collision mesh more closely to the display mesh
             Spaceship exhaust plume
             Remove or "do" all TODOs
             Change interfaces to abstract classes where most implementations just leave the methods empty
             Play an animation and sound when a crate is delivered
-            Implement all mission titles for the HUD
+DONE        Implement all mission titles for the HUD
             Refactor all code to use FCurves
             Remove the player ship during 'mission complete'
             Implement repairing stations

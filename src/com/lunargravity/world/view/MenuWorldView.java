@@ -25,16 +25,12 @@ import com.lunargravity.mvc.IView;
 import com.lunargravity.world.model.IMenuWorldModel;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
-
-import java.io.IOException;
 
 public class MenuWorldView implements IView, ISceneAssetOwner {
     private static final long MOON_ROTATION_TIME = 360000; // 360 seconds to rotate 360°
-    private static final float SPACE_BACKGROUND_WIDTH = 1280.0f;
-    private static final float SPACE_BACKGROUND_HEIGHT = 960.0f;
-    private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-    private static final Vector3f MOON_AMBIENT_LIGHT = new Vector3f(0.005f, 0.005f, 0.005f);
+    private static final float CAMERA_HEIGHT = 3.0f;
+    private static final float CAMERA_DISTANCE = 15.0f;
+    private static final Vector3f MOON_AMBIENT_LIGHT = new Vector3f(0.05f, 0.05f, 0.05f);
     private static final Vector3f Y_AXIS = new Vector3f(0.0f, 1.0f, 0.0f);
 
     private final DisplayMeshCache _displayMeshCache;
@@ -63,15 +59,13 @@ public class MenuWorldView implements IView, ISceneAssetOwner {
         _moonModelMatrix = new Matrix4f();
 
         _camera = new Transform();
-        _camera._position.x = -9.5f;
-        _camera._position.z = 75.0f;
         _camera.calculateViewMatrix();
 
         _moonRotation = new FloatLinearInterpLoop(engine.getAnimationManager());
     }
 
     @Override
-    public void initialLoadCompleted() throws IOException {
+    public void initialLoadCompleted() {
         _moonRotation.start(0.0f, 359.0f, MOON_ROTATION_TIME);
     }
 
@@ -86,10 +80,16 @@ public class MenuWorldView implements IView, ISceneAssetOwner {
             return;
         }
 
+        var angle = (float)Math.toRadians(_moonRotation.getCurrentValue());
+        _camera._position.x = (float)Math.sin(angle) * CAMERA_DISTANCE;
+        _camera._position.y = CAMERA_HEIGHT;
+        _camera._position.z = (float)Math.cos(angle) * CAMERA_DISTANCE;
+        _camera._viewMatrix.setLookAt(_camera._position, new Vector3f(), Y_AXIS);
+
         _vpMatrix.set(projectionMatrix).mul(_camera.getViewMatrix());
         _spaceDisplayMesh.draw(_renderer, _renderer.getDiffuseTextureProgram(), _vpMatrix);
 
-        _moonModelMatrix.identity().rotate((float)Math.toRadians(_moonRotation.getCurrentValue()), Y_AXIS);
+        _moonModelMatrix.identity();
         _mvMatrix.set(_camera.getViewMatrix()).mul(_moonModelMatrix);
         GLDirectionalLightProgram program = _renderer.getDirectionalLightProgram();
         program.setAmbientLight(MOON_AMBIENT_LIGHT);

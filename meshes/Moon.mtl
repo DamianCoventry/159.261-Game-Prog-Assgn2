@@ -1,7 +1,7 @@
 # Blender MTL File: 'Moon.blend'
-# Material Count: 5
+# Material Count: 7
 
-newmtl Ganymede
+newmtl Concrete
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -10,20 +10,64 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\GanymedeSphericalMap.png
+map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\Concrete.png
+
+newmtl GoldFoil
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\GoldFoil.png
+
+newmtl LargeMetalTexture
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\LargeMetalTexture.png
+
+newmtl MetalPlate
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\MetalPlate.png
 
 newmtl Moon
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
-Ks 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
-illum 1
-map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\MoonSphericalMap.png
+illum 2
+map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\GreyDirt.png
 
-newmtl OuterSpace
+newmtl PolishedSteel
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\PolishedSteel.png
+
+newmtl Space
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -33,25 +77,3 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\StarsBackground.png
-
-newmtl Phobos
-Ns 225.000000
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\PhobosSphericalMap.png
-
-newmtl Titan
-Ns 225.000000
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-map_Kd C:\\Development\\159.261-Game-Prog-Assgn2\\images\\TitanSphericalMap.png

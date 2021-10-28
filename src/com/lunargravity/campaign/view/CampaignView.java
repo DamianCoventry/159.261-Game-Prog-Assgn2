@@ -33,23 +33,32 @@ public class CampaignView implements
     private static final String GET_READY = "getReady";
     private static final String PLAYER_DIED = "playerDied";
 
-    private static final long MOON_ROTATION_TIME = 36000; // 36 seconds to rotate 360°
-    private static final long CAMERA_TRANSLATE_TIME = 4000;
-    private static final float CAMERA_Z_COORDINATE_FAR = 400.0f;
-    private static final float CAMERA_Z_COORDINATE_NEAR = 44.0f;
+    private static final long PLANET_ROTATION_TIME = 600000; // 10 minutes to rotate 360°
+    private static final long NATURAL_SATELLITE_ROTATION_TIME = 360000; // 6 minutes to rotate 360°
+    private static final long CAMERA_TRANSLATE_TIME = 5000;
+    private static final float[] CAMERA_Z_COORDINATES_FAR = { 1650.0f, 1600.0f, 2250.0f, 2250.0f };
+    private static final float[] CAMERA_Z_COORDINATES_NEAR = { 150.0f, 100.0f, 750.0f, 850.0f };
 
+    private static final Vector3f X_AXIS = new Vector3f(1.0f, 0.0f, 0.0f);
     private static final Vector3f Y_AXIS = new Vector3f(0.0f, 1.0f, 0.0f);
     private static final float OUTRO_Y_COORDINATE_TOP = 400.0f;
     private static final float OUTRO_Y_COORDINATE_BOTTOM = 16.0f;
     private static final long OUTRO_ANIMATE_TIME = 3000;
 
-    private static final float NATURAL_SATELLITE_PADDING = 50.0f;
-    private static final int NUM_NATURAL_SATELLITES = 4;
+    private static final float[] PLANET_X_ROTATIONS_DEGREES = { 2.5f, -1.25f, 3.25f, 30.0f };
 
-    private static final int NATURAL_SATELLITE_EARTH_MOON = 0;
-    private static final int NATURAL_SATELLITE_MARS_PHOBOS = 1;
-    private static final int NATURAL_SATELLITE_JUPITER_GANYMEDE = 2;
-    private static final int NATURAL_SATELLITE_SATURN_TITAN = 3;
+    private static final Vector3f[] NATURAL_SATELLITE_POSITIONS = {
+            new Vector3f(10.0f, 0.0f, 70.0f),
+            new Vector3f(4.0f, 0.0f, 70.0f),
+            new Vector3f(15.0f, 0.0f, 625.0f),
+            new Vector3f(15.0f, 0.0f, 750.0f)
+    };
+    private static final int NUM_PLANETS_NATURAL_SATELLITES = 4;
+
+    private static final int EARTH_MOON = 0;
+    private static final int MARS_PHOBOS = 1;
+    private static final int JUPITER_GANYMEDE = 2;
+    private static final int SATURN_TITAN = 3;
 
     private final WidgetManager _widgetManager;
     private final ICampaignController _controller;
@@ -59,14 +68,14 @@ public class CampaignView implements
     private final TextureCache _textureCache;
     private final IEngine _engine;
 
-    private final Vector3f[] _naturalSatellitePositions;
-
     private DisplayMesh _spaceDisplayMesh;
     private DisplayMesh[] _naturalSatellites;
+    private DisplayMesh[] _planets;
     private final Matrix4f _vpMatrix;
     private final Matrix4f _mvMatrix;
-    private final Matrix4f _naturalSatelliteModelMatrix;
+    private final Matrix4f _modelMatrix;
     private final Transform _camera;
+    private final FloatLinearInterpLoop _planetRotation;
     private final FloatLinearInterpLoop _naturalSatelliteRotation;
     private final Vector3SineLinearInterp _cameraPosition;
     private final FloatSineLinearInterp _episodeOutroYCoordinate;
@@ -91,38 +100,38 @@ public class CampaignView implements
         _textureCache = new TextureCache();
         _mvMatrix = new Matrix4f();
         _vpMatrix = new Matrix4f();
-        _naturalSatelliteModelMatrix = new Matrix4f();
+        _modelMatrix = new Matrix4f();
+        _camera = new Transform();
 
+        _planetRotation = new FloatLinearInterpLoop(_engine.getAnimationManager());
         _naturalSatelliteRotation = new FloatLinearInterpLoop(_engine.getAnimationManager());
         _cameraPosition = new Vector3SineLinearInterp(_engine.getAnimationManager());
         _episodeOutroYCoordinate = new FloatSineLinearInterp(_engine.getAnimationManager());
-
-        _naturalSatellitePositions = new Vector3f[NUM_NATURAL_SATELLITES];
-        float x = (NATURAL_SATELLITE_PADDING * NUM_NATURAL_SATELLITES) / -2.0f;
-        for (int i = 0; i < NUM_NATURAL_SATELLITES; ++i) {
-            _naturalSatellitePositions[i] = new Vector3f(x, 0.0f, 0.0f);
-            x += NATURAL_SATELLITE_PADDING;
-        }
-
-        _camera = new Transform();
     }
 
     @Override
     public void initialLoadCompleted() throws Exception {
         GlStaticMeshBuilder builder = new GlStaticMeshBuilder(_displayMeshCache, _materialCache, _textureCache);
-        builder.build("meshes/Moon.obj");
+        builder.build("meshes/EpisodeIntroOutro.obj");
         for (var a : builder.getMeshes()) {
             _displayMeshCache.add(a);
         };
 
-        _naturalSatellites = new DisplayMesh[NUM_NATURAL_SATELLITES];
-        _naturalSatellites[NATURAL_SATELLITE_EARTH_MOON] = _displayMeshCache.getByExactName("EarthMoon.Display");
-        _naturalSatellites[NATURAL_SATELLITE_MARS_PHOBOS] = _displayMeshCache.getByExactName("MarsPhobos.Display");
-        _naturalSatellites[NATURAL_SATELLITE_JUPITER_GANYMEDE] = _displayMeshCache.getByExactName("JupiterGanymede.Display");
-        _naturalSatellites[NATURAL_SATELLITE_SATURN_TITAN] = _displayMeshCache.getByExactName("SaturnTitan.Display");
+        _naturalSatellites = new DisplayMesh[NUM_PLANETS_NATURAL_SATELLITES];
+        _naturalSatellites[EARTH_MOON] = _displayMeshCache.getByExactName("EarthMoon.Display");
+        _naturalSatellites[MARS_PHOBOS] = _displayMeshCache.getByExactName("MarsPhobos.Display");
+        _naturalSatellites[JUPITER_GANYMEDE] = _displayMeshCache.getByExactName("JupiterGanymede.Display");
+        _naturalSatellites[SATURN_TITAN] = _displayMeshCache.getByExactName("SaturnTitan.Display");
+
+        _planets = new DisplayMesh[NUM_PLANETS_NATURAL_SATELLITES];
+        _planets[EARTH_MOON] = _displayMeshCache.getByExactName("Earth.Display");
+        _planets[MARS_PHOBOS] = _displayMeshCache.getByExactName("Mars.Display");
+        _planets[JUPITER_GANYMEDE] = _displayMeshCache.getByExactName("Jupiter.Display");
+        _planets[SATURN_TITAN] = _displayMeshCache.getByExactName("Saturn.Display");
 
         _spaceDisplayMesh = _displayMeshCache.getByExactName("OuterSpace.Display");
-        _naturalSatelliteRotation.start(0.0f, 359.0f, MOON_ROTATION_TIME);
+        _planetRotation.start(0.0f, 359.0f, PLANET_ROTATION_TIME);
+        _naturalSatelliteRotation.start(0.0f, 359.0f, NATURAL_SATELLITE_ROTATION_TIME);
     }
 
     @Override
@@ -148,14 +157,22 @@ public class CampaignView implements
         _vpMatrix.set(projectionMatrix).mul(_camera.getViewMatrix());
         _spaceDisplayMesh.draw(_widgetManager.getRenderer(), _widgetManager.getRenderer().getDiffuseTextureProgram(), _vpMatrix);
 
-        for (int i = 0; i < NUM_NATURAL_SATELLITES; ++i) {
-            _naturalSatelliteModelMatrix
-                    .identity()
-                    .translate(_naturalSatellitePositions[i])
-                    .rotate((float) Math.toRadians(_naturalSatelliteRotation.getCurrentValue()), Y_AXIS);
-            _mvMatrix.set(_camera.getViewMatrix()).mul(_naturalSatelliteModelMatrix);
-            _naturalSatellites[i].draw(_widgetManager.getRenderer(), _widgetManager.getRenderer().getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
-        }
+        _modelMatrix
+                .identity()
+                // origin
+                .rotate((float)Math.toRadians(PLANET_X_ROTATIONS_DEGREES[_model.getEpisode()]), X_AXIS)
+                .rotate((float)Math.toRadians(-_planetRotation.getCurrentValue()), Y_AXIS);
+        _mvMatrix.set(_camera.getViewMatrix()).mul(_modelMatrix);
+        _planets[_model.getEpisode()].draw(_widgetManager.getRenderer(),
+                _widgetManager.getRenderer().getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
+
+        _modelMatrix
+                .identity()
+                .translate(NATURAL_SATELLITE_POSITIONS[_model.getEpisode()])
+                .rotate((float)Math.toRadians(_naturalSatelliteRotation.getCurrentValue()), Y_AXIS);
+        _mvMatrix.set(_camera.getViewMatrix()).mul(_modelMatrix);
+        _naturalSatellites[_model.getEpisode()].draw(_widgetManager.getRenderer(),
+                _widgetManager.getRenderer().getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
     }
 
     @Override
@@ -204,6 +221,14 @@ public class CampaignView implements
                 a.freeNativeResources();
             }
         }
+        if (_planets != null) {
+            for (var a : _planets) {
+                a.freeNativeResources();
+            }
+        }
+        if (_planetRotation != null) {
+            _planetRotation.unregister();
+        }
         if (_naturalSatelliteRotation != null) {
             _naturalSatelliteRotation.unregister();
         }
@@ -214,10 +239,9 @@ public class CampaignView implements
 
     @Override
     public void showEpisodeIntro() throws IOException {
-        float x = _naturalSatellitePositions[_model.getEpisode()].x;
         _cameraPosition.start(
-                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATE_FAR),
-                new Vector3f(x, 0.0f, CAMERA_Z_COORDINATE_NEAR),
+                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATES_FAR[_model.getEpisode()]),
+                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATES_NEAR[_model.getEpisode()]),
                 CAMERA_TRANSLATE_TIME);
         _widgetManager.hideAll();
         _widgetManager.show(_episodeIntro, WidgetManager.ShowAs.FIRST);
@@ -228,11 +252,8 @@ public class CampaignView implements
         if (_episodeOutro == null) {
             return;
         }
-        float x = _naturalSatellitePositions[_model.getEpisode()].x;
-        _cameraPosition.start(
-                new Vector3f(x, 0.0f, CAMERA_Z_COORDINATE_NEAR),
-                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATE_FAR),
-                CAMERA_TRANSLATE_TIME);
+
+        _cameraPosition.setValue(new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATES_NEAR[_model.getEpisode()]));
 
         _episodeOutroYCoordinate.start(OUTRO_Y_COORDINATE_TOP, OUTRO_Y_COORDINATE_BOTTOM, OUTRO_ANIMATE_TIME);
 
