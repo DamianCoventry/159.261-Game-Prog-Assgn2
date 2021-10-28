@@ -115,7 +115,7 @@ public class CampaignView implements
         builder.build("meshes/EpisodeIntroOutro.obj");
         for (var a : builder.getMeshes()) {
             _displayMeshCache.add(a);
-        };
+        }
 
         _naturalSatellites = new DisplayMesh[NUM_PLANETS_NATURAL_SATELLITES];
         _naturalSatellites[EARTH_MOON] = _displayMeshCache.getByExactName("EarthMoon.Display");
@@ -141,11 +141,11 @@ public class CampaignView implements
 
     @Override
     public void drawView3d(int viewport, Matrix4f projectionMatrix) {
-        if (!_widgetManager.isVisible(_episodeIntro) && !_widgetManager.isVisible(_episodeOutro)) {
+        if (!_widgetManager.isVisible(_episodeIntro) && !_widgetManager.isVisible(_episodeOutro) && !_widgetManager.isVisible(_gameWon)) {
             return;
         }
 
-        if (_episodeOutro != null) {
+        if (_episodeOutro != null && _widgetManager.isVisible(_episodeOutro)) {
             Vector2f position = _episodeOutro.getPosition();
             position.y = _episodeOutroYCoordinate.getCurrentValue();
             _episodeOutro.setPosition(position);
