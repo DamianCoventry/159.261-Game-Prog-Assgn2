@@ -57,12 +57,7 @@ public class PlayerDiedState extends StateBase implements ICampaignControllerObs
 
     @Override
     public void gameOver() {
-        getGameWorldView().setupForNewLevel();
         changeState(new GameOverState(getContext()));
-    }
-
-    private IGameWorldView getGameWorldView() {
-        return (IGameWorldView)getContext().getWorldView();
     }
 
     @Override

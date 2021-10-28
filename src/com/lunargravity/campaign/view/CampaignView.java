@@ -157,21 +157,23 @@ public class CampaignView implements
         _vpMatrix.set(projectionMatrix).mul(_camera.getViewMatrix());
         _spaceDisplayMesh.draw(_widgetManager.getRenderer(), _widgetManager.getRenderer().getDiffuseTextureProgram(), _vpMatrix);
 
+        int i = Math.min(3, _model.getEpisode());
+        
         _modelMatrix
                 .identity()
                 // origin
-                .rotate((float)Math.toRadians(PLANET_X_ROTATIONS_DEGREES[_model.getEpisode()]), X_AXIS)
+                .rotate((float)Math.toRadians(PLANET_X_ROTATIONS_DEGREES[i]), X_AXIS)
                 .rotate((float)Math.toRadians(-_planetRotation.getCurrentValue()), Y_AXIS);
         _mvMatrix.set(_camera.getViewMatrix()).mul(_modelMatrix);
-        _planets[_model.getEpisode()].draw(_widgetManager.getRenderer(),
+        _planets[i].draw(_widgetManager.getRenderer(),
                 _widgetManager.getRenderer().getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
 
         _modelMatrix
                 .identity()
-                .translate(NATURAL_SATELLITE_POSITIONS[_model.getEpisode()])
+                .translate(NATURAL_SATELLITE_POSITIONS[i])
                 .rotate((float)Math.toRadians(_naturalSatelliteRotation.getCurrentValue()), Y_AXIS);
         _mvMatrix.set(_camera.getViewMatrix()).mul(_modelMatrix);
-        _naturalSatellites[_model.getEpisode()].draw(_widgetManager.getRenderer(),
+        _naturalSatellites[i].draw(_widgetManager.getRenderer(),
                 _widgetManager.getRenderer().getDirectionalLightProgram(), _mvMatrix, projectionMatrix);
     }
 
@@ -239,9 +241,11 @@ public class CampaignView implements
 
     @Override
     public void showEpisodeIntro() throws IOException {
+        int i = Math.min(3, _model.getEpisode());
+
         _cameraPosition.start(
-                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATES_FAR[_model.getEpisode()]),
-                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATES_NEAR[_model.getEpisode()]),
+                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATES_FAR[i]),
+                new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATES_NEAR[i]),
                 CAMERA_TRANSLATE_TIME);
         _widgetManager.hideAll();
         _widgetManager.show(_episodeIntro, WidgetManager.ShowAs.FIRST);
@@ -252,8 +256,8 @@ public class CampaignView implements
         if (_episodeOutro == null) {
             return;
         }
-
-        _cameraPosition.setValue(new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATES_NEAR[_model.getEpisode()]));
+        int i = Math.min(3, _model.getEpisode());
+        _cameraPosition.setValue(new Vector3f(0.0f, 0.0f, CAMERA_Z_COORDINATES_NEAR[i]));
 
         _episodeOutroYCoordinate.start(OUTRO_Y_COORDINATE_TOP, OUTRO_Y_COORDINATE_BOTTOM, OUTRO_ANIMATE_TIME);
 
@@ -342,11 +346,11 @@ public class CampaignView implements
         else if (wci._id.equals(EPISODE_OUTRO_ANNOUNCEMENT) && wci._type.equals("ImageWidget")) {
             _episodeOutro = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
-        else if (wci._id.equals(GAME_OVER_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            _gameOver = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
+        else if (wci._id.equals(GAME_OVER_ANNOUNCEMENT) && wci._type.equals("ImageWidget")) {
+            _gameOver = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
-        else if (wci._id.equals(GAME_WON_ANNOUNCEMENT) && wci._type.equals("AnnouncementWidget")) {
-            _gameWon = new Widget(viewportConfig, wci, new AnnouncementWidget(_widgetManager, this));
+        else if (wci._id.equals(GAME_WON_ANNOUNCEMENT) && wci._type.equals("ImageWidget")) {
+            _gameWon = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));
         }
         else if (wci._id.equals(MISSION_INTRO_ANNOUNCEMENT) && wci._type.equals("ImageWidget")) {
             _missionIntro = new Widget(viewportConfig, wci, new ImageWidget(_widgetManager));

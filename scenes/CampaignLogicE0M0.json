@@ -36,54 +36,38 @@
             "_children": []
         },
         {
-            "_id": "gameWon",
-            "_type": "AnnouncementWidget",
+            "_id": "gameOver",
+            "_type": "ImageWidget",
             "_position": {
                 "x": 0.0,
                 "y": 0.0
             },
             "_size": {
-                "x": 1280.0,
-                "y": 960.0
+                "x": 300.0,
+                "y": 400.0
             },
             "_properties": {
-                "backgroundImage": "images/EarthMoonBackground.png",
-                "initialPosition": "fullViewport"
+                "backgroundImage": "images/GameOver.png",
+                "initialPosition": "centerInViewport"
             },
-            "_children": [
-                {
-                    "_id": "majorTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 415.0,
-                        "y": 480.0
-                    },
-                    "_size": {
-                        "x": 450.0,
-                        "y": 100.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/Congratulations.png"
-                    },
-                    "_children": []
-                },
-                {
-                    "_id": "minorTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 515.0,
-                        "y": 430.0
-                    },
-                    "_size": {
-                        "x": 250.0,
-                        "y": 50.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/GameWon.png"
-                    },
-                    "_children": []
-                }
-            ]
+            "_children": []
+        },
+        {
+            "_id": "gameWon",
+            "_type": "ImageWidget",
+            "_position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "_size": {
+                "x": 300.0,
+                "y": 400.0
+            },
+            "_properties": {
+                "backgroundImage": "images/GameWon.png",
+                "initialPosition": "centerInViewport"
+            },
+            "_children": []
         },
         {
             "_id": "missionPaused",

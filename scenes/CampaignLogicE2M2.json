@@ -37,136 +37,37 @@
         },
         {
             "_id": "gameOver",
-            "_type": "AnnouncementWidget",
+            "_type": "ImageWidget",
             "_position": {
                 "x": 0.0,
                 "y": 0.0
             },
             "_size": {
-                "x": 1280.0,
-                "y": 960.0
+                "x": 300.0,
+                "y": 400.0
             },
             "_properties": {
-                "backgroundImage": "images/JupiterGanymedeBackground.png",
-                "initialPosition": "fullViewport"
+                "backgroundImage": "images/GameOver.png",
+                "initialPosition": "centerInViewport"
             },
-            "_children": [
-                {
-                    "_id": "subTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 920.0,
-                        "y": 16.0
-                    },
-                    "_size": {
-                        "x": 342.0,
-                        "y": 168.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/Episode0SubTitle.png"
-                    },
-                    "_children": []
-                },
-                {
-                    "_id": "subTitleBlendImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 920.0,
-                        "y": 16.0
-                    },
-                    "_size": {
-                        "x": 342.0,
-                        "y": 168.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/EpisodeSubTitleBlend.png",
-                        "backgroundAlpha": "0.5"
-                    },
-                    "_children": []
-                },
-                {
-                    "_id": "majorTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 415.0,
-                        "y": 480.0
-                    },
-                    "_size": {
-                        "x": 450.0,
-                        "y": 100.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/GameOver.png"
-                    },
-                    "_children": []
-                },
-                {
-                    "_id": "minorTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 515.0,
-                        "y": 430.0
-                    },
-                    "_size": {
-                        "x": 250.0,
-                        "y": 50.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/LakhmuFossae.png"
-                    },
-                    "_children": []
-                }
-            ]
+            "_children": []
         },
         {
             "_id": "gameWon",
-            "_type": "AnnouncementWidget",
+            "_type": "ImageWidget",
             "_position": {
                 "x": 0.0,
                 "y": 0.0
             },
             "_size": {
-                "x": 1280.0,
-                "y": 960.0
+                "x": 300.0,
+                "y": 400.0
             },
             "_properties": {
-                "backgroundImage": "images/JupiterGanymedeBackground.png",
-                "initialPosition": "fullViewport"
+                "backgroundImage": "images/GameWon.png",
+                "initialPosition": "centerInViewport"
             },
-            "_children": [
-                {
-                    "_id": "majorTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 415.0,
-                        "y": 480.0
-                    },
-                    "_size": {
-                        "x": 450.0,
-                        "y": 100.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/Congratulations.png"
-                    },
-                    "_children": []
-                },
-                {
-                    "_id": "minorTitleImage",
-                    "_type": "ImageWidget",
-                    "_position": {
-                        "x": 515.0,
-                        "y": 430.0
-                    },
-                    "_size": {
-                        "x": 250.0,
-                        "y": 50.0
-                    },
-                    "_properties": {
-                        "backgroundImage": "images/GameWon.png"
-                    },
-                    "_children": []
-                }
-            ]
+            "_children": []
         },
         {
             "_id": "missionPaused",

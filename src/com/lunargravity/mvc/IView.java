@@ -20,9 +20,6 @@ import com.lunargravity.engine.graphics.TextureCache;
 import com.lunargravity.engine.scene.ISceneAssetOwner;
 import org.joml.Matrix4f;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.IOException;
-
 public interface IView extends ISceneAssetOwner {
     void initialLoadCompleted() throws Exception;
     void viewThink();
