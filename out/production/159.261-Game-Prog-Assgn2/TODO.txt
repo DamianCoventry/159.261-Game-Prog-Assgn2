@@ -4,8 +4,8 @@ DONE        Create a different 'natural satellite' for each episode intro/outro
 DONE        Update the menu world scene
 DONE        Update the episode intro screen to move towards the correct natural satellite
 DONE        Update the episode outro screen to move away from the correct natural satellite
-            Update the game over screen to view the correct natural satellite
-            Update game won screen to do something with the natural satellites
+DONE        Update the game over screen to view the correct natural satellite
+DONE        Update game won screen to do something with the natural satellites
             Fade in/out the progress buff animations
 DONE        Make sure all delivery zones are rendered and lined up correctly
 DONE        Re-align each collision mesh more closely to the display mesh
